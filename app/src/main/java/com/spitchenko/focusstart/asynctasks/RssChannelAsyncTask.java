@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Message;
 
 import com.spitchenko.focusstart.model.Channel;
 
@@ -14,44 +16,72 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
-
-import static com.spitchenko.focusstart.asynctasks.RssChannelAsyncTask.rssTag.CHANNEL;
-import static com.spitchenko.focusstart.asynctasks.RssChannelAsyncTask.rssTag.DESCRIPTION;
-import static com.spitchenko.focusstart.asynctasks.RssChannelAsyncTask.rssTag.IMAGE;
-import static com.spitchenko.focusstart.asynctasks.RssChannelAsyncTask.rssTag.ITEM;
-import static com.spitchenko.focusstart.asynctasks.RssChannelAsyncTask.rssTag.LAST_BUILD_DATE;
-import static com.spitchenko.focusstart.asynctasks.RssChannelAsyncTask.rssTag.LINK;
-import static com.spitchenko.focusstart.asynctasks.RssChannelAsyncTask.rssTag.TITLE;
-import static com.spitchenko.focusstart.asynctasks.RssChannelAsyncTask.rssTag.URL_RSS;
-
 /**
  * Date: 24.02.17
  * Time: 21:52
  *
  * @author anatoliy
  */
-public final class RssChannelAsyncTask extends AsyncTask<URL, Void, List<Channel>> {
-	enum rssTag {
-		ITEM("item"),
-		CHANNEL("channel"),
-		TITLE("title"),
-		LINK("link"),
-		DESCRIPTION("description"),
-		IMAGE("image"),
-		URL_RSS("url"),
-		LAST_BUILD_DATE("lastBuildDate");
-
-		private final String text;
-
-		rssTag(final String text) {
-			this.text = text;
+public final class RssChannelAsyncTask extends AsyncTask<URL, Void, Void> {
+	private enum rssTag {
+		ITEM {
+			@Override
+			public String toString() {
+				return "item";
+			}
+		},
+		CHANNEL {
+			@Override
+			public String toString() {
+				return "channel";
+			}
+		},
+		LINK {
+			@Override
+			public String toString() {
+				return "link";
+			}
+		},
+		DESCRIPTION {
+			@Override
+			public String toString() {
+				return "description";
+			}
+		},
+		IMAGE {
+			@Override
+			public String toString() {
+				return "image";
+			}
+		},
+		URL_RSS {
+			@Override
+			public String toString() {
+				return "url";
+			}
+		},
+		LAST_BUILD_DATE {
+			@Override
+			public String toString() {
+				return "lastBuildDate";
+			}
+		},
+		TITLE {
+			@Override
+			public String toString() {
+				return "title";
+			}
 		}
 	}
 
 	private XmlPullParser xpp;
+	private Handler mHandler;
 	private List<Channel> mChannels;
 
-	public RssChannelAsyncTask() {
+	public RssChannelAsyncTask(final Handler handler) {
+
+
+		mHandler = handler;
 		mChannels = new ArrayList<>();
 		try {
 			XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
@@ -63,12 +93,19 @@ public final class RssChannelAsyncTask extends AsyncTask<URL, Void, List<Channel
 	}
 
 	@Override
-	protected List<Channel> doInBackground(URL... params) {
+	protected Void doInBackground(URL... params) {
 		for (URL singleUrl : params) {
 			mChannels.add(getChannel(singleUrl));
 		}
-		return mChannels;
+
+
+		final Message msg = new Message();
+		msg.obj = mChannels;
+		mHandler.sendMessage(msg);
+		return null;
 	}
+
+
 
 	private InputStream getInputStream(URL url) {
 		try {
@@ -89,38 +126,41 @@ public final class RssChannelAsyncTask extends AsyncTask<URL, Void, List<Channel
 			xpp.setInput(getInputStream(singleUrl), "UTF_8");
 
 			boolean insideChannel = false;
+			boolean insideImage = false;
 
 			int eventType = xpp.getEventType();
-			while (!xpp.getName().equalsIgnoreCase(ITEM.text)) {
+			while (true) {
 				if (eventType == XmlPullParser.START_TAG) {
 
-					if (xpp.getName().equalsIgnoreCase(CHANNEL.text)) {
+					if (xpp.getName().equalsIgnoreCase(rssTag.CHANNEL.toString())) {
 						insideChannel = true;
-					} else if (xpp.getName().equalsIgnoreCase(TITLE.text)) {
+					} else if (xpp.getName().equalsIgnoreCase(rssTag.IMAGE.toString())) {
+						insideImage = true;
+					}
+					else if (xpp.getName().equalsIgnoreCase(rssTag.TITLE.toString()) && !insideImage) {
 						if (insideChannel) {
 							title = xpp.nextText();
 						}
-					} else if (xpp.getName().equalsIgnoreCase(LINK.text)) {
+					} else if (xpp.getName().equalsIgnoreCase(rssTag.LINK.toString()) && !insideImage) {
 						if (insideChannel) {
 							link = new URL(xpp.nextText());
 						}
-					} else if (xpp.getName().equalsIgnoreCase(DESCRIPTION.text)) {
+					} else if (xpp.getName().equalsIgnoreCase(rssTag.DESCRIPTION.toString())) {
 						if (insideChannel) {
 							subtitle = xpp.nextText();
 						}
-					} else if (xpp.getName().equalsIgnoreCase(IMAGE.text)) {
-						while (!xpp.getName().equalsIgnoreCase(URL_RSS.text) || eventType != XmlPullParser.END_TAG) {
-							eventType = xpp.next();
-						}
+					} else if (xpp.getName().equalsIgnoreCase(rssTag.URL_RSS.toString()) && insideImage) {
 						if (insideChannel) {
 							image = new URL(xpp.nextText());
 						}
-					} else if (xpp.getName().equalsIgnoreCase(LAST_BUILD_DATE.text)) {
+					} else if (xpp.getName().equalsIgnoreCase(rssTag.LAST_BUILD_DATE.toString())) {
 						if (insideChannel) {
 							lastBuildDate = xpp.nextText();
 						}
+					} else if (xpp.getName().equalsIgnoreCase(rssTag.ITEM.toString())) {
+						break;
 					}
-				} else if (eventType == XmlPullParser.END_TAG && xpp.getName().equalsIgnoreCase(CHANNEL.text)) {
+				} else if (eventType == XmlPullParser.END_TAG && xpp.getName().equalsIgnoreCase(rssTag.CHANNEL.toString())) {
 					insideChannel = false;
 				}
 

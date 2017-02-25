@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.StrictMode;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -58,6 +59,8 @@ public final class ChannelRecyclerAdapter extends RecyclerView.Adapter<ChannelRe
 			StrictMode.setThreadPolicy(policy);
 			try {
 				bmp = BitmapFactory.decodeStream(url.openConnection().getInputStream());
+			} catch (NullPointerException e) {
+				Log.d("Bitmap", "null");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
