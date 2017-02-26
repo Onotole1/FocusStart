@@ -11,7 +11,7 @@ import lombok.Setter;
  *
  * @author anatoliy
  */
-public final class Channel {
+public final class Channel implements NewsModule {
 	private @Getter @Setter	String title;
 	private @Getter @Setter String subtitle;
 	private @Getter @Setter String lastBuildDate;
