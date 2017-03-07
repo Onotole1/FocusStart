@@ -1,6 +1,7 @@
 package com.spitchenko.focusstart.model;
 
 import java.net.URL;
+import java.util.List;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -17,4 +18,5 @@ public final class Channel implements NewsModule {
 	private @Getter @Setter String lastBuildDate;
 	private @Getter @Setter URL link;
 	private @Getter @Setter URL image;
+	private @Getter @Setter List<ChannelItem> channelItems;
 }

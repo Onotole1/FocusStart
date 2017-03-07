@@ -9,7 +9,7 @@ import android.os.Handler;
 import android.os.Message;
 
 import com.spitchenko.focusstart.model.NewsModule;
-import com.spitchenko.focusstart.parser.RssChannelParser;
+import com.spitchenko.focusstart.parser.AtomRssParser;
 
 /**
  * Date: 24.02.17
@@ -29,9 +29,11 @@ public final class RssChannelAsyncTask extends AsyncTask<URL, Void, Void> {
 
 	@Override
 	protected Void doInBackground(URL... params) {
-		RssChannelParser rssChannelParser = new RssChannelParser();
+		AtomRssParser atomRssParser = new AtomRssParser();
 		for (URL singleUrl : params) {
-			mChannels.add(rssChannelParser.parseXml(singleUrl));
+			synchronized (this) {
+				mChannels.add(atomRssParser.parseXml(singleUrl));
+			}
 		}
 
 

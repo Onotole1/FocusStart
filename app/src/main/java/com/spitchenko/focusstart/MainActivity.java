@@ -30,9 +30,10 @@ public class MainActivity extends AppCompatActivity {
         RssChannelAsyncTask rssChannelAsyncTask = new RssChannelAsyncTask(handler);
         try {
             rssChannelAsyncTask.execute(new URL("https://news.yandex.ru/index.rss")
-		            , new URL("http://feeds.pcworld.com/pcworld/latestnews")
+                    , new URL("http://www.xn--atemschutzunflle-7nb.de/asu.xml")
+		            /*, new URL("http://feeds.pcworld.com/pcworld/latestnews")
 		            , new URL("https://news.rambler.ru/rss/head/")
-		            , new URL("https://lenta.ru/rss/news"));
+		            , new URL("https://lenta.ru/rss/news")*/);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
