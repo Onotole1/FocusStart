@@ -1,4 +1,4 @@
-package com.spitchenko.focusstart.parser;
+package com.spitchenko.focusstart.channel_window;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,7 +14,7 @@ import org.xmlpull.v1.XmlPullParserFactory;
  *
  * @author anatoliy
  */
-class XmlParser {
+final class XmlParser {
 	private XmlPullParser xpp;
 
 	XmlParser(final URL url) {
@@ -75,7 +75,7 @@ class XmlParser {
 
 				eventType = xpp.next();
 			}
-		} catch (XmlPullParserException | IOException e) {
+		} catch (final XmlPullParserException | IOException e) {
 			e.printStackTrace();
 		}
 
@@ -84,8 +84,9 @@ class XmlParser {
 
 	private InputStream getInputStream(final URL url) {
 		try {
-			return url.openConnection().getInputStream();
-		} catch (IOException e) {
+			return url.openConnection().getInputStream();//java.net.unknownhostexception unable to resolve host
+		} catch (final IOException e) {
+			e.printStackTrace();
 			return null;
 		}
 	}

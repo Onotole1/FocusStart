@@ -1,4 +1,4 @@
-package com.spitchenko.focusstart.parser;
+package com.spitchenko.focusstart.channel_window;
 
 /**
  * Date: 07.03.17
@@ -6,29 +6,28 @@ package com.spitchenko.focusstart.parser;
  *
  * @author anatoliy
  */
-class AtomTagEnum {
+final class AtomTagEnum {
 	enum atomTag {
 		FEED("feed"),
 		ENTRY("entry"),
 		LINK("link"),
 		ICON("icon"),
 		LINK_HREF("href"),
-		LINK_ALTERNATE("alternate"),
-		SUMMARY("summary"),
 		PUBLISHED("published"),
 		UPDATED("updated"),
 		TITLE("title"),
-		SUBTITLE("subtitle");
+		SUBTITLE("subtitle"),
+		DATE_PATTERN("yyyy-MM-dd'T'HH:mm:ssZ");
 
 		final String text;
 
-		atomTag(String text) {
+		atomTag(final String text) {
 			this.text = text;
 		}
 
 
 		@Override
-		public String toString() {
+		public final String toString() {
 			return text;
 		}
 	}

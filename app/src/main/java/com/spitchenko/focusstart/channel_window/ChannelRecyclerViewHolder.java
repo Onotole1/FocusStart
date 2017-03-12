@@ -1,4 +1,4 @@
-package com.spitchenko.focusstart.adapters;
+package com.spitchenko.focusstart.channel_window;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -17,6 +17,7 @@ import lombok.Setter;
  * @author anatoliy
  */
 final class ChannelRecyclerViewHolder extends RecyclerView.ViewHolder {
+
 	private @Getter @Setter	TextView titleChannel;
 	private @Getter @Setter	TextView subtitleChannel;
 	private @Getter @Setter	ImageView imageChannel;

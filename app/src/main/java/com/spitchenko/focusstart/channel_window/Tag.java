@@ -1,4 +1,4 @@
-package com.spitchenko.focusstart.parser;
+package com.spitchenko.focusstart.channel_window;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,7 +14,7 @@ import lombok.Setter;
  *
  * @author anatoliy
  */
-class Tag {
+final class Tag {
 	@Getter @Setter String name;
 	@Getter @Setter String text;
 	@Getter @Setter int depth;
@@ -22,7 +22,7 @@ class Tag {
 	@Getter @Setter List<Tag> children = new ArrayList<>();
 	@Getter @Setter Map<String, String> attributes = new HashMap<>();
 
-	Tag(String name, Tag parent, int depth) {
+	Tag(final String name, final Tag parent, final int depth) {
 		this.name = name;
 		this.parent = parent;
 		this.depth = depth;

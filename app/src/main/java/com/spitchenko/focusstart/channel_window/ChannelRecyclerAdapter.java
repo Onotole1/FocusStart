@@ -1,11 +1,16 @@
-package com.spitchenko.focusstart.adapters;
+package com.spitchenko.focusstart.channel_window;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.List;
+import java.util.ArrayList;
 
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Typeface;
+import android.os.Build;
+import android.os.Parcelable;
 import android.os.StrictMode;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -14,7 +19,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.spitchenko.focusstart.R;
-import com.spitchenko.focusstart.model.Channel;
+import com.spitchenko.focusstart.channel_iItem_window.ChannelItemActivity;
+import com.spitchenko.focusstart.model.ChannelItem;
 
 /**
  * Date: 24.02.17
@@ -22,46 +28,62 @@ import com.spitchenko.focusstart.model.Channel;
  *
  * @author anatoliy
  */
-public final class ChannelRecyclerAdapter extends RecyclerView.Adapter<ChannelRecyclerViewHolder> {
-	private List<Channel> mChannels;
+final class ChannelRecyclerAdapter extends RecyclerView.Adapter<ChannelRecyclerViewHolder> {
+	private ArrayList<Channel> channels;
+	private Context context;
 
-	public ChannelRecyclerAdapter(final List<Channel> channels) {
-		mChannels = channels;
+	ChannelRecyclerAdapter(final ArrayList<Channel> channels) {
+		this.channels = channels;
 	}
 
 	@Override
 	public final ChannelRecyclerViewHolder onCreateViewHolder(final ViewGroup parent, final int viewType) {
+		context = parent.getContext();
 		View channelElement = LayoutInflater.from(parent.getContext()).inflate(R.layout.channel_element, parent, false);
 		return new ChannelRecyclerViewHolder(channelElement);
 	}
 
 	@Override
 	public final void onBindViewHolder(final ChannelRecyclerViewHolder holder, final int position) {
-		final Channel bindChannel = mChannels.get(position);
+		final Channel bindChannel = channels.get(position);
 
 		holder.getTitleChannel().setText(bindChannel.getTitle());
 		holder.getSubtitleChannel().setText(bindChannel.getSubtitle());
 		holder.getImageChannel().setImageBitmap(loadBitmapFromUrl(bindChannel.getImage()));
+		if (!bindChannel.isRead()) {
+			holder.getTitleChannel().setTypeface(null, Typeface.BOLD);
+		}
+
+		holder.itemView.setOnClickListener (new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				//rw database
+				//sendbroadcast
+				Intent intent = new Intent(context, ChannelItemActivity.class);
+				intent.putParcelableArrayListExtra(ChannelItem.getKEY(), (ArrayList<? extends Parcelable>) channels.get(holder.getAdapterPosition()).getChannelItems());
+				context.startActivity(intent);
+			}
+		});
 	}
 
 	@Override
 	public final int getItemCount() {
-		return mChannels.size();
+		return channels == null ? 0 : channels.size();
 	}
 
 	private Bitmap loadBitmapFromUrl(final URL url) {
 		Bitmap bmp = null;
 		int SDK_INT = android.os.Build.VERSION.SDK_INT;
-		if (SDK_INT > 8)
+		if (SDK_INT > Build.VERSION_CODES.FROYO)
 		{
 			StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
 					.permitAll().build();
 			StrictMode.setThreadPolicy(policy);
 			try {
 				bmp = BitmapFactory.decodeStream(url.openConnection().getInputStream());
-			} catch (NullPointerException e) {
+			} catch (final NullPointerException e) {
 				Log.d("Bitmap", "null");
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				e.printStackTrace();
 			}
 
