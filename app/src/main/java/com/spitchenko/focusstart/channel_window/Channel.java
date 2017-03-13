@@ -18,7 +18,7 @@ import lombok.Setter;
  *
  * @author anatoliy
  */
-final class Channel implements Parcelable {
+public final class Channel implements Parcelable {
 	private final static @Getter String KEY = "CHANNEL";
 
 	private @Getter @Setter	String title;
@@ -29,7 +29,7 @@ final class Channel implements Parcelable {
 	private @Getter @Setter boolean isRead;
 	private @Getter @Setter List<ChannelItem> channelItems;
 
-	Channel() {
+	public Channel() {
 	}
 
 	private Channel(Parcel in) {

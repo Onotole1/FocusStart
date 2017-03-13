@@ -14,6 +14,8 @@
 		tools:ignore="AllowBackup,GoogleAppIndexingWarning">
 		<service android:name="com.spitchenko.focusstart.channel_window.RssChannelIntentService" />
 		<service android:name="com.spitchenko.focusstart.channel_window.RssChannelReadIntentService" />
+		<service android:name="com.spitchenko.focusstart.channel_iItem_window.RssChannelItemIntentService" />
+		<service android:name="com.spitchenko.focusstart.channel_iItem_window.RssChannelItemReadIntentService" />
 		
 		<activity android:name="com.spitchenko.focusstart.channel_window.ChannelActivity">
 			<intent-filter>

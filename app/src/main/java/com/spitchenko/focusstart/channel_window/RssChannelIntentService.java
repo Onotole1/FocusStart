@@ -9,6 +9,8 @@ import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 
+import com.spitchenko.focusstart.database.AtomRssChannelDbHelper;
+
 /**
  * Date: 09.03.17
  * Time: 15:18

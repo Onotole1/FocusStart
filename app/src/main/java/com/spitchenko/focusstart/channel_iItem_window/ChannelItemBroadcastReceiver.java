@@ -1,4 +1,4 @@
-package com.spitchenko.focusstart.channel_window;
+package com.spitchenko.focusstart.channel_iItem_window;
 
 import java.util.ArrayList;
 
@@ -8,27 +8,29 @@ import android.content.Intent;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
+import com.spitchenko.focusstart.model.ChannelItem;
+
 /**
  * Date: 11.03.17
  * Time: 17:06
  *
  * @author anatoliy
  */
-public final class ChannelBroadcastReceiver extends BroadcastReceiver {
-	private final ArrayList<Channel> receivedChannels = new ArrayList<>();
+public final class ChannelItemBroadcastReceiver extends BroadcastReceiver {
+	private final ArrayList<ChannelItem> receivedChannels = new ArrayList<>();
 	private final RecyclerView recyclerView;
 
-	public ChannelBroadcastReceiver(RecyclerView recyclerView) {
+	public ChannelItemBroadcastReceiver(RecyclerView recyclerView) {
 		this.recyclerView = recyclerView;
 	}
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		Channel channel = intent.getParcelableExtra(Channel.getKEY());
+		ChannelItem channel = intent.getParcelableExtra(ChannelItem.getKEY());
 		receivedChannels.add(channel);
 		RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(context);
 		recyclerView.setLayoutManager(layoutManager);
-		ChannelRecyclerAdapter channelRecyclerAdapter = new ChannelRecyclerAdapter(receivedChannels);
+		ChannelItemRecyclerAdapter channelRecyclerAdapter = new ChannelItemRecyclerAdapter(receivedChannels);
 		recyclerView.setAdapter(channelRecyclerAdapter);
 	}
 }
