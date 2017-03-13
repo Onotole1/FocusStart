@@ -19,12 +19,12 @@ final class XmlParser {
 
 	XmlParser(final URL url) {
 		try {
-			XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
+			final XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
 			factory.setNamespaceAware(true);
 			xpp = factory.newPullParser();
-			InputStream inputStream = getInputStream(url);
+			final InputStream inputStream = getInputStream(url);
 			xpp.setInput(inputStream, "UTF_8");
-		} catch (XmlPullParserException e) {
+		} catch (final XmlPullParserException e) {
 			e.printStackTrace();
 		}
 	}
@@ -111,29 +111,17 @@ final class XmlParser {
 		return null;
 	}
 
-	String getValueAttributeTag(final String inputTag, final String parentTag, final String attribute, final Tag tag) {
-		Tag parent = getCurrentTagByParent(parentTag, tag);
-		if (null != parent && null != parent.getChildren()) {
-			for (Tag t : parent.getChildren()) {
-				if (t.getName().equals(inputTag)) {
-					return t.getAttributes().get(attribute);
-				}
-			}
-		}
-		return null;
-	}
-
 	Tag getCurrentTagByParent(final String inputTag, final Tag tag) {
 		Tag result = null;
 		if (inputTag.equals(tag.getName())) {
 			return tag;
 		} else {
-			for (Tag t : tag.getChildren()) {
+			for (final Tag t : tag.getChildren()) {
 				if (t.getName().equals(inputTag)) {
 					return t;
 				}
 			}
-			for (Tag t : tag.getChildren()) {
+			for (final Tag t : tag.getChildren()) {
 				result = getCurrentTagByParent(inputTag, t);
 			}
 		}

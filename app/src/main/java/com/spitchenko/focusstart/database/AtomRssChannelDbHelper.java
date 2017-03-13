@@ -1,4 +1,4 @@
-package com.spitchenko.focusstart.channel_window;
+package com.spitchenko.focusstart.database;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -11,6 +11,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.spitchenko.focusstart.channel_window.Channel;
 import com.spitchenko.focusstart.model.ChannelItem;
 
 /**
@@ -19,7 +20,7 @@ import com.spitchenko.focusstart.model.ChannelItem;
  *
  * @author anatoliy
  */
-final class AtomRssChannelDbHelper extends SQLiteOpenHelper {
+public final class AtomRssChannelDbHelper extends SQLiteOpenHelper {
 	private static final int DATABASE_VERSION = 1;
 	private static final String DATABASE_NAME = "AtomRssChannel.db";
 
@@ -55,7 +56,7 @@ final class AtomRssChannelDbHelper extends SQLiteOpenHelper {
 	private static final String SQL_DELETE_CHANNEL_ENTRIES =
 			"DROP TABLE IF EXISTS " + AtomRssDataBase.ChannelEntry.TABLE_NAME;
 
-	AtomRssChannelDbHelper(final Context context) {
+	public AtomRssChannelDbHelper(final Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
 	}
 
@@ -72,15 +73,15 @@ final class AtomRssChannelDbHelper extends SQLiteOpenHelper {
 	}
 
 
-	final Channel readChannelFromDb(final URL url) {
-		SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
-		Channel channel = new Channel();
+	public final Channel readChannelFromDb(final URL url) {
+		final SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
+		final Channel channel = new Channel();
 
-		Cursor cursorChannel = sqLiteDatabase.rawQuery("SELECT *  FROM  "
+		final Cursor cursorChannel = sqLiteDatabase.rawQuery("SELECT *  FROM  "
 		                                               + AtomRssDataBase.ChannelEntry.TABLE_NAME + " WHERE "
 		                                               + AtomRssDataBase.ChannelEntry.COLUMN_NAME_CHANNEL_LINK + "= '"
 		                                               + url.toString() + "' ORDER BY "
-		                                               + AtomRssDataBase.ChannelEntry._ID, null);
+		                                               + AtomRssDataBase.ChannelEntry._ID + " DESC", null);
 		cursorChannel.moveToFirst();
 		if (cursorChannel.getCount() > 0) {
 
@@ -91,12 +92,13 @@ final class AtomRssChannelDbHelper extends SQLiteOpenHelper {
 			try {
 				channel.setLink(new URL(cursorChannel.getString(cursorChannel.getColumnIndex(AtomRssDataBase.ChannelEntry.COLUMN_NAME_CHANNEL_LINK))));
 				channel.setImage(new URL(cursorChannel.getString(cursorChannel.getColumnIndex(AtomRssDataBase.ChannelEntry.COLUMN_NAME_CHANNEL_IMAGE))));
-			} catch (MalformedURLException e) {
+			} catch (final MalformedURLException e) {
 				e.printStackTrace();
 			}
 
 
-			ArrayList<ChannelItem> channelItems = readChannelItemsFromDb(sqLiteDatabase, cursorChannel.getLong(cursorChannel.getColumnIndex(AtomRssDataBase.ChannelEntry._ID)));
+			final ArrayList<ChannelItem> channelItems =
+					readChannelItemsFromDb(cursorChannel.getLong(cursorChannel.getColumnIndex(AtomRssDataBase.ChannelEntry._ID)));
 			channel.setChannelItems(channelItems);
 		}
 		cursorChannel.close();
@@ -104,9 +106,10 @@ final class AtomRssChannelDbHelper extends SQLiteOpenHelper {
 		return channel;
 	}
 
-	private ArrayList<ChannelItem> readChannelItemsFromDb(final SQLiteDatabase sqLiteDatabase, final long channelId) {
-		ArrayList<ChannelItem> channelItems = new ArrayList<>();
-		Cursor cursorChannelItem = sqLiteDatabase.rawQuery("SELECT *  FROM  "
+	private ArrayList<ChannelItem> readChannelItemsFromDb(final long channelId) {
+		final SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
+		final ArrayList<ChannelItem> channelItems = new ArrayList<>();
+		final Cursor cursorChannelItem = sqLiteDatabase.rawQuery("SELECT *  FROM  "
 		                                                   + AtomRssDataBase.ChannelItemEntry.TABLE_NAME + " WHERE "
 		                                                   + AtomRssDataBase.ChannelEntry.COLUMN_NAME_CHANNEL_ID + "= '"
 		                                                   + channelId + "'", null);
@@ -117,25 +120,23 @@ final class AtomRssChannelDbHelper extends SQLiteOpenHelper {
 			channelItem.setSubtitle(cursorChannelItem.getString(cursorChannelItem.getColumnIndex(AtomRssDataBase.ChannelItemEntry.COLUMN_NAME_CHANNEL_ITEM_SUBTITLE)));
 			try {
 				channelItem.setLink(new URL(cursorChannelItem.getString(cursorChannelItem.getColumnIndex(AtomRssDataBase.ChannelItemEntry.COLUMN_NAME_CHANNEL_ITEM_LINK))));
-			} catch (MalformedURLException e) {
+			} catch (final MalformedURLException e) {
 				e.printStackTrace();
 			}
 			channelItem.setPubDate(cursorChannelItem.getString(cursorChannelItem.getColumnIndex(AtomRssDataBase.ChannelItemEntry.COLUMN_NAME_CHANNEL_ITEM_PUB_DATE)));
 			channelItem.setUpdateDate(cursorChannelItem.getString(cursorChannelItem.getColumnIndex(AtomRssDataBase.ChannelItemEntry.COLUMN_NAME_CHANNEL_ITEM_UPDATE_DATE)));
 			channelItem.setRead(longToBool(cursorChannelItem.getLong(cursorChannelItem.getColumnIndex(AtomRssDataBase.ChannelItemEntry.COLUMN_NAME_CHANNEL_ITEM_ISREAD))));
-			cursorChannelItem.moveToNext();
 			channelItems.add(channelItem);
-		} while (!cursorChannelItem.isLast());
+		} while (cursorChannelItem.moveToNext());
 		cursorChannelItem.close();
 		sqLiteDatabase.close();
 
 		return channelItems;
 	}
 
-	final void writeChannelToDb(final Channel channel) {
-		SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
-		ContentValues values = new ContentValues();
-
+	public final void writeChannelToDb(final Channel channel) {
+		final SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+		final ContentValues values = new ContentValues();
 
 		values.put(AtomRssDataBase.ChannelEntry.COLUMN_NAME_CHANNEL_TITLE, channel.getTitle());
 		values.put(AtomRssDataBase.ChannelEntry.COLUMN_NAME_CHANNEL_SUBTITLE, channel.getSubtitle());
@@ -172,9 +173,9 @@ final class AtomRssChannelDbHelper extends SQLiteOpenHelper {
 		sqLiteDatabase.close();
 	}
 
-	final void deleteChannelFromDb(final Channel channel) {
-		SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
-		Cursor cursor = sqLiteDatabase.rawQuery("SELECT " + AtomRssDataBase.ChannelEntry._ID + "  FROM  "
+	public final void deleteChannelFromDb(final Channel channel) {
+		final SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+		final Cursor cursor = sqLiteDatabase.rawQuery("SELECT " + AtomRssDataBase.ChannelEntry._ID + "  FROM  "
 		                                        + AtomRssDataBase.ChannelEntry.TABLE_NAME + " WHERE "
 		                                        + AtomRssDataBase.ChannelEntry.COLUMN_NAME_CHANNEL_LINK + "= '"
 		                                        + channel.getLink().toString() + "'", null);
@@ -182,9 +183,14 @@ final class AtomRssChannelDbHelper extends SQLiteOpenHelper {
 		long id = cursor.getLong(cursor.getColumnIndex(AtomRssDataBase.ChannelEntry._ID));
 		do {
 			sqLiteDatabase.delete(AtomRssDataBase.ChannelItemEntry.TABLE_NAME, AtomRssDataBase.ChannelEntry._ID + "=" + id, null);
-			cursor.moveToNext();
-		} while (!cursor.isLast());
+		} while (cursor.moveToNext());
 		cursor.close();
+		sqLiteDatabase.close();
+	}
+
+	public final void updateValueFromDb(final String tableName, final String columnValue, final String value, final String whereColumn, final String whereValue) {
+		final SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+		sqLiteDatabase.execSQL("UPDATE " + tableName + " SET " + columnValue + "=" + value + " WHERE " + whereColumn + "='" + whereValue + "'");
 		sqLiteDatabase.close();
 	}
 
@@ -192,7 +198,7 @@ final class AtomRssChannelDbHelper extends SQLiteOpenHelper {
 		return number == 1;
 	}
 
-	private long boolToLong(final boolean bool) {
+	public long boolToLong(final boolean bool) {
 		return bool ? 1 : 0;
 	}
 }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -40,11 +41,19 @@ final class ChannelItemRecyclerAdapter extends RecyclerView.Adapter<ChannelItemR
 
 		holder.getTitleChannel().setText(bindChannel.getTitle());
 		holder.getSubtitleChannel().setText(bindChannel.getSubtitle());
+		if (!bindChannel.isRead()) {
+			holder.getTitleChannel().setTypeface(null, Typeface.BOLD);
+		}
 
 		holder.itemView.setOnClickListener (new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(channelItems.get(holder.getAdapterPosition()).getLink().toString()));
+				if (!channelItems.get(holder.getAdapterPosition()).isRead()) {
+					final Intent intent = new Intent(context, RssChannelItemReadIntentService.class);
+					intent.putExtra(ChannelItem.getKEY(), channelItems.get(holder.getAdapterPosition()));
+					context.startService(intent);
+				}
+				final Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(channelItems.get(holder.getAdapterPosition()).getLink().toString()));
 				context.startActivity(intent);
 			}
 		});

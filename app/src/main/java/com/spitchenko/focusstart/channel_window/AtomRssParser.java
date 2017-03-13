@@ -6,7 +6,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 
 import com.spitchenko.focusstart.model.ChannelItem;
@@ -32,7 +31,7 @@ final class AtomRssParser {
 	}
 
 	private Channel parseRss(final XmlParser xmlParser, final Tag root, final URL url) {
-		Channel singleChannel = new Channel();
+		final Channel singleChannel = new Channel();
 
 		singleChannel.setTitle(xmlParser.getValueTag(RssTagEnum.rssTag.TITLE.text, RssTagEnum.rssTag.CHANNEL.text, root));
 		singleChannel.setSubtitle(xmlParser.getValueTag(RssTagEnum.rssTag.DESCRIPTION.text, RssTagEnum.rssTag.CHANNEL.text, root));
@@ -49,17 +48,16 @@ final class AtomRssParser {
 		return singleChannel;
 	}
 
-	private List<ChannelItem> parseRssChannelItems(final Tag tag) {
-		List<ChannelItem> channelItems = new ArrayList<>();
+	private ArrayList<ChannelItem> parseRssChannelItems(final Tag tag) {
+		ArrayList<ChannelItem> channelItems = new ArrayList<>();
 
-		//Tag channel = xmlParser.getCurrentTagByParent(RssTagEnum.rssTag.RSS.text, tag);
 		if (null != tag) {
 			if (null != tag.getChildren()) {
-				for (Tag t : tag.getChildren()) {
+				for (final Tag t : tag.getChildren()) {
 					ChannelItem channelItem = null;
 					if (t.getName().equals(RssTagEnum.rssTag.ITEM.text)) {
 						channelItem = new ChannelItem();
-						for (Tag t1 : t.getChildren()) {
+						for (final Tag t1 : t.getChildren()) {
 							if (t1.getName().equals(RssTagEnum.rssTag.TITLE.text)) {
 								channelItem.setTitle(t1.getText());
 							} else if (t1.getName().equals(RssTagEnum.rssTag.LINK.text)) {
@@ -80,7 +78,7 @@ final class AtomRssParser {
 					}
 				}
 				if (channelItems.isEmpty()) {
-					for (Tag t : tag.getChildren()) {
+					for (final Tag t : tag.getChildren()) {
 						channelItems = parseRssChannelItems(t);
 					}
 				}
@@ -90,18 +88,17 @@ final class AtomRssParser {
 	}
 
 	private Date parseAtomRssDate(final String input, final String pattern) {
-		Date result = null;
 		SimpleDateFormat format = new SimpleDateFormat(pattern, Locale.ENGLISH);
 		try {
-			result = format.parse(input);
-		} catch (ParseException e) {
+			return format.parse(input);
+		} catch (final ParseException e) {
 			e.printStackTrace();
+			return null;
 		}
-		return result;
 	}
 
 	private Channel parseAtom(final XmlParser xmlParser, final Tag root, final URL url) {
-		Channel singleChannel = new Channel();
+		final Channel singleChannel = new Channel();
 
 		singleChannel.setTitle(xmlParser.getValueTag(AtomTagEnum.atomTag.TITLE.text, AtomTagEnum.atomTag.FEED.text, root));
 		singleChannel.setSubtitle(xmlParser.getValueTag(AtomTagEnum.atomTag.SUBTITLE.text, AtomTagEnum.atomTag.FEED.text, root));
@@ -118,16 +115,16 @@ final class AtomRssParser {
 		return singleChannel;
 	}
 
-	private List<ChannelItem> parseAtomChannelItems(final Tag tag, final XmlParser xmlParser) {
-		List<ChannelItem> channelItems = new ArrayList<>();
+	private ArrayList<ChannelItem> parseAtomChannelItems(final Tag tag, final XmlParser xmlParser) {
+		final ArrayList<ChannelItem> channelItems = new ArrayList<>();
 
 		Tag channel = xmlParser.getCurrentTagByParent(AtomTagEnum.atomTag.FEED.text, tag);
 
-		for (Tag t:channel.getChildren()) {
+		for (final Tag t:channel.getChildren()) {
 			ChannelItem channelItem = null;
 			if (t.getName().equals(AtomTagEnum.atomTag.ENTRY.text)) {
 				channelItem = new ChannelItem();
-				for (Tag t1:t.getChildren()) {
+				for (final Tag t1:t.getChildren()) {
 					if (t1.getName().equals(AtomTagEnum.atomTag.TITLE.text)) {
 						channelItem.setTitle(t1.getText());
 					} else if (t1.getName().equals(AtomTagEnum.atomTag.LINK.text)) {

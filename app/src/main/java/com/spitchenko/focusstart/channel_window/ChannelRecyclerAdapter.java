@@ -10,7 +10,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.os.Build;
-import android.os.Parcelable;
 import android.os.StrictMode;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -39,7 +38,7 @@ final class ChannelRecyclerAdapter extends RecyclerView.Adapter<ChannelRecyclerV
 	@Override
 	public final ChannelRecyclerViewHolder onCreateViewHolder(final ViewGroup parent, final int viewType) {
 		context = parent.getContext();
-		View channelElement = LayoutInflater.from(parent.getContext()).inflate(R.layout.channel_element, parent, false);
+		final View channelElement = LayoutInflater.from(parent.getContext()).inflate(R.layout.channel_element, parent, false);
 		return new ChannelRecyclerViewHolder(channelElement);
 	}
 
@@ -57,11 +56,14 @@ final class ChannelRecyclerAdapter extends RecyclerView.Adapter<ChannelRecyclerV
 		holder.itemView.setOnClickListener (new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				//rw database
-				//sendbroadcast
-				Intent intent = new Intent(context, ChannelItemActivity.class);
-				intent.putParcelableArrayListExtra(ChannelItem.getKEY(), (ArrayList<? extends Parcelable>) channels.get(holder.getAdapterPosition()).getChannelItems());
-				context.startActivity(intent);
+				if (!channels.get(holder.getAdapterPosition()).isRead()) {
+					final Intent intent = new Intent(context, RssChannelReadIntentService.class);
+					intent.putExtra(Channel.getKEY(), channels.get(holder.getAdapterPosition()));
+					context.startService(intent);
+				}
+				final Intent intentBrowser = new Intent(context, ChannelItemActivity.class);
+				intentBrowser.putExtra(ChannelItem.getKEY(), channels.get(holder.getAdapterPosition()).getLink());
+				context.startActivity(intentBrowser);
 			}
 		});
 	}

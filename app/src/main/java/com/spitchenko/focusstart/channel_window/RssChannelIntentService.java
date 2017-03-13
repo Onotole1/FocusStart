@@ -9,6 +9,8 @@ import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 
+import com.spitchenko.focusstart.database.AtomRssChannelDbHelper;
+
 /**
  * Date: 09.03.17
  * Time: 15:18
@@ -25,13 +27,13 @@ public final class RssChannelIntentService extends IntentService {
 
 	@Override
 	protected final void onHandleIntent(@Nullable final Intent intent) {
-		AtomRssParser atomRssParser = new AtomRssParser();
-		ArrayList<Channel> channels = new ArrayList<>();
-		ArrayList<URL> urls = new ArrayList<>();
-		AtomRssChannelDbHelper atomRssChannelDbHelper = new AtomRssChannelDbHelper(this);
+		final AtomRssParser atomRssParser = new AtomRssParser();
+		final ArrayList<Channel> channels = new ArrayList<>();
+		final ArrayList<URL> urls = new ArrayList<>();
+		final AtomRssChannelDbHelper atomRssChannelDbHelper = new AtomRssChannelDbHelper(this);
 
 		if (null != intent) {
-			Object input = intent.getExtras().get(KEY);
+			final Object input = intent.getExtras().get(KEY);
 			if (input instanceof ArrayList<?>) {
 				for (int i = 0; i < ((ArrayList) input).size(); i++) {
 					if (((ArrayList) input).get(i) instanceof String) {
@@ -46,8 +48,8 @@ public final class RssChannelIntentService extends IntentService {
 		}
 
 		for (final URL singleUrl : urls) {
-			Channel channelFromDb = atomRssChannelDbHelper.readChannelFromDb(singleUrl);
-			Channel channelFromUrl = atomRssParser.parseXml(singleUrl);
+			final Channel channelFromDb = atomRssChannelDbHelper.readChannelFromDb(singleUrl);
+			final Channel channelFromUrl = atomRssParser.parseXml(singleUrl);
 			if (null == channelFromDb.getLink()) {
 				channels.add(channelFromUrl);
 				atomRssChannelDbHelper.writeChannelToDb(channelFromUrl);
@@ -62,7 +64,7 @@ public final class RssChannelIntentService extends IntentService {
 		}
 
 		for (final Channel channel:channels) {
-			Intent broadcastIntent = new Intent("com.spitchenko.focusstart.LOAD_CHANNEL");
+			final Intent broadcastIntent = new Intent("com.spitchenko.focusstart.LOAD_CHANNEL");
 			broadcastIntent.setPackage(getPackageName());
 			broadcastIntent.putExtra(Channel.getKEY(), channel);
 			LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
