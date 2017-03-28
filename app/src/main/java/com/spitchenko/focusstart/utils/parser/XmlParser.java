@@ -9,8 +9,6 @@ import org.xmlpull.v1.XmlPullParserFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.logging.Level;
-import java.util.logging.LogRecord;
 
 import lombok.NonNull;
 
@@ -92,9 +90,7 @@ final class XmlParser {
 		try {
 			return url.openConnection().getInputStream();
 		} catch (final IOException e) {
-            final LogCatHandler logCatHandler = new LogCatHandler();
-            final LogRecord record = new LogRecord(Level.INFO, e.getLocalizedMessage());
-            logCatHandler.publish(record);
+            LogCatHandler.publishInfoRecord(e.getMessage());
 			return null;
 		}
 	}

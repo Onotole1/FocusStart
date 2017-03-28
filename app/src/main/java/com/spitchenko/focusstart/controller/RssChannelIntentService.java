@@ -327,7 +327,7 @@ public final class RssChannelIntentService extends IntentService {
         return result.toString().trim();
     }
 
-    private String makeTextFromChannel(@NonNull final String title, @NonNull final int number) {
+    private String makeTextFromChannel(@NonNull final String title, final int number) {
             final StringBuilder stringBuilder = new StringBuilder();
             final String plural = this.getResources()
                     .getQuantityString(R.plurals.plurals_news, number, number);
