@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+	xmlns:android="http://schemas.android.com/apk/res/android">
+	<PreferenceCategory android:title="@string/check_updates">
+		<CheckBoxPreference
+			android:key="@string/notification_checkbox"
+			android:summary="@string/turn_on_notifications"
+			android:title="@string/notifications" />
+		<Preference
+			android:key="@string/notification_button"
+			android:summary="@string/period_notifications"
+			android:title="@string/period" />
+	</PreferenceCategory>
+</PreferenceScreen>
