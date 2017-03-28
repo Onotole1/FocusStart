@@ -1,13 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:tools="http://schemas.android.com/tools"
-	android:layout_width="match_parent"
-	android:layout_height="match_parent"
-	tools:context="com.spitchenko.focusstart.channel_iItem_window.ChannelItemActivity">
-	
-	<android.support.v7.widget.RecyclerView
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:id="@+id/activity_channel_item_recycler_view"/>
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                tools:context=".userinterface.channellitem.ChannelItemActivity">
+
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/activity_channel_item_app_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+
+        <android.support.v7.widget.Toolbar
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:id="@+id/activity_channel_item_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="56dp">
+        </android.support.v7.widget.Toolbar>
+    </android.support.design.widget.AppBarLayout>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/activity_channel_item_recycler_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/activity_channel_item_app_bar"/>
 
 </RelativeLayout>

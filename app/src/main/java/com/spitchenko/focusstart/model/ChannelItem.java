@@ -1,11 +1,12 @@
 package com.spitchenko.focusstart.model;
 
-import java.net.URL;
-
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Date;
+
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 
 /**
@@ -19,31 +20,31 @@ public final class ChannelItem implements Parcelable {
 
 	private @Getter @Setter String title;
 	private @Getter @Setter String subtitle;
-	private @Getter @Setter String pubDate;
-	private @Getter @Setter String updateDate;
-	private @Getter @Setter URL link;
+	private @Getter @Setter Date pubDate;
+	private @Getter @Setter Date updateDate;
+	private @Getter @Setter String link;
 	private @Getter @Setter boolean isRead;
 
 	public ChannelItem() {
 	}
 
-	private ChannelItem(Parcel in) {
+	private ChannelItem(@NonNull final Parcel in) {
 		title = in.readString();
 		subtitle = in.readString();
-		pubDate = in.readString();
-		updateDate = in.readString();
-		link = (URL)in.readSerializable();
+		pubDate = (Date) in.readSerializable();
+		updateDate = (Date) in.readSerializable();
+		link = in.readString();
 		isRead = in.readByte() != 0;
 	}
 
 	public static final Creator<ChannelItem> CREATOR = new Creator<ChannelItem>() {
 		@Override
-		public ChannelItem createFromParcel(Parcel in) {
-			return new ChannelItem(in);
+		public ChannelItem createFromParcel(@NonNull final Parcel source) {
+			return new ChannelItem(source);
 		}
 
 		@Override
-		public ChannelItem[] newArray(int size) {
+		public ChannelItem[] newArray(final int size) {
 			return new ChannelItem[size];
 		}
 	};
@@ -54,12 +55,12 @@ public final class ChannelItem implements Parcelable {
 	}
 
 	@Override
-	public void writeToParcel(Parcel dest, int flags) {
+	public void writeToParcel(final Parcel dest, final int flags) {
 		dest.writeString(title);
 		dest.writeString(subtitle);
-		dest.writeString(pubDate);
-		dest.writeString(updateDate);
-		dest.writeSerializable(link);
+		dest.writeSerializable(pubDate);
+		dest.writeSerializable(updateDate);
+		dest.writeString(link);
 		dest.writeByte((byte) (isRead ? 1 : 0));
 	}
 }
