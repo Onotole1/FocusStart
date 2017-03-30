@@ -16,16 +16,22 @@
             xmlns:tools="http://schemas.android.com/tools"
             android:id="@+id/activity_channel_item_toolbar"
             android:layout_width="match_parent"
-            android:layout_height="56dp">
+            android:layout_height="@dimen/toolbar_height">
         </android.support.v7.widget.Toolbar>
     </android.support.design.widget.AppBarLayout>
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/activity_channel_item_recycler_view"
-        android:layout_width="wrap_content"
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/activity_channel_item_swipe_refresh_layout"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/activity_channel_item_app_bar"/>
+        android:layout_below="@id/activity_channel_item_app_bar">
 
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/activity_channel_item_recycler_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/activity_channel_item_app_bar"/>
+    </android.support.v4.widget.SwipeRefreshLayout>
 </RelativeLayout>

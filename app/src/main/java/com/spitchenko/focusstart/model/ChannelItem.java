@@ -3,7 +3,9 @@ package com.spitchenko.focusstart.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 
 import lombok.Getter;
 import lombok.NonNull;
@@ -63,4 +65,30 @@ public final class ChannelItem implements Parcelable {
 		dest.writeString(link);
 		dest.writeByte((byte) (isRead ? 1 : 0));
 	}
+
+	public ChannelItem cloneChannelItem() {
+        final ChannelItem clone = new ChannelItem();
+        clone.setTitle(this.getTitle());
+        clone.setSubtitle(this.getSubtitle());
+        clone.setPubDate(this.getPubDate());
+        clone.setUpdateDate(this.getUpdateDate());
+        clone.setLink(this.getLink());
+        clone.setRead(this.isRead());
+        return clone;
+    }
+
+    public static Integer countMatches(final ArrayList<ChannelItem> input) {
+        Integer result = 0;
+        final Iterator<ChannelItem> iterator = input.iterator();
+        while (iterator.hasNext()) {
+            final ChannelItem current = iterator.next();
+            iterator.remove();
+            for (final ChannelItem item:input) {
+                if (item.getLink().equals(current.getLink())) {
+                    result++;
+                }
+            }
+        }
+        return result;
+    }
 }

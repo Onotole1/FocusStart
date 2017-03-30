@@ -11,6 +11,6 @@
 		android:layout_height="wrap_content"
 		android:layout_centerHorizontal="true"
 		android:layout_centerVertical="true"
-		android:textSize="30sp"
+		android:textSize="@dimen/empty_text_size"
 		tools:text="Список каналов пуст" />
 </RelativeLayout>

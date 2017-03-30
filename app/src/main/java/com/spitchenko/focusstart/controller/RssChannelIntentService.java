@@ -35,6 +35,8 @@ import javax.net.ssl.HttpsURLConnection;
 
 import lombok.NonNull;
 
+import static com.spitchenko.focusstart.model.ChannelItem.countMatches;
+
 /**
  * Date: 09.03.17
  * Time: 15:18
@@ -51,6 +53,7 @@ public final class RssChannelIntentService extends IntentService {
 	private final static String REFRESH = NAME_CHANNEL_SERVICE + ".refresh";
     private final static String NOTIFICATION = NAME_CHANNEL_SERVICE + ".notification";
     private final static String REFRESH_CURRENT_CHANNEL = NAME_CHANNEL_SERVICE + ".refreshCurrent";
+    private final static String REFRESH_ALL_CHANNELS = NAME_CHANNEL_SERVICE + ".refreshAll";
     private final static int NOTIFICATION_ID = 100500;
 
 	public RssChannelIntentService() {
@@ -82,6 +85,9 @@ public final class RssChannelIntentService extends IntentService {
                 case REFRESH_CURRENT_CHANNEL:
                     refreshCurrentChannel(intent);
                     break;
+                case REFRESH_ALL_CHANNELS:
+                    refreshAllChannels();
+                    break;
             }
         }
     }
@@ -107,8 +113,37 @@ public final class RssChannelIntentService extends IntentService {
         }
     }
 
+    private void refreshAllChannels() {
+        final AtomRssChannelDbHelper channelDbHelper = new AtomRssChannelDbHelper(this);
+        final ArrayList<Channel> channelsDb = channelDbHelper.readAllChannelsFromDb();
+        final AtomRssParser atomRssParser = new AtomRssParser();
+
+        for (final Channel channel:channelsDb) {
+            try {
+                final Channel channelUrl = atomRssParser.parseXml(channel.getLink());
+
+                final ArrayList<ChannelItem> itemsAll
+                        = new ArrayList<>(channel.getChannelItems().size());
+
+                for (final ChannelItem item:channel.getChannelItems()) {
+                    itemsAll.add(item.cloneChannelItem());
+                }
+                for (final ChannelItem item:channelUrl.getChannelItems()) {
+                    itemsAll.add(item.cloneChannelItem());
+                }
+
+                if (channel.getChannelItems().size() > countMatches(itemsAll)) {
+                    channelDbHelper.refreshCurrentChannel(channel, channelUrl);
+                }
+                readChannelsFromDb(null);
+            } catch (IOException | XmlPullParserException e) {
+                sendChannelToBroadcast(null, ChannelActivity.getNoinetActionKey());
+            }
+        }
+    }
+
     private void notificationReload(@NonNull final Intent intent) {
-        if (ChannelActivity.isActivityRun) {
+        if (ChannelActivity.isActivityRun()) {
             final ArrayList<Parcelable> input = intent.getParcelableArrayListExtra(NOTIFICATION);
             for (final Parcelable message:input) {
                 if (message instanceof Message) {
@@ -117,7 +152,6 @@ public final class RssChannelIntentService extends IntentService {
                 }
             }
         } else {
-            //resultIntent.putParcelableArrayListExtra(NOTIFICATION, atomRssChannelHelper.getAllMessages());
             final Intent activityIntent = new Intent(this, ChannelActivity.class);
             activityIntent.setAction(ChannelActivity.getRefreshKey());
             activityIntent.putExtra(ChannelActivity.getRefreshKey()
@@ -174,21 +208,6 @@ public final class RssChannelIntentService extends IntentService {
             }
         }
         return channelMap;
-    }
-
-    private Integer countMatches(final ArrayList<ChannelItem> input) {
-        Integer result = 0;
-        final Iterator<ChannelItem> iterator = input.iterator();
-        while (iterator.hasNext()) {
-            final ChannelItem current = iterator.next();
-            iterator.remove();
-            for (final ChannelItem item:input) {
-                if (item.getLink().equals(current.getLink())) {
-                    result++;
-                }
-            }
-        }
-        return result;
     }
 
 	private void removeChannel(@NonNull final Intent intent) {
@@ -393,5 +412,9 @@ public final class RssChannelIntentService extends IntentService {
 
     public static String getRefreshCurrentChannelKey() {
         return REFRESH_CURRENT_CHANNEL;
+    }
+
+    public static String getRefreshAllChannelsKey() {
+        return REFRESH_ALL_CHANNELS;
     }
 }

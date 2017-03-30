@@ -33,58 +33,54 @@ final class XmlParser {
         }
 	}
 
-	Tag readTags() {
-		Tag parent = null;
-		Tag nextTag = null;
-		int depth = 0;
-		try {
-			int eventType = xpp.getEventType();
+	Tag readTags() throws IOException, XmlPullParserException {
+        Tag parent = null;
+        Tag nextTag = null;
+        int depth = 0;
+            int eventType = xpp.getEventType();
 
-			while (eventType != XmlPullParser.END_DOCUMENT) {
+            while (eventType != XmlPullParser.END_DOCUMENT) {
 
-				if(eventType == XmlPullParser.START_TAG) {//Проверка на тип
-					nextTag = new Tag(xpp.getName(), parent, xpp.getDepth() );
+                if (eventType == XmlPullParser.START_TAG) {//Проверка на тип
+                    nextTag = new Tag(xpp.getName(), parent, xpp.getDepth());
 
-					if (null == parent) {
-						parent = nextTag;
-					} else if (xpp.getDepth() > depth) {
-						parent.children.add(nextTag);
-						parent = nextTag;
-					} else 	if (xpp.getDepth() < depth) {
-						while (xpp.getDepth() - parent.getDepth() != 1) {
-							parent = parent.parent;
-						}
-						nextTag.setParent(parent);
-						parent.children.add(nextTag);
-						parent = nextTag;
-					} else if(xpp.getDepth() == depth) {
-						if (parent.getDepth() == nextTag.getDepth()) {
-							parent = parent.parent;
-							nextTag.setParent(parent);
-						}
-						parent.children.add(nextTag);
-						parent = nextTag;
-					}
-					for (int i = 0; i < xpp.getAttributeCount(); i++) {
-						nextTag.getAttributes().put(xpp.getAttributeName(i), xpp.getAttributeValue(i));
-					}
-					depth = xpp.getDepth();
-				} else if((eventType == XmlPullParser.TEXT) && !xpp.isWhitespace() && null != nextTag) {
-					if (null != xpp.getText()) {
-						nextTag.setText(xpp.getText());
-					}
-				} else if (eventType == XmlPullParser.CDSECT && null != xpp.getText() && null != nextTag) {
-					nextTag.setText(xpp.getText());
-				}
+                    if (null == parent) {
+                        parent = nextTag;
+                    } else if (xpp.getDepth() > depth) {
+                        parent.children.add(nextTag);
+                        parent = nextTag;
+                    } else if (xpp.getDepth() < depth) {
+                        while (xpp.getDepth() - parent.getDepth() != 1) {
+                            parent = parent.parent;
+                        }
+                        nextTag.setParent(parent);
+                        parent.children.add(nextTag);
+                        parent = nextTag;
+                    } else if (xpp.getDepth() == depth) {
+                        if (parent.getDepth() == nextTag.getDepth()) {
+                            parent = parent.parent;
+                            nextTag.setParent(parent);
+                        }
+                        parent.children.add(nextTag);
+                        parent = nextTag;
+                    }
+                    for (int i = 0; i < xpp.getAttributeCount(); i++) {
+                        nextTag.getAttributes().put(xpp.getAttributeName(i), xpp.getAttributeValue(i));
+                    }
+                    depth = xpp.getDepth();
+                } else if ((eventType == XmlPullParser.TEXT) && !xpp.isWhitespace() && null != nextTag) {
+                    if (null != xpp.getText()) {
+                        nextTag.setText(xpp.getText());
+                    }
+                } else if (eventType == XmlPullParser.CDSECT && null != xpp.getText() && null != nextTag) {
+                    nextTag.setText(xpp.getText());
+                }
+                eventType = xpp.nextToken();
+            }
 
-				eventType = xpp.nextToken();
-			}
-		} catch (final XmlPullParserException | IOException e) {
-            LogCatHandler.publishInfoRecord(e.getMessage());
-		}
+        return getRoot(parent);
 
-		return getRoot(parent);
-	}
+    }
 
 	private InputStream getInputStream(final URL url) {
 		try {

@@ -11,6 +11,7 @@ import android.view.MenuItem;
 import com.spitchenko.focusstart.R;
 import com.spitchenko.focusstart.model.Channel;
 import com.spitchenko.focusstart.model.ChannelItem;
+import com.spitchenko.focusstart.userinterface.channelwindow.ChannelAddDialogFragment;
 import com.spitchenko.focusstart.userinterface.settingswindow.SettingsActivity;
 
 import java.util.ArrayList;
@@ -94,4 +95,11 @@ public abstract class BaseActivity extends AppCompatActivity {
 			recyclerView.setLayoutManager(layoutManager);
 		}
 	}
+
+    protected void showNetworkDialog() {
+        final NoInternetDialog noInternetDialog = new NoInternetDialog();
+        final android.app.FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+        fragmentTransaction.add(noInternetDialog, ChannelAddDialogFragment.getDialogFragmentTag());
+        fragmentTransaction.commit();
+    }
 }

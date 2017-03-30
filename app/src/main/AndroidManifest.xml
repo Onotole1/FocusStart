@@ -12,7 +12,7 @@
 		android:icon="@drawable/ic_rss_feed_amber_50_36dp"
 		android:label="@string/app_name"
 		android:supportsRtl="true"
-		android:theme="@style/AppTheme"
+		android:theme="@android:style/Theme.Holo"
 		tools:ignore="AllowBackup,GoogleAppIndexingWarning">
 		<service android:name="com.spitchenko.focusstart.controller.RssChannelIntentService" />
 		<service android:name="com.spitchenko.focusstart.controller.RssChannelItemIntentService" />

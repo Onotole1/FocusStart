@@ -3,6 +3,7 @@ package com.spitchenko.focusstart.controller;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.support.annotation.Nullable;
 
 import com.spitchenko.focusstart.model.ChannelItem;
 import com.spitchenko.focusstart.userinterface.channellitem.ChannelItemActivity;
@@ -26,8 +27,9 @@ public final class ChannelItemBroadcastReceiver extends BroadcastReceiver {
 	@Override
 	public final void onReceive(@NonNull final Context context, @NonNull final Intent intent) {
 		final ChannelItem channel = intent.getParcelableExtra(ChannelItem.getKEY());
+        final String action = intent.getStringExtra(ChannelItemActivity.getNoInternetKey());
 		receivedChannels.add(channel);
-		notifyObservers();
+		notifyObservers(action);
 	}
 
 	public void addObserver(@NonNull final ChannelItemActivity observer) {
@@ -41,9 +43,9 @@ public final class ChannelItemBroadcastReceiver extends BroadcastReceiver {
 		}
 	}
 
-	public void notifyObservers() {
+	public void notifyObservers(@Nullable final String action) {
 		for (final ChannelItemActivity observer:observers) {
-			observer.update(receivedChannels);
+			observer.update(receivedChannels, action);
 		}
 	}
 

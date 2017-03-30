@@ -15,7 +15,7 @@
 		<android.support.v7.widget.Toolbar android:id="@+id/activity_settings_toolbar"
 			xmlns:android="http://schemas.android.com/apk/res/android"
 			android:layout_width="match_parent"
-			android:layout_height="56dp" />
+			android:layout_height="@dimen/toolbar_height" />
 	</android.support.design.widget.AppBarLayout>
 	
 	<FrameLayout

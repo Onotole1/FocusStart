@@ -13,7 +13,9 @@ import com.spitchenko.focusstart.R;
 import com.spitchenko.focusstart.controller.RssChannelItemIntentService;
 import com.spitchenko.focusstart.model.ChannelItem;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Locale;
 
 import lombok.NonNull;
 
@@ -26,6 +28,7 @@ import lombok.NonNull;
 final class ChannelItemRecyclerAdapter extends RecyclerView.Adapter<ChannelItemRecyclerViewHolder> {
 	private final ArrayList<ChannelItem> channelItems;
 	private Context context;
+    private SimpleDateFormat formatter = new SimpleDateFormat("HH:mm dd.MM.yyyy", Locale.ENGLISH);
 
 	ChannelItemRecyclerAdapter(@NonNull final ArrayList<ChannelItem> channelItems) {
 		this.channelItems = channelItems;
@@ -45,6 +48,11 @@ final class ChannelItemRecyclerAdapter extends RecyclerView.Adapter<ChannelItemR
 
 		holder.getTitleChannel().setText(bindChannel.getTitle());
 		holder.getSubtitleChannel().setText(bindChannel.getSubtitle());
+        if (null != bindChannel.getUpdateDate()) {
+            holder.getUpdateDate().setText(formatter.format(bindChannel.getUpdateDate()));
+        } else if (null != bindChannel.getPubDate()) {
+            holder.getUpdateDate().setText(formatter.format(bindChannel.getPubDate()));
+        }
 		if (!bindChannel.isRead()) {
 			holder.getTitleChannel().setTypeface(null, Typeface.BOLD);
 		}
@@ -54,7 +62,7 @@ final class ChannelItemRecyclerAdapter extends RecyclerView.Adapter<ChannelItemR
 			public void onClick(@NonNull final View v) {
 				if (!channelItems.get(holder.getAdapterPosition()).isRead()) {
 					final Intent intent = new Intent(context, RssChannelItemIntentService.class);
-					intent.setAction(RssChannelItemIntentService.READ_CURRENT_CHANNEL);
+					intent.setAction(RssChannelItemIntentService.getReadCurrentChannelKey());
 					intent.putExtra(ChannelItem.getKEY(), channelItems.get(holder.getAdapterPosition()));
 					context.startService(intent);
 				}

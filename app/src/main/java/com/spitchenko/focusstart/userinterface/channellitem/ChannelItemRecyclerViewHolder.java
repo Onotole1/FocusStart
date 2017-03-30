@@ -20,10 +20,12 @@ final class ChannelItemRecyclerViewHolder extends RecyclerView.ViewHolder {
 
 	private @Getter @Setter	TextView titleChannel;
 	private @Getter @Setter	TextView subtitleChannel;
+    private @Getter @Setter	TextView updateDate;
 
 	ChannelItemRecyclerViewHolder(@NonNull final View itemView) {
 		super(itemView);
 		titleChannel = (TextView)itemView.findViewById(R.id.channel_item_element_tittle_text_view);
 		subtitleChannel = (TextView)itemView.findViewById(R.id.channel_item_element_subtitle_text_view);
+        updateDate = (TextView)itemView.findViewById(R.id.channel_item_element_update_text_view);
 	}
 }

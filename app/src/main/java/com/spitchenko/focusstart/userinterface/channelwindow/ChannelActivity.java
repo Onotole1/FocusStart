@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -26,7 +27,7 @@ import java.util.ArrayList;
 import lombok.NonNull;
 
 public final class ChannelActivity extends BaseActivity {
-    public static boolean isActivityRun;
+    private static boolean isActivityRun;
 	public final static String CHANNEL_ACTIVITY_NAME = "com.spitchenko.focusstart.userinterface.channelwindow.ChannelActivity";
 	private final static String CHANNEL_ID_SCROLL_KEY = CHANNEL_ACTIVITY_NAME + ".channelScrollKey";
     private final static String REFRESH_ACTION = CHANNEL_ACTIVITY_NAME + ".refreshAction";
@@ -34,72 +35,40 @@ public final class ChannelActivity extends BaseActivity {
     private final static String IO_EXCEPTION_ACTION = CHANNEL_ACTIVITY_NAME + ".IOException";
 
 	private RecyclerView recyclerView;
-	private LocalBroadcastManager bManager;
+    private SwipeRefreshLayout swipeRefreshLayout;
+	private LocalBroadcastManager localBroadcastManager;
 	private ChannelBroadcastReceiver channelBroadcastReceiver;
 
     @Override
     protected final void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_channel);
-
-		final Toolbar toolbar = (Toolbar) findViewById(R.id.activity_channel_toolbar);
-		setSupportActionBar(toolbar);
-		if (null != getSupportActionBar()) {
-			getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-			getSupportActionBar().setDisplayShowHomeEnabled(true);
-		}
-
-		recyclerView = (RecyclerView) findViewById(R.id.activity_channel_recycler_view);
-		final LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-		recyclerView.setLayoutManager(layoutManager);
-		recyclerView.setAdapter(new ChannelRecyclerEmptyAdapter());
-		final ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
-		itemTouchHelper.attachToRecyclerView(recyclerView);
-
-		final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-		fab.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(final View v) {
-				showAddChannelDialog();
-			}
-		});
-
-        final Intent input = getIntent();
-        if (null != input && null == savedInstanceState) {
-            if (input.getAction().equals(REFRESH_ACTION)) {
-                final ArrayList<Parcelable> inputMessages
-                        = input.getParcelableArrayListExtra(REFRESH_ACTION);
-                for (final Parcelable key:inputMessages) {
-                    if (key instanceof Message) {
-                        showRefreshDialog(((Message) key).getUrl(), ((Message) key).getMessage());
-                    }
-                }
-            }
-        }
+        initViews();
+        initRefreshDialog(savedInstanceState);
     }
 
 	@Override
 	protected final void onResume() {
 		super.onResume();
-       // restoreRecyclerScroll(SCROLL_POSITION);
-		bManager = LocalBroadcastManager.getInstance(this);
+		localBroadcastManager = LocalBroadcastManager.getInstance(this);
         channelBroadcastReceiver = new ChannelBroadcastReceiver();
         final IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(ChannelBroadcastReceiver.getReceiveChannelsKey());
         intentFilter.addAction(ChannelBroadcastReceiver.getRefreshDialogKey());
-        bManager.registerReceiver(channelBroadcastReceiver, intentFilter);
+        localBroadcastManager.registerReceiver(channelBroadcastReceiver, intentFilter);
         channelBroadcastReceiver.addObserver(this);
+
         final Intent intent = new Intent(getApplicationContext(), RssChannelIntentService.class);
         intent.setAction(RssChannelIntentService.getReadChannelsKey());
         startService(intent);
+
         isActivityRun = true;
 	}
 
 	@Override
 	protected final void onPause() {
 		super.onPause();
-       // saveRecyclerScroll(SCROLL_POSITION);
-		bManager.unregisterReceiver(channelBroadcastReceiver);
+		localBroadcastManager.unregisterReceiver(channelBroadcastReceiver);
 		channelBroadcastReceiver.removeObserver(this);
         isActivityRun = false;
 	}
@@ -151,18 +120,11 @@ public final class ChannelActivity extends BaseActivity {
                     break;
             }
         }
+        swipeRefreshLayout.setRefreshing(false);
 	}
 
     public void updateNew(@NonNull final String url, @NonNull final String message) {
         showRefreshDialog(url, message);
-    }
-
-    private void showNetworkDialog() {
-        final NoInternetDialog noInternetDialog = new NoInternetDialog();
-        final android.app.FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-        fragmentTransaction.add(noInternetDialog, ChannelAddDialogFragment.getDialogFragmentTag());
-        fragmentTransaction.addToBackStack(null);
-        fragmentTransaction.commit();
     }
 
     @Override
@@ -200,6 +162,60 @@ public final class ChannelActivity extends BaseActivity {
 			startService(intent);
 		}
 	};
+
+	private void initViews() {
+        final Toolbar toolbar = (Toolbar) findViewById(R.id.activity_channel_toolbar);
+        setSupportActionBar(toolbar);
+        if (null != getSupportActionBar()) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+        }
+
+        swipeRefreshLayout
+                = (SwipeRefreshLayout) findViewById(R.id.activity_channel_swipe_refresh_layout);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                final Intent intent = new Intent(getApplicationContext(), RssChannelIntentService.class);
+                intent.setAction(RssChannelIntentService.getRefreshAllChannelsKey());
+                startService(intent);
+            }
+        });
+
+        recyclerView = (RecyclerView) findViewById(R.id.activity_channel_recycler_view);
+        final LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setAdapter(new ChannelRecyclerEmptyAdapter());
+        final ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
+        itemTouchHelper.attachToRecyclerView(recyclerView);
+
+        final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(final View v) {
+                showAddChannelDialog();
+            }
+        });
+    }
+
+    private void initRefreshDialog(final Bundle savedInstanceState) {
+        final Intent input = getIntent();
+        if (null != input && null == savedInstanceState) {
+            if (input.getAction().equals(REFRESH_ACTION)) {
+                final ArrayList<Parcelable> inputMessages
+                        = input.getParcelableArrayListExtra(REFRESH_ACTION);
+                for (final Parcelable key:inputMessages) {
+                    if (key instanceof Message) {
+                        showRefreshDialog(((Message) key).getUrl(), ((Message) key).getMessage());
+                    }
+                }
+            }
+        }
+    }
+
+    public static boolean isActivityRun() {
+        return isActivityRun;
+    }
 
 	public static String getRefreshKey() {
         return REFRESH_ACTION;

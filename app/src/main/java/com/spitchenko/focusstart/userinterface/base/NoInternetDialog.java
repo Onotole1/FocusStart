@@ -1,4 +1,4 @@
-package com.spitchenko.focusstart.userinterface.channelwindow;
+package com.spitchenko.focusstart.userinterface.base;
 
 import android.app.Dialog;
 import android.app.DialogFragment;
