@@ -178,7 +178,7 @@ public final class ChannelItemActivityAndBroadcastObserver implements ActivityAn
         final android.app.FragmentTransaction fragmentTransaction
                 = activity.getFragmentManager().beginTransaction();
         fragmentTransaction.add(noInternetDialog, ChannelAddDialogFragment.getDialogFragmentTag());
-        fragmentTransaction.commit();
+        fragmentTransaction.commitAllowingStateLoss();
     }
 
     private void readUrlFromIntent() {

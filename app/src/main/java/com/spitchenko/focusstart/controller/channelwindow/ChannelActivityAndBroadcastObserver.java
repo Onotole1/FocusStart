@@ -228,7 +228,7 @@ public class ChannelActivityAndBroadcastObserver implements ActivityAndBroadcast
         final android.app.FragmentTransaction fragmentTransaction
                 = activity.getFragmentManager().beginTransaction();
         fragmentTransaction.add(noInternetDialog, ChannelAddDialogFragment.getDialogFragmentTag());
-        fragmentTransaction.commit();
+        fragmentTransaction.commitAllowingStateLoss();
     }
 
     private void showRefreshDialog(@NonNull final String url, @NonNull final String message) {
