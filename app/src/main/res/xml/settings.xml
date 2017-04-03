@@ -6,9 +6,13 @@
 			android:key="@string/notification_checkbox"
 			android:summary="@string/turn_on_notifications"
 			android:title="@string/notifications" />
-		<Preference
-			android:key="@string/notification_button"
-			android:summary="@string/period_notifications"
-			android:title="@string/period" />
+		<ListPreference
+            android:dependency="@string/notification_checkbox"
+			android:key="@string/notifications_list"
+			android:title="@string/period"
+            android:dialogTitle="@string/notifications_list_dialog"
+            android:entries="@array/notifications_entries"
+            android:entryValues="@array/notifications_entries_values_seconds"
+            android:defaultValue="@string/notifications_entries_default_value"/>
 	</PreferenceCategory>
 </PreferenceScreen>

@@ -59,8 +59,8 @@ public final class ChannelRecyclerAdapter extends RecyclerView.Adapter<ChannelRe
 			@Override
 			public void onClick(final View v) {
 				if (!channels.get(holder.getAdapterPosition()).isRead()) {
-                    RssChannelIntentService.start(channels.get(holder.getAdapterPosition())
-                            , RssChannelIntentService.getReadCurrentChannelKey(), context);
+                    RssChannelIntentService.start(RssChannelIntentService.getReadCurrentChannelKey()
+                            , context, channels.get(holder.getAdapterPosition()), null);
 				}
 				ChannelItemActivity.start(getPrefsUrlKey()
                         , channels.get(holder.getAdapterPosition()).getLink(), context);

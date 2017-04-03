@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="notifications_entries">
+        <item>Once every 15 minutes</item>
+        <item>Once per hour</item>
+        <item>Once every half a day</item>
+        <item>Once a day</item>
+        <item>Once a week</item>
+        <item>Once a month</item>
+    </string-array>
+    <string-array name="notifications_entries_values_seconds">
+        <item>900</item>
+        <item>3600</item>
+        <item>43200</item>
+        <item>86400</item>
+        <item>604800</item>
+        <item>2592000</item>
+    </string-array>
+</resources>

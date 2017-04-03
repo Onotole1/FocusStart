@@ -14,8 +14,7 @@ import android.content.SharedPreferences;
  */
 public final class AlarmController {
     private final static String ALARM_CONTROLLER = "com.spitchenko.focusstart.controller.AlarmController";
-    private final static String HOURS = ALARM_CONTROLLER + ".hours";
-    private final static String MINUTES = ALARM_CONTROLLER + ".minutes";
+    private final static String SECONDS = ALARM_CONTROLLER + ".seconds";
 
     private Context context;
 
@@ -26,14 +25,14 @@ public final class AlarmController {
     public void startAlarm() {
         final SharedPreferences preferences
                 = context.getSharedPreferences(ALARM_CONTROLLER, Context.MODE_PRIVATE);
-        final int hour = preferences.getInt(HOURS, 0);
-        final int minute = preferences.getInt(MINUTES, 0);
+        final int seconds = preferences.getInt(SECONDS, 0);
 
-        if (minute > 0) {
+        if (seconds > 0) {
             final AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
             final Intent intent = new Intent(context, RefreshBroadcastReceiver.class);
             final PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
-            alarmManager.setRepeating(AlarmManager.RTC, System.currentTimeMillis(), intervalMillis(hour, minute), pendingIntent);
+            alarmManager.setRepeating(AlarmManager.RTC, System.currentTimeMillis(), seconds * 1000
+                    , pendingIntent);
         }
     }
 
@@ -44,35 +43,16 @@ public final class AlarmController {
         alarmManager.cancel(pendingIntent);
     }
 
-    public void restartAlarm() {
+    void restartAlarm() {
         stopAlarm();
         startAlarm();
     }
 
-    public void saveTimeToPreferences(final int hours, final int minutes, final Context context) {
+    public void saveTimeSecondsToPreferences(final int seconds, final Context context) {
         final SharedPreferences preferences
                 = context.getSharedPreferences(ALARM_CONTROLLER, Context.MODE_PRIVATE);
         final SharedPreferences.Editor editor = preferences.edit();
-        editor.putInt(HOURS, hours);
-        editor.putInt(MINUTES, minutes);
+        editor.putInt(SECONDS, seconds);
         editor.apply();
-    }
-
-    private long intervalMillis(final int hour, final int minute) {
-        final long hourMillis = hour * 60 * 60 * 1000;
-        final long minuteMillis = minute * 60 * 1000;
-        return hourMillis + minuteMillis;
-    }
-
-    public int readHour(final Context context) {
-        final SharedPreferences preferences
-                = context.getSharedPreferences(ALARM_CONTROLLER, Context.MODE_PRIVATE);
-        return preferences.getInt(HOURS,0);
-    }
-
-    public int readMinute(final Context context) {
-        final SharedPreferences preferences
-                = context.getSharedPreferences(ALARM_CONTROLLER, Context.MODE_PRIVATE);
-        return preferences.getInt(MINUTES,0);
     }
 }

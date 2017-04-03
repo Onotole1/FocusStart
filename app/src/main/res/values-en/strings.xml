@@ -9,7 +9,7 @@
     <string name="reload">Refresh</string>
     <string name="http_or_https" translatable="false">http(s)://</string>
     <string name="notification_checkbox" translatable="false">notif</string>
-    <string name="notification_button" translatable="false">time</string>
+    <string name="notifications_list" translatable="false">time</string>
     <string name="plural_prefix">The channel</string>
     <string name="internet_exception">No Internet connection</string>
     <string name="turn_on_internet">Enable Internet</string>
@@ -19,6 +19,8 @@
     <string name="period_notifications">Set update validation period</string>
     <string name="period">Rhythm</string>
     <string name="check_updates">Checking for updates</string>
+    <string name="notifications_list_dialog">Set the check period for updates</string>
+    <string name="notifications_entries_default">Once per hour</string>
 
     <plurals name="plurals_news">
         <item quantity="one">has %1$d update</item>

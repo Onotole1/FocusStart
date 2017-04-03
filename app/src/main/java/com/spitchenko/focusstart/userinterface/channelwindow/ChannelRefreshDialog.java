@@ -3,7 +3,6 @@ package com.spitchenko.focusstart.userinterface.channelwindow;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 
@@ -31,10 +30,8 @@ public final class ChannelRefreshDialog extends DialogFragment {
         builder.setMessage(input.getString(MESSAGE))
                 .setPositiveButton(R.string.reload, new DialogInterface.OnClickListener() {
                     public void onClick(final DialogInterface dialog, final int id) {
-                        final Intent intent = new Intent(getActivity(), RssChannelIntentService.class);
-                        intent.setAction(RssChannelIntentService.getRefreshCurrentChannelKey());
-                        intent.putExtra(RssChannelIntentService.getKeyUrl(), channelUrl);
-                        getActivity().startService(intent);
+                        RssChannelIntentService.start(RssChannelIntentService.getRefreshCurrentChannelKey()
+                                , getActivity(), null, channelUrl);
                     }
                 })
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {

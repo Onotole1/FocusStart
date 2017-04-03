@@ -5,7 +5,6 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -23,58 +22,57 @@ import com.spitchenko.focusstart.controller.channelwindow.RssChannelIntentServic
  * @author anatoliy
  */
 public final class ChannelAddDialogFragment extends DialogFragment {
-	private final static String DIALOG_FRAGMENT_TAG = "dialogTag";
-	private final static String CHANNELS_PREFERENCES_KEY = "channels_preferences";
+    private final static String DIALOG_FRAGMENT_TAG = "dialogTag";
+    private final static String CHANNELS_PREFERENCES_KEY = "channels_preferences";
 
-	@Override
-	public void onDestroyView() {
-		if (getDialog() != null && getRetainInstance()) {
-			getDialog().setDismissMessage(null);
-		}
-		super.onDestroyView();
-	}
+    @Override
+    public void onDestroyView() {
+        if (getDialog() != null && getRetainInstance()) {
+            getDialog().setDismissMessage(null);
+        }
+        super.onDestroyView();
+    }
 
-	@SuppressLint("InflateParams")
-	@Override
-	public Dialog onCreateDialog(final Bundle savedInstanceState) {
-		final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-		final LayoutInflater inflater = getActivity().getLayoutInflater();
-		final View promptsView = inflater.inflate(R.layout.add_channel_dialog, null);
-		final EditText userInput = (EditText) promptsView.findViewById(R.id.input_text);
-		final SharedPreferences sharedPreferences
-				= getActivity().getSharedPreferences(CHANNELS_PREFERENCES_KEY, Context.MODE_PRIVATE);
+    @SuppressLint("InflateParams")
+    @Override
+    public Dialog onCreateDialog(final Bundle savedInstanceState) {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        final LayoutInflater inflater = getActivity().getLayoutInflater();
+        final View promptsView = inflater.inflate(R.layout.add_channel_dialog, null);
+        final EditText userInput = (EditText) promptsView.findViewById(R.id.input_text);
+        final SharedPreferences sharedPreferences
+                = getActivity().getSharedPreferences(CHANNELS_PREFERENCES_KEY, Context.MODE_PRIVATE);
 
-		readFromPreferences(sharedPreferences, userInput);
-		builder.setView(promptsView)
-		.setPositiveButton(R.string.add, new DialogInterface.OnClickListener() {
-					public void onClick(final DialogInterface dialog, final int id) {
-						writeToPreferences(userInput.getText().toString(), sharedPreferences);
+        readFromPreferences(sharedPreferences, userInput);
+        builder.setView(promptsView)
+                .setPositiveButton(R.string.add, new DialogInterface.OnClickListener() {
+                    public void onClick(final DialogInterface dialog, final int id) {
+                        writeToPreferences(userInput.getText().toString(), sharedPreferences);
 
-						final Intent intent = new Intent(getActivity().getApplicationContext(), RssChannelIntentService.class);
-						intent.setAction(RssChannelIntentService.getReadWriteActionKey());
-						intent.putExtra(RssChannelIntentService.getKeyUrl(), userInput.getText().toString());
-						getActivity().startService(intent);
-					}
-				})
-				.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-					public void onClick(final DialogInterface dialog, final int id) {
-						writeToPreferences(userInput.getText().toString(), sharedPreferences);
-					}
-				});
-		return builder.create();
-	}
+                        RssChannelIntentService.start(RssChannelIntentService
+                                .getReadWriteActionKey(), getActivity(), null
+                                , userInput.getText().toString());
+                    }
+                })
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    public void onClick(final DialogInterface dialog, final int id) {
+                        writeToPreferences(userInput.getText().toString(), sharedPreferences);
+                    }
+                });
+        return builder.create();
+    }
 
-	private void writeToPreferences(final String input, final SharedPreferences sharedPreferences) {
-		final SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.putString(CHANNELS_PREFERENCES_KEY, input);
-		editor.apply();
-	}
+    private void writeToPreferences(final String input, final SharedPreferences sharedPreferences) {
+        final SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(CHANNELS_PREFERENCES_KEY, input);
+        editor.apply();
+    }
 
-	private void readFromPreferences(final SharedPreferences sharedPreferences, final EditText editText) {
-		final String sharedString = sharedPreferences.getString(CHANNELS_PREFERENCES_KEY, "");
-		editText.setText(sharedString);
-		editText.setSelection(sharedString.length());
-	}
+    private void readFromPreferences(final SharedPreferences sharedPreferences, final EditText editText) {
+        final String sharedString = sharedPreferences.getString(CHANNELS_PREFERENCES_KEY, "");
+        editText.setText(sharedString);
+        editText.setSelection(sharedString.length());
+    }
 
     public static String getDialogFragmentTag() {
         return DIALOG_FRAGMENT_TAG;

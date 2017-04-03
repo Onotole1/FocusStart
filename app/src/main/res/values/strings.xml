@@ -8,7 +8,7 @@
     <string name="reload">Обновить</string>
 	<string name="http_or_https" translatable="false">http(s)://</string>
 	<string name="notification_checkbox" translatable="false">notif</string>
-	<string name="notification_button" translatable="false">time</string>
+	<string name="notifications_list" translatable="false">time</string>
     <string name="plural_prefix">В канале</string>
     <string name="internet_exception">Интернет-соединение отсутствует</string>
     <string name="turn_on_internet">Включить интернет</string>
@@ -19,6 +19,9 @@
     <string name="period">Периодичность</string>
     <string name="check_updates">Уведомления</string>
     <string name="channel_image_image_description">channel_image</string>
+    <string name="notifications_list_dialog">Задайте период проверки обновлений</string>
+    <string name="notifications_entries_default_value" translatable="false">3600</string>
+    <string name="notifications_entries_default">Один раз в час</string>
 
     <plurals name="plurals_news">
 		<item quantity="zero">нет обновлений</item>
