@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="notifications_entries">
+        <item>Один раз в 15 минут</item>
+        <item>Один раз в час</item>
+        <item>Один раз в полдня</item>
+        <item>Один раз в день</item>
+        <item>Один раз в неделю</item>
+        <item>Один раз в месяц</item>
+    </string-array>
+    <string-array name="notifications_entries_values_seconds">
+        <item>900</item>
+        <item>3600</item>
+        <item>43200</item>
+        <item>86400</item>
+        <item>604800</item>
+        <item>2592000</item>
+    </string-array>
+</resources>

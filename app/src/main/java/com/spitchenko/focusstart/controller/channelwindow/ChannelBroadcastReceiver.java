@@ -25,7 +25,6 @@ public final class ChannelBroadcastReceiver extends BroadcastReceiver {
 	private final static String CHANNEL_BROADCAST_RECEIVER = "com.spitchenko.focusstart.ChannelBroadcastReceiver";
     private final static String RECEIVE_CHANNELS_KEY = CHANNEL_BROADCAST_RECEIVER + ".receive";
     private final static String REFRESH_DIALOG_KEY = CHANNEL_BROADCAST_RECEIVER + ".RefreshDialog";
-    private final static String CHANNEL_URL_KEY = CHANNEL_BROADCAST_RECEIVER + ".ChannelUrl";
     private final static String MESSAGE_KEY = CHANNEL_BROADCAST_RECEIVER + ".MessageKey";
     private final static String NO_INTERNET_ACTION = CHANNEL_BROADCAST_RECEIVER + ".noInet";
     private final static String IO_EXCEPTION_ACTION = CHANNEL_BROADCAST_RECEIVER + ".IOException";
@@ -55,9 +54,7 @@ public final class ChannelBroadcastReceiver extends BroadcastReceiver {
                 }
                 break;
             case REFRESH_DIALOG_KEY:
-                final String url = intent.getStringExtra(CHANNEL_URL_KEY);
-                final String dialogMessage = intent.getStringExtra(MESSAGE_KEY);
-                notifyObserversUpdate(url, dialogMessage);
+                notifyObserversUpdate();
                 break;
             case REMOVE_ACTION:
                 final Channel removeChannel = intent.getParcelableExtra(REMOVE_ACTION);
@@ -90,9 +87,9 @@ public final class ChannelBroadcastReceiver extends BroadcastReceiver {
 		}
 	}
 
-    public void notifyObserversUpdate(@NonNull final String url, @NonNull final String message) {
+    public void notifyObserversUpdate() {
         for (final ChannelActivityAndBroadcastObserver observer:observers) {
-            observer.updateOnReceiveNotification(url, message);
+            observer.updateOnReceiveNotification();
         }
     }
 
@@ -143,7 +140,9 @@ public final class ChannelBroadcastReceiver extends BroadcastReceiver {
         final Intent broadcastIntent = new Intent();
         broadcastIntent.setAction(action);
         broadcastIntent.setPackage(packageName);
-        broadcastIntent.putExtra(ChannelBroadcastReceiver.getReceiveChannelsKey(), extra);
+        if (null != extra) {
+            broadcastIntent.putExtra(ChannelBroadcastReceiver.getReceiveChannelsKey(), extra);
+        }
         LocalBroadcastManager.getInstance(context).sendBroadcast(broadcastIntent);
     }
 }

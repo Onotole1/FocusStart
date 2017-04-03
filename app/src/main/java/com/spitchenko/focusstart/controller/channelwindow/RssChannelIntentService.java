@@ -155,6 +155,8 @@ public final class RssChannelIntentService extends IntentService {
 
     private void notificationReload() {
         ChannelActivity.start(this);
+        ChannelBroadcastReceiver.start(null, ChannelBroadcastReceiver.getRefreshDialogKey()
+                , getPackageName(), this);
     }
 
     private void refresh() {
@@ -236,7 +238,7 @@ public final class RssChannelIntentService extends IntentService {
             }
 
         } catch (final IOException | XmlPullParserException e) {
-            if (checkConnection()) {
+            if (!checkConnection()) {
                 ChannelBroadcastReceiver.start(null, ChannelBroadcastReceiver.getNoInternetAction()
                         , getPackageName(), this);
             } else {
@@ -400,12 +402,14 @@ public final class RssChannelIntentService extends IntentService {
         return REFRESH_ALL_CHANNELS;
     }
 
-    public static void start(@Nullable final Parcelable extra, @NonNull final String action
-            , @NonNull final Context context) {
+    public static void start(@NonNull final String action, @NonNull final Context context
+            , @Nullable final Parcelable extra, @Nullable final String channelUrl) {
         final Intent intent = new Intent(context, RssChannelIntentService.class);
         intent.setAction(action);
         if (null != extra) {
             intent.putExtra(action, extra);
+        } else if (null != channelUrl) {
+            intent.putExtra(action, channelUrl);
         }
         context.startService(intent);
     }

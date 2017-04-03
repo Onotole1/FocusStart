@@ -21,39 +21,20 @@ public final class SettingsFragment extends PreferenceFragment {
 	public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addObserver(settingsFragmentController);
-        notifyOnCreate(savedInstanceState);
-	}
-
-	@Override
-	public void onViewStateRestored(final Bundle savedInstanceState) {
-		super.onViewStateRestored(savedInstanceState);
-        notifyOnViewStateRestored(savedInstanceState);
+        notifyOnCreate();
 	}
 
 	@Override
 	public void onSaveInstanceState(final Bundle outState) {
-        notifyOnSaveInstanceState(outState);
         removeObserver(settingsFragmentController);
         super.onSaveInstanceState(outState);
     }
 
 
 
-	private void notifyOnCreate(final Bundle savedInstanceState) {
+	private void notifyOnCreate() {
         for (final SettingsFragmentController settingsFragmentController:observers) {
-            settingsFragmentController.updateOnCreate(savedInstanceState);
-        }
-    }
-
-    private void notifyOnViewStateRestored(final Bundle savedInstanceState) {
-        for (final SettingsFragmentController settingsFragmentController:observers) {
-            settingsFragmentController.updateOnViewStateRestored(savedInstanceState);
-        }
-    }
-
-    private void notifyOnSaveInstanceState(final Bundle outState) {
-        for (final SettingsFragmentController settingsFragmentController:observers) {
-            settingsFragmentController.updateOnSaveInstanceState(outState);
+            settingsFragmentController.updateOnCreate();
         }
     }
 
