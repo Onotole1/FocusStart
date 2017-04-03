@@ -1,17 +1,15 @@
-package com.spitchenko.focusstart.controller;
+package com.spitchenko.focusstart.controller.channelitemwindow;
 
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.annotation.Nullable;
-import android.support.v4.content.LocalBroadcastManager;
 
 import com.spitchenko.focusstart.database.AtomRssChannelDbHelper;
 import com.spitchenko.focusstart.database.AtomRssDataBase;
 import com.spitchenko.focusstart.model.Channel;
 import com.spitchenko.focusstart.model.ChannelItem;
-import com.spitchenko.focusstart.userinterface.channellitem.ChannelItemActivity;
 import com.spitchenko.focusstart.utils.parser.AtomRssParser;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -30,7 +28,7 @@ import static com.spitchenko.focusstart.model.ChannelItem.countMatches;
  * @author anatoliy
  */
 public final class RssChannelItemIntentService extends IntentService {
-	private final static String NAME_ITEM_SERVICE = "com.spitchenko.focusstart.controller.RssChannelItemIntentService";
+	private final static String NAME_ITEM_SERVICE = "com.spitchenko.focusstart.controller.channel_item_window.RssChannelItemIntentService";
 	private final static String READ_CURRENT_CHANNEL = NAME_ITEM_SERVICE + ".readCurrentChannelDb";
 	private final static String READ_CHANNELS = NAME_ITEM_SERVICE + ".channelsDb";
     private final static String REFRESH_CHANNEL_ITEMS = NAME_ITEM_SERVICE + ".refresh";
@@ -57,7 +55,7 @@ public final class RssChannelItemIntentService extends IntentService {
 	}
 
     private void refreshChannelItems(@NonNull final Intent intent) {
-        final String channelUrl = intent.getStringExtra(ChannelItem.getKEY());
+        final String channelUrl = intent.getStringExtra(REFRESH_CHANNEL_ITEMS);
         final AtomRssChannelDbHelper atomRssDbHelper = new AtomRssChannelDbHelper(this);
         final AtomRssParser atomRssParser = new AtomRssParser();
 
@@ -78,60 +76,63 @@ public final class RssChannelItemIntentService extends IntentService {
 
                 if (channelFromDb.getChannelItems().size() > countMatches(itemsAll)) {
                     atomRssDbHelper.refreshCurrentChannel(channelFromDb, channelFromUrl);
+                    final Channel readableChannel = atomRssDbHelper.readChannelFromDb(channelFromUrl.getLink());
+                    if (null != readableChannel) {
+                        readableChannel.setRead(true);
+                        atomRssDbHelper.deleteChannelFromDb(readableChannel);
+                        atomRssDbHelper.writeChannelToDb(readableChannel);
+                    }
                 }
                 final Channel result = atomRssDbHelper.readChannelFromDb(channelFromDb.getLink());
                 if (null != result) {
-                    sendChannelItemsToBroadcast(result.getChannelItems(), null);
+                    sendChannelItemsToBroadcast(result.getChannelItems(), ChannelItemBroadcastReceiver.getChannelItemsRefresh());
                 }
             }
         } catch (IOException | XmlPullParserException e) {
-            sendChannelItemsToBroadcast(null, ChannelItemActivity.getNoInternetKey());
+            sendChannelItemsToBroadcast(null, ChannelItemBroadcastReceiver.getNoInternetAction());
         }
     }
 
     private void readChannelItemsFromDb(@NonNull final Intent intent) {
 		final AtomRssChannelDbHelper atomChannelDbHelper = new AtomRssChannelDbHelper(this);
-		final String channelUrl = intent.getStringExtra(ChannelItem.getKEY());
+		final String channelUrl = intent.getStringExtra(READ_CHANNELS);
 		final Channel inputChannel = atomChannelDbHelper.readChannelFromDb(channelUrl);
 		if (null != inputChannel) {
-			sendChannelItemsToBroadcast(inputChannel.getChannelItems(), null);
+			sendChannelItemsToBroadcast(inputChannel.getChannelItems()
+                    , ChannelItemBroadcastReceiver.getReceiveChannelItemsKey());
 		}
 	}
 
 	private void readCurrentChannelFromDb(@NonNull final Intent intent) {
 		final AtomRssChannelDbHelper atomChannelDbHelper = new AtomRssChannelDbHelper(this);
 		final ChannelItem inputChannelItem = intent.getParcelableExtra(ChannelItem.getKEY());
-		final SharedPreferences sharedPreferences = getSharedPreferences(ChannelItemActivity
-                .getChannelItemIdPreferencesKey(), Context.MODE_PRIVATE);
-		final String channelUrl = sharedPreferences.getString(ChannelItemActivity
-                .getChannelItemIdPreferencesKey(), null);
+        final SharedPreferences sharedPreferences
+                = this.getSharedPreferences(ChannelItemActivityAndBroadcastObserver.getPrefsUrlKey()
+                , Context.MODE_PRIVATE);
+        final String channelUrl = sharedPreferences
+                .getString(ChannelItemActivityAndBroadcastObserver.getPrefsUrlKey(), null);
 
 		if (!inputChannelItem.isRead()) {
 			final Channel inputChannel = atomChannelDbHelper.readChannelFromDb(channelUrl);
-			atomChannelDbHelper.updateValueFromDb(AtomRssDataBase.ChannelItemEntry.TABLE_NAME, AtomRssDataBase.ChannelItemEntry.CHANNEL_ITEM_ISREAD
+			atomChannelDbHelper.updateValueFromDb(AtomRssDataBase.ChannelItemEntry.TABLE_NAME
+                    , AtomRssDataBase.ChannelItemEntry.CHANNEL_ITEM_ISREAD
 					, Long.toString(atomChannelDbHelper.boolToLong(true))
 					, AtomRssDataBase.ChannelItemEntry.CHANNEL_ITEM_LINK, inputChannelItem.getLink());
 			inputChannelItem.setRead(true);
 
 			if (null != inputChannel) {
-				sendChannelItemsToBroadcast(inputChannel.getChannelItems(), null);
+				sendChannelItemsToBroadcast(inputChannel.getChannelItems()
+                        , ChannelItemBroadcastReceiver.getReceiveChannelItemsKey());
 			}
 		}
 	}
 
-	private void sendChannelItemsToBroadcast(@Nullable final ArrayList<ChannelItem> channelItems, final String action) {
+	private void sendChannelItemsToBroadcast(@Nullable final ArrayList<ChannelItem> channelItems
+            , @NonNull final String action) {
         if (null != channelItems) {
-            for (final ChannelItem channelItem : channelItems) {
-                final Intent broadcastIntent = new Intent(ChannelItemBroadcastReceiver.getChannelItemReceiverKey());
-                broadcastIntent.setPackage(getPackageName());
-                broadcastIntent.putExtra(ChannelItem.getKEY(), channelItem);
-                LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
-            }
+            ChannelItemBroadcastReceiver.start(action, getPackageName(), this, channelItems);
         } else {
-            final Intent broadcastIntent = new Intent(ChannelItemBroadcastReceiver.getChannelItemReceiverKey());
-            broadcastIntent.putExtra(ChannelItemActivity.getNoInternetKey(), action);
-            broadcastIntent.setPackage(getPackageName());
-            LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
+            ChannelItemBroadcastReceiver.start(action, getPackageName(), this, null);
         }
 	}
 
@@ -145,5 +146,19 @@ public final class RssChannelItemIntentService extends IntentService {
 
     public static String getReadChannelsKey() {
         return READ_CHANNELS;
+    }
+
+    public static void start(@Nullable final ChannelItem channelItem, @Nullable final String url
+            , @NonNull final String key, @NonNull final Context activity) {
+        final Intent intent = new Intent(activity
+                , RssChannelItemIntentService.class);
+        if (null != url) {
+            intent.putExtra(key, url);
+        }
+        if (null != channelItem) {
+            intent.putExtra(ChannelItem.getKEY(), channelItem);
+        }
+        intent.setAction(key);
+        activity.startService(intent);
     }
 }

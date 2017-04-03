@@ -3,9 +3,10 @@ package com.spitchenko.focusstart.userinterface.settingswindow;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 
-import com.spitchenko.focusstart.R;
+import com.spitchenko.focusstart.controller.settingswindow.SettingsActivityController;
+
+import java.util.ArrayList;
 
 /**
  * Date: 23.03.17
@@ -14,27 +15,38 @@ import com.spitchenko.focusstart.R;
  * @author anatoliy
  */
 public final class SettingsActivity extends AppCompatActivity {
-
+    ArrayList<SettingsActivityController> observers = new ArrayList<>();
+    SettingsActivityController settingsActivityController = new SettingsActivityController(this);
 
 	@Override
-	protected void onCreate(@Nullable final Bundle savedInstanceState) {
+    protected void onCreate(@Nullable final Bundle savedInstanceState) {
+        addObserver(settingsActivityController);
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_settings);
-
-		final Toolbar toolbar = (Toolbar) findViewById(R.id.activity_settings_toolbar);
-		setSupportActionBar(toolbar);
-		if (null != getSupportActionBar()) {
-			getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-			getSupportActionBar().setDisplayShowHomeEnabled(true);
-		}
-		if (null == savedInstanceState) {
-			getFragmentManager().beginTransaction().replace(R.id.app_bar_layout_container, new SettingsFragment()).commit();
-		}
+        notifyOnCreate(savedInstanceState);
+        removeObserver(settingsActivityController);
 	}
 
-	@Override
+    @Override
 	public boolean onSupportNavigateUp() {
 		onBackPressed();
 		return true;
 	}
+
+	private void notifyOnCreate(final Bundle savedInstanceState) {
+        for (final SettingsActivityController controller: observers) {
+            controller.updateOnCreate(savedInstanceState);
+        }
+    }
+
+	private void addObserver(final SettingsActivityController observer) {
+        if (!observers.contains(observer)) {
+            observers.add(observer);
+        }
+    }
+
+    private void removeObserver(final SettingsActivityController observer) {
+        if (observers.contains(observer)) {
+            observers.remove(observer);
+        }
+    }
 }

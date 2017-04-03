@@ -2,16 +2,13 @@ package com.spitchenko.focusstart.userinterface.base;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Parcelable;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.spitchenko.focusstart.R;
-import com.spitchenko.focusstart.model.Channel;
-import com.spitchenko.focusstart.model.ChannelItem;
-import com.spitchenko.focusstart.userinterface.channelwindow.ChannelAddDialogFragment;
+import com.spitchenko.focusstart.controller.ActivityAndBroadcastObserver;
 import com.spitchenko.focusstart.userinterface.settingswindow.SettingsActivity;
 
 import java.util.ArrayList;
@@ -25,8 +22,25 @@ import lombok.NonNull;
  * @author anatoliy
  */
 public abstract class BaseActivity extends AppCompatActivity {
-	protected RecyclerView recyclerView;
-	protected Parcelable recyclerState;
+    protected ArrayList<ActivityAndBroadcastObserver> observers = new ArrayList<>();
+
+    @Override
+    public void onCreate(@Nullable final Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        notifyOnCreate(savedInstanceState);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        notifyOnPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        notifyOnResume();
+    }
 
     @Override
 	public boolean onCreateOptionsMenu(@NonNull final Menu menu) {
@@ -38,30 +52,6 @@ public abstract class BaseActivity extends AppCompatActivity {
 	public boolean onSupportNavigateUp() {
 		onBackPressed();
 		return true;
-	}
-
-	protected ArrayList<Channel> convertObjectToChannelList(@NonNull final Object object) {
-		final ArrayList<Channel> result = new ArrayList<>();
-		if (object instanceof ArrayList) {
-			for (final Object o:(ArrayList)object) {
-				if (o instanceof Channel) {
-					result.add((Channel) o);
-				}
-			}
-		}
-		return result;
-	}
-
-	protected ArrayList<ChannelItem> convertObjectToChannelItemList(@NonNull final Object object) {
-		final ArrayList<ChannelItem> result = new ArrayList<>();
-		if (object instanceof ArrayList) {
-			for (final Object o:(ArrayList)object) {
-				if (o instanceof ChannelItem) {
-					result.add((ChannelItem) o);
-				}
-			}
-		}
-		return result;
 	}
 
 	@Override
@@ -81,25 +71,54 @@ public abstract class BaseActivity extends AppCompatActivity {
     @Override
     protected void onRestoreInstanceState(final Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        if (null != savedInstanceState && null != recyclerView) {
-            final RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
-            layoutManager.onRestoreInstanceState(recyclerState);
-            recyclerView.setLayoutManager(layoutManager);
+        notifyOnRestoreInstanceState(savedInstanceState);
+    }
+
+    @Override
+    protected void onSaveInstanceState(final Bundle outState) {
+        super.onSaveInstanceState(outState);
+        notifyOnSavedInstanceState(outState);
+    }
+
+    protected void addObserver(final ActivityAndBroadcastObserver observer) {
+        if (!observers.contains(observer)) {
+            observers.add(observer);
         }
     }
 
-    protected void restoreRecyclerState() {
-		if (null != recyclerState && null != recyclerView) {
-			final RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
-			layoutManager.onRestoreInstanceState(recyclerState);
-			recyclerView.setLayoutManager(layoutManager);
-		}
-	}
+    protected void removeObserver(final ActivityAndBroadcastObserver observer) {
+        if (!observers.isEmpty()) {
+            observers.remove(observer);
+        }
+    }
 
-    protected void showNetworkDialog() {
-        final NoInternetDialog noInternetDialog = new NoInternetDialog();
-        final android.app.FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-        fragmentTransaction.add(noInternetDialog, ChannelAddDialogFragment.getDialogFragmentTag());
-        fragmentTransaction.commit();
+    private void notifyOnCreate(final Bundle savedInstanceState) {
+        for (final ActivityAndBroadcastObserver observer:observers) {
+            observer.updateOnCreate(savedInstanceState);
+        }
+    }
+
+    private void notifyOnResume() {
+        for (final ActivityAndBroadcastObserver observer:observers) {
+            observer.updateOnResume();
+        }
+    }
+
+    private void notifyOnSavedInstanceState(final Bundle outState) {
+        for (final ActivityAndBroadcastObserver observer:observers) {
+            observer.updateOnSavedInstanceState(outState);
+        }
+    }
+
+    private void notifyOnRestoreInstanceState(final Bundle savedInstanceState) {
+        for (final ActivityAndBroadcastObserver observer:observers) {
+            observer.updateOnRestoreInstanceState(savedInstanceState);
+        }
+    }
+
+    private void notifyOnPause() {
+        for (final ActivityAndBroadcastObserver observer:observers) {
+            observer.updateOnPause();
+        }
     }
 }

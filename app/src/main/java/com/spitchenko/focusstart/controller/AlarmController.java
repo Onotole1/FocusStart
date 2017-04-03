@@ -17,8 +17,13 @@ public final class AlarmController {
     private final static String HOURS = ALARM_CONTROLLER + ".hours";
     private final static String MINUTES = ALARM_CONTROLLER + ".minutes";
 
+    private Context context;
 
-    public void startAlarm(final Context context) {
+    public AlarmController(final Context context) {
+        this.context = context;
+    }
+
+    public void startAlarm() {
         final SharedPreferences preferences
                 = context.getSharedPreferences(ALARM_CONTROLLER, Context.MODE_PRIVATE);
         final int hour = preferences.getInt(HOURS, 0);
@@ -32,16 +37,16 @@ public final class AlarmController {
         }
     }
 
-    public void stopAlarm(final Context context) {
+    public void stopAlarm() {
         final AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         final Intent intent = new Intent(context, RefreshBroadcastReceiver.class);
         final PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
         alarmManager.cancel(pendingIntent);
     }
 
-    public void restartAlarm(final Context context) {
-        stopAlarm(context);
-        startAlarm(context);
+    public void restartAlarm() {
+        stopAlarm();
+        startAlarm();
     }
 
     public void saveTimeToPreferences(final int hours, final int minutes, final Context context) {

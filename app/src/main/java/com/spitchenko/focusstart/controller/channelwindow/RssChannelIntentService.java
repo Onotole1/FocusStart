@@ -1,15 +1,15 @@
-package com.spitchenko.focusstart.controller;
+package com.spitchenko.focusstart.controller.channelwindow;
 
 import android.app.IntentService;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.RingtoneManager;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.LocalBroadcastManager;
 import android.webkit.URLUtil;
 
 import com.spitchenko.focusstart.R;
@@ -17,7 +17,6 @@ import com.spitchenko.focusstart.database.AtomRssChannelDbHelper;
 import com.spitchenko.focusstart.database.AtomRssDataBase;
 import com.spitchenko.focusstart.model.Channel;
 import com.spitchenko.focusstart.model.ChannelItem;
-import com.spitchenko.focusstart.model.Message;
 import com.spitchenko.focusstart.userinterface.channelwindow.ChannelActivity;
 import com.spitchenko.focusstart.utils.logger.LogCatHandler;
 import com.spitchenko.focusstart.utils.parser.AtomRssParser;
@@ -44,7 +43,7 @@ import static com.spitchenko.focusstart.model.ChannelItem.countMatches;
  * @author anatoliy
  */
 public final class RssChannelIntentService extends IntentService {
-	private final static String NAME_CHANNEL_SERVICE = "com.spitchenko.focusstart.controller.RssChannelIntentService";
+	private final static String NAME_CHANNEL_SERVICE = "com.spitchenko.focusstart.controller.channel_window.RssChannelIntentService";
 	private final static String KEY_URL = NAME_CHANNEL_SERVICE + "url";
 	private final static String READ_CURRENT_CHANNEL = NAME_CHANNEL_SERVICE + ".readCurrentChannelDb";
 	private final static String READ_CHANNELS = NAME_CHANNEL_SERVICE + ".controller.channelsDb";
@@ -65,13 +64,13 @@ public final class RssChannelIntentService extends IntentService {
         if (null != intent && null != intent.getAction()) {
             switch (intent.getAction()) {
                 case READ_CURRENT_CHANNEL:
-                    readCurrentChannelDb(intent, null);
+                    readCurrentChannelDb(intent, ChannelBroadcastReceiver.getReceiveChannelsKey());
                     break;
                 case READ_WRITE_ACTION:
-                    readWriteFromUrl(intent, null);
+                    readWriteFromUrl(intent, ChannelBroadcastReceiver.getReceiveChannelsKey());
                     break;
                 case READ_CHANNELS:
-                    readChannelsFromDb(null);
+                    readChannelsFromDb(ChannelBroadcastReceiver.getReceiveChannelsKey());
                     break;
                 case REMOVE_CHANNEL:
                     removeChannel(intent);
@@ -80,7 +79,7 @@ public final class RssChannelIntentService extends IntentService {
                     refresh();
                     break;
                 case NOTIFICATION:
-                    notificationReload(intent);
+                    notificationReload();
                     break;
                 case REFRESH_CURRENT_CHANNEL:
                     refreshCurrentChannel(intent);
@@ -102,13 +101,17 @@ public final class RssChannelIntentService extends IntentService {
             final Channel channelFromUrl = atomRssParser.parseXml(inputUrl);
 
             channelDbHelper.refreshCurrentChannel(channelFromDb, channelFromUrl);
-            sendChannelToBroadcast(channelFromUrl, null);
+
+            readChannelsFromDb(ChannelBroadcastReceiver.getReceiveChannelsKey());
+
 
         } catch (final IOException | XmlPullParserException e) {
-            if (checkConnection()) {
-                sendChannelToBroadcast(null, ChannelActivity.getIoExceptionActionKey());
+            if (!checkConnection()) {
+                ChannelBroadcastReceiver.start(null
+                        , ChannelBroadcastReceiver.getNoInternetAction(), getPackageName(), this);
             } else {
-                sendChannelToBroadcast(null, ChannelActivity.getNoinetActionKey());
+                ChannelBroadcastReceiver.start(null
+                        , ChannelBroadcastReceiver.getIoExceptionAction(), getPackageName(), this);
             }
         }
     }
@@ -135,30 +138,23 @@ public final class RssChannelIntentService extends IntentService {
                 if (channel.getChannelItems().size() > countMatches(itemsAll)) {
                     channelDbHelper.refreshCurrentChannel(channel, channelUrl);
                 }
-                readChannelsFromDb(null);
-            } catch (IOException | XmlPullParserException e) {
-                sendChannelToBroadcast(null, ChannelActivity.getNoinetActionKey());
+                readChannelsFromDb(ChannelBroadcastReceiver.getReceiveChannelsKey());
+            } catch (final IOException | XmlPullParserException e) {
+                if (!checkConnection()) {
+                    ChannelBroadcastReceiver.start(null
+                            , ChannelBroadcastReceiver.getNoInternetAction(), getPackageName()
+                            , this);
+                } else {
+                    ChannelBroadcastReceiver.start(null
+                            , ChannelBroadcastReceiver.getIoExceptionAction(), getPackageName()
+                            , this);
+                }
             }
         }
     }
 
-    private void notificationReload(@NonNull final Intent intent) {
-        if (ChannelActivity.isActivityRun()) {
-            final ArrayList<Parcelable> input = intent.getParcelableArrayListExtra(NOTIFICATION);
-            for (final Parcelable message:input) {
-                if (message instanceof Message) {
-                    sendNotifyToBroadcast(((Message) message).getUrl()
-                            , ((Message) message).getMessage());
-                }
-            }
-        } else {
-            final Intent activityIntent = new Intent(this, ChannelActivity.class);
-            activityIntent.setAction(ChannelActivity.getRefreshKey());
-            activityIntent.putExtra(ChannelActivity.getRefreshKey()
-                    , intent.getParcelableArrayListExtra(NOTIFICATION));
-            activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(activityIntent);
-        }
+    private void notificationReload() {
+        ChannelActivity.start(this);
     }
 
     private void refresh() {
@@ -171,10 +167,13 @@ public final class RssChannelIntentService extends IntentService {
             try {
                 channelsFromNet.add(atomRssParser.parseXml(channelDb.getLink()));
             } catch (final IOException | XmlPullParserException e) {
-                if (checkConnection()) {
-                    sendChannelToBroadcast(null, ChannelActivity.getIoExceptionActionKey());
+                if (!checkConnection()) {
+                    ChannelBroadcastReceiver.start(null
+                            , ChannelBroadcastReceiver.getNoInternetAction(), getPackageName(), this);
                 } else {
-                    sendChannelToBroadcast(null, ChannelActivity.getNoinetActionKey());
+                    ChannelBroadcastReceiver.start(null
+                            , ChannelBroadcastReceiver.getIoExceptionAction(), getPackageName()
+                            , this);
                 }
             }
         }
@@ -214,7 +213,7 @@ public final class RssChannelIntentService extends IntentService {
 		final AtomRssChannelDbHelper channelDbHelper = new AtomRssChannelDbHelper(this);
 		final Channel inputChannel = intent.getParcelableExtra(REMOVE_CHANNEL);
 		channelDbHelper.deleteChannelFromDb(inputChannel);
-		sendChannelToBroadcast(inputChannel, REMOVE_CHANNEL);
+        ChannelBroadcastReceiver.start(inputChannel, REMOVE_CHANNEL, getPackageName(), this);
 	}
 
 	private void readWriteFromUrl(@NonNull final Intent intent, @Nullable final String action) {
@@ -230,17 +229,19 @@ public final class RssChannelIntentService extends IntentService {
             if (channelFromDb != null) {
                 channelDbHelper.deleteChannelFromDb(channelFromDb);
                 channelDbHelper.writeChannelToDb(channelFromUrl);
-                sendChannelToBroadcast(channelFromUrl, action);
+                ChannelBroadcastReceiver.start(channelFromUrl, action, getPackageName(), this);
             } else {
                 channelDbHelper.writeChannelToDb(channelFromUrl);
-                sendChannelToBroadcast(channelFromUrl, action);
+                ChannelBroadcastReceiver.start(channelFromUrl, action, getPackageName(), this);
             }
 
         } catch (final IOException | XmlPullParserException e) {
             if (checkConnection()) {
-                sendChannelToBroadcast(null, ChannelActivity.getIoExceptionActionKey());
+                ChannelBroadcastReceiver.start(null, ChannelBroadcastReceiver.getNoInternetAction()
+                        , getPackageName(), this);
             } else {
-                sendChannelToBroadcast(null, ChannelActivity.getNoinetActionKey());
+                ChannelBroadcastReceiver.start(null
+                        , ChannelBroadcastReceiver.getIoExceptionAction(), getPackageName(), this);
             }
         }
 
@@ -265,7 +266,7 @@ public final class RssChannelIntentService extends IntentService {
 
     }
 
-    private void readCurrentChannelDb(@NonNull final Intent intent, @Nullable final String action) {
+    private void readCurrentChannelDb(@NonNull final Intent intent, @NonNull final String action) {
 		final Channel inputChannel = intent.getParcelableExtra(READ_CURRENT_CHANNEL);
 		if (!inputChannel.isRead()) {
 			final AtomRssChannelDbHelper channelDbHelper = new AtomRssChannelDbHelper(this);
@@ -274,7 +275,7 @@ public final class RssChannelIntentService extends IntentService {
 					, AtomRssDataBase.ChannelEntry.CHANNEL_LINK, inputChannel.getLink());
 			inputChannel.setRead(true);
 
-			sendChannelToBroadcast(inputChannel, action);
+            ChannelBroadcastReceiver.start(inputChannel, action, getPackageName(), this);
 		}
 	}
 
@@ -283,25 +284,9 @@ public final class RssChannelIntentService extends IntentService {
 		final ArrayList<Channel> channels = channelDbHelper.readAllChannelsFromDb();
 
 		for (final Channel channel:channels) {
-			sendChannelToBroadcast(channel, action);
+            ChannelBroadcastReceiver.start(channel, action, getPackageName(), this);
 		}
 	}
-
-	private void sendChannelToBroadcast(@Nullable final Channel channel, @Nullable final String action) {
-		final Intent broadcastIntent = new Intent(ChannelBroadcastReceiver.getReceiveChannelsKey());
-		broadcastIntent.setPackage(getPackageName());
-		broadcastIntent.putExtra(ChannelBroadcastReceiver.getReceiveChannelsKey(), channel);
-        broadcastIntent.putExtra(ChannelBroadcastReceiver.getMessageKey(), action);
-		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
-	}
-
-    private void sendNotifyToBroadcast(@NonNull final String url, @NonNull final String message) {
-        final Intent broadcastIntent = new Intent(ChannelBroadcastReceiver.getRefreshDialogKey());
-        broadcastIntent.setPackage(getPackageName());
-        broadcastIntent.putExtra(ChannelBroadcastReceiver.getChannelUrlKey(), url);
-        broadcastIntent.putExtra(ChannelBroadcastReceiver.getMessageKey(), message);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
-    }
 
 	private String formatHttp(@NonNull final String input) {
         if (!URLUtil.isHttpUrl(input) || !URLUtil.isHttpsUrl(input)) {
@@ -370,15 +355,12 @@ public final class RssChannelIntentService extends IntentService {
                 .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                 .setAutoCancel(true);
 
-        final AtomRssChannelDbHelper atomRssChannelHelper = new AtomRssChannelDbHelper(this);
         for (final Channel key:messages.keySet()) {
-            final Message currentMessage = new Message(key.getLink()
-                    , makeTextFromChannel(key.getTitle(), messages.get(key)));
-            atomRssChannelHelper.saveMessage(currentMessage);
+            writeNotificationToPrefs(key.getLink(), makeTextFromChannel(key.getTitle()
+                    , messages.get(key)));
         }
         final Intent resultIntent = new Intent(this, RssChannelIntentService.class);
         resultIntent.setAction(NOTIFICATION);
-        resultIntent.putParcelableArrayListExtra(NOTIFICATION, atomRssChannelHelper.getAllMessages());
         final PendingIntent resultPendingIntent = PendingIntent.getService(this, 0, resultIntent, 0);
         builder.setContentIntent(resultPendingIntent);
         final NotificationManager mNotificationManager =
@@ -416,5 +398,27 @@ public final class RssChannelIntentService extends IntentService {
 
     public static String getRefreshAllChannelsKey() {
         return REFRESH_ALL_CHANNELS;
+    }
+
+    public static void start(@Nullable final Parcelable extra, @NonNull final String action
+            , @NonNull final Context context) {
+        final Intent intent = new Intent(context, RssChannelIntentService.class);
+        intent.setAction(action);
+        if (null != extra) {
+            intent.putExtra(action, extra);
+        }
+        context.startService(intent);
+    }
+
+    private void writeNotificationToPrefs(final String link, final String message) {
+        final SharedPreferences sharedPreferences
+                = getSharedPreferences(NOTIFICATION, Context.MODE_PRIVATE);
+        final SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(link, message);
+        editor.apply();
+    }
+
+    public static SharedPreferences getReadMessagesPreferences(final Context context) {
+        return context.getSharedPreferences(NOTIFICATION, Context.MODE_PRIVATE);
     }
 }

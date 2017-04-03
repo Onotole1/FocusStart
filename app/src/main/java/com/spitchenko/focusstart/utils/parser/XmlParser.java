@@ -38,12 +38,11 @@ final class XmlParser {
         Tag nextTag = null;
         int depth = 0;
             int eventType = xpp.getEventType();
-
+            final StringBuilder stringBuilder = new StringBuilder();
             while (eventType != XmlPullParser.END_DOCUMENT) {
 
                 if (eventType == XmlPullParser.START_TAG) {//Проверка на тип
                     nextTag = new Tag(xpp.getName(), parent, xpp.getDepth());
-
                     if (null == parent) {
                         parent = nextTag;
                     } else if (xpp.getDepth() > depth) {
@@ -68,18 +67,28 @@ final class XmlParser {
                         nextTag.getAttributes().put(xpp.getAttributeName(i), xpp.getAttributeValue(i));
                     }
                     depth = xpp.getDepth();
-                } else if ((eventType == XmlPullParser.TEXT) && !xpp.isWhitespace() && null != nextTag) {
+                } else if ((eventType == XmlPullParser.TEXT || eventType == XmlPullParser.CDSECT) && !xpp.isWhitespace() && null != nextTag) {
                     if (null != xpp.getText()) {
-                        nextTag.setText(xpp.getText());
+                        stringBuilder.append(xpp.getText());
                     }
-                } else if (eventType == XmlPullParser.CDSECT && null != xpp.getText() && null != nextTag) {
-                    nextTag.setText(xpp.getText());
+                } else if (eventType == XmlPullParser.ENTITY_REF && null != xpp.getText() && null != nextTag) {
+                    if (null != xpp.getText()) {
+                        stringBuilder.append(xpp.getText());
+                        stringBuilder.append(xpp.getName());
+                        stringBuilder.append(";");
+                    }
+                } else if (eventType == XmlPullParser.END_TAG) {
+                    if (null != nextTag && !stringBuilder.toString().isEmpty()) {
+                        nextTag.setText(stringBuilder.toString());
+                        stringBuilder.delete(0, stringBuilder.length());
+                    }
                 }
                 eventType = xpp.nextToken();
             }
 
-        return getRoot(parent);
+            parent = getRoot(parent);
 
+        return parent;
     }
 
 	private InputStream getInputStream(final URL url) {

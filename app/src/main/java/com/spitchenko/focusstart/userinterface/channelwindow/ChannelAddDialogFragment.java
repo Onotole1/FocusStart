@@ -14,7 +14,7 @@ import android.view.View;
 import android.widget.EditText;
 
 import com.spitchenko.focusstart.R;
-import com.spitchenko.focusstart.controller.RssChannelIntentService;
+import com.spitchenko.focusstart.controller.channelwindow.RssChannelIntentService;
 
 /**
  * Date: 19.03.17

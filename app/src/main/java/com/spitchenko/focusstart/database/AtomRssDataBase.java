@@ -27,13 +27,6 @@ public final class AtomRssDataBase {
 		static final String CHANNEL_ITEM_SUBTITLE = "subtitle";
 		static final String CHANNEL_ITEM_PUB_DATE = "pubDate";
 		public static final String CHANNEL_ITEM_LINK = "link";
-		static final String CHANNEL_ITEM_UPDATE_DATE = "updateDate";
 		public static final String CHANNEL_ITEM_ISREAD = "isRead";
 	}
-
-	static abstract class MessagesQueue implements BaseColumns {
-        static final String TABLE_NAME = "messages";
-        static final String MESSAGE_URL = "message_url";
-        static final String MESSAGE_BODY = "message_body";
-    }
 }

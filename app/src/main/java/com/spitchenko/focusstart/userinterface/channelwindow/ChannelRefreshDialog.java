@@ -8,7 +8,7 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 
 import com.spitchenko.focusstart.R;
-import com.spitchenko.focusstart.controller.RssChannelIntentService;
+import com.spitchenko.focusstart.controller.channelwindow.RssChannelIntentService;
 
 /**
  * Date: 24.03.17

@@ -82,7 +82,8 @@ public final class AtomRssParser {
 							} else if (t1.getName().equals(RssTagEnum.RssTagEnumeration.DESCRIPTION.text)) {
 								channelItem.setSubtitle(t1.getText());
 							} else if (t1.getName().equals(RssTagEnum.RssTagEnumeration.PUB_DATE.text)) {
-								channelItem.setPubDate(new Date(t1.getText()));
+								channelItem.setPubDate(parseAtomRssDate(t1.getText()
+                                        , RssTagEnum.RssTagEnumeration.DATE_PATTERN.text));
 							}
 						}
 					}

@@ -23,8 +23,8 @@ public final class OnBootReceiver extends BroadcastReceiver {
             final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
             if (sharedPreferences.getBoolean(context.getResources()
                     .getString(R.string.notification_checkbox), false)) {
-                final AlarmController alarmController = new AlarmController();
-                alarmController.restartAlarm(context);
+                final AlarmController alarmController = new AlarmController(context);
+                alarmController.restartAlarm();
             }
         }
     }

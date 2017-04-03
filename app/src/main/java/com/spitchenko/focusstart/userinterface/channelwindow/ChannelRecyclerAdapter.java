@@ -1,7 +1,6 @@
 package com.spitchenko.focusstart.userinterface.channelwindow;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Typeface;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -9,14 +8,15 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.spitchenko.focusstart.R;
-import com.spitchenko.focusstart.controller.RssChannelIntentService;
+import com.spitchenko.focusstart.controller.channelwindow.RssChannelIntentService;
 import com.spitchenko.focusstart.model.Channel;
-import com.spitchenko.focusstart.model.ChannelItem;
 import com.spitchenko.focusstart.userinterface.channellitem.ChannelItemActivity;
 
 import java.util.ArrayList;
 
 import lombok.Getter;
+
+import static com.spitchenko.focusstart.controller.channelitemwindow.ChannelItemActivityAndBroadcastObserver.getPrefsUrlKey;
 
 /**
  * Date: 24.02.17
@@ -24,11 +24,11 @@ import lombok.Getter;
  *
  * @author anatoliy
  */
-final class ChannelRecyclerAdapter extends RecyclerView.Adapter<ChannelRecyclerViewHolder> {
+public final class ChannelRecyclerAdapter extends RecyclerView.Adapter<ChannelRecyclerViewHolder> {
 	private final @Getter ArrayList<Channel> channels;
 	private Context context;
 
-	ChannelRecyclerAdapter(final ArrayList<Channel> channels) {
+	public ChannelRecyclerAdapter(final ArrayList<Channel> channels) {
 		this.channels = channels;
 	}
 
@@ -59,17 +59,11 @@ final class ChannelRecyclerAdapter extends RecyclerView.Adapter<ChannelRecyclerV
 			@Override
 			public void onClick(final View v) {
 				if (!channels.get(holder.getAdapterPosition()).isRead()) {
-					final Intent intent = new Intent(context, RssChannelIntentService.class);
-					intent.setAction(RssChannelIntentService.getReadCurrentChannelKey());
-					intent.putExtra(RssChannelIntentService.getReadCurrentChannelKey()
-                            , channels.get(holder.getAdapterPosition()));
-					context.startService(intent);
+                    RssChannelIntentService.start(channels.get(holder.getAdapterPosition())
+                            , RssChannelIntentService.getReadCurrentChannelKey(), context);
 				}
-				final Intent intentBrowser = new Intent(context, ChannelItemActivity.class);
-				intentBrowser.putExtra(ChannelItem.getKEY(), channels.get(holder.getAdapterPosition()).getLink());
-				intentBrowser.putExtra(ChannelItemActivity.getChannelItemIdPreferencesKey()
-						, channels.get(holder.getAdapterPosition()).getLink());
-				context.startActivity(intentBrowser);
+				ChannelItemActivity.start(getPrefsUrlKey()
+                        , channels.get(holder.getAdapterPosition()).getLink(), context);
 			}
 		});
 	}
@@ -79,7 +73,7 @@ final class ChannelRecyclerAdapter extends RecyclerView.Adapter<ChannelRecyclerV
 		return channels == null ? 0 : channels.size();
 	}
 
-	void removeItem(final int index) {
+	public void removeItem(final int index) {
 		channels.remove(index);
 	}
 }

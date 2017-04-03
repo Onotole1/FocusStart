@@ -23,7 +23,6 @@ public final class ChannelItem implements Parcelable {
 	private @Getter @Setter String title;
 	private @Getter @Setter String subtitle;
 	private @Getter @Setter Date pubDate;
-	private @Getter @Setter Date updateDate;
 	private @Getter @Setter String link;
 	private @Getter @Setter boolean isRead;
 
@@ -34,7 +33,6 @@ public final class ChannelItem implements Parcelable {
 		title = in.readString();
 		subtitle = in.readString();
 		pubDate = (Date) in.readSerializable();
-		updateDate = (Date) in.readSerializable();
 		link = in.readString();
 		isRead = in.readByte() != 0;
 	}
@@ -61,7 +59,6 @@ public final class ChannelItem implements Parcelable {
 		dest.writeString(title);
 		dest.writeString(subtitle);
 		dest.writeSerializable(pubDate);
-		dest.writeSerializable(updateDate);
 		dest.writeString(link);
 		dest.writeByte((byte) (isRead ? 1 : 0));
 	}
@@ -71,7 +68,6 @@ public final class ChannelItem implements Parcelable {
         clone.setTitle(this.getTitle());
         clone.setSubtitle(this.getSubtitle());
         clone.setPubDate(this.getPubDate());
-        clone.setUpdateDate(this.getUpdateDate());
         clone.setLink(this.getLink());
         clone.setRead(this.isRead());
         return clone;

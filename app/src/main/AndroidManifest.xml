@@ -14,12 +14,14 @@
 		android:supportsRtl="true"
 		android:theme="@android:style/Theme.Holo"
 		tools:ignore="AllowBackup,GoogleAppIndexingWarning">
-		<service android:name="com.spitchenko.focusstart.controller.RssChannelIntentService" />
-		<service android:name="com.spitchenko.focusstart.controller.RssChannelItemIntentService" />
+		<service android:name="com.spitchenko.focusstart.controller.channelwindow.RssChannelIntentService" />
+		<service android:name="com.spitchenko.focusstart.controller.channelitemwindow.RssChannelItemIntentService" />
 		
 		<activity
 			android:name="com.spitchenko.focusstart.userinterface.channelwindow.ChannelActivity"
-			android:theme="@style/AppTheme.NoActionBar">
+			android:theme="@style/AppTheme.NoActionBar"
+            android:launchMode="singleInstance"
+            >
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />
 				

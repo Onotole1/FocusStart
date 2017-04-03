@@ -10,7 +10,6 @@ import android.graphics.BitmapFactory;
 
 import com.spitchenko.focusstart.model.Channel;
 import com.spitchenko.focusstart.model.ChannelItem;
-import com.spitchenko.focusstart.model.Message;
 import com.spitchenko.focusstart.utils.logger.LogCatHandler;
 
 import java.io.ByteArrayOutputStream;
@@ -22,7 +21,6 @@ import lombok.NonNull;
 
 import static com.spitchenko.focusstart.database.AtomRssDataBase.ChannelEntry;
 import static com.spitchenko.focusstart.database.AtomRssDataBase.ChannelItemEntry;
-import static com.spitchenko.focusstart.database.AtomRssDataBase.MessagesQueue;
 
 /**
  * Date: 09.03.17
@@ -56,18 +54,11 @@ public final class AtomRssChannelDbHelper extends SQLiteOpenHelper {
 			ChannelItemEntry.CHANNEL_ITEM_SUBTITLE + TEXT_TYPE + "," +
 			ChannelItemEntry.CHANNEL_ITEM_LINK + TEXT_TYPE + "," +
 			ChannelItemEntry.CHANNEL_ITEM_PUB_DATE + TEXT_TYPE + "," +
-			ChannelItemEntry.CHANNEL_ITEM_UPDATE_DATE + TEXT_TYPE + "," +
 			ChannelEntry.CHANNEL_ID + " INTEGER" + "," +
 			ChannelItemEntry.CHANNEL_ITEM_ISREAD + " INTEGER" + "," +
 			"FOREIGN KEY(" + ChannelEntry.CHANNEL_ID +
 			") REFERENCES " + ChannelEntry.TABLE_NAME + "(" + ChannelEntry.CHANNEL_ID + ")" +
 			" )";
-
-    private static final String SQL_CREATE_MESSAGES_ENTRIES =
-            "CREATE TABLE " + MessagesQueue.TABLE_NAME + " (" +
-                    MessagesQueue._ID + " INTEGER PRIMARY KEY," +
-                    MessagesQueue.MESSAGE_URL + TEXT_TYPE + "," +
-                    MessagesQueue.MESSAGE_BODY + TEXT_TYPE + ")";
 
 	private static final String SQL_DELETE_CHANNEL_ENTRIES =
 			"DROP TABLE IF EXISTS " + ChannelEntry.TABLE_NAME;
@@ -80,7 +71,6 @@ public final class AtomRssChannelDbHelper extends SQLiteOpenHelper {
 	public final void onCreate(@NonNull final SQLiteDatabase db) {
 		db.execSQL(SQL_CREATE_CHANNEL_ENTRIES);
 		db.execSQL(SQL_CREATE_CHANNEL_ITEM_ENTRIES);
-        db.execSQL(SQL_CREATE_MESSAGES_ENTRIES);
 	}
 
 	@Override
@@ -139,15 +129,11 @@ public final class AtomRssChannelDbHelper extends SQLiteOpenHelper {
         while (!cursorChannelItem.isAfterLast()) {
 			final ChannelItem channelItem = new ChannelItem();
 			final String channelItemPub = cursorChannelItem.getString(cursorChannelItem.getColumnIndex(ChannelItemEntry.CHANNEL_ITEM_PUB_DATE));
-			final String channelItemUpdate = cursorChannelItem.getString(cursorChannelItem.getColumnIndex(ChannelItemEntry.CHANNEL_ITEM_UPDATE_DATE));
 			channelItem.setTitle(cursorChannelItem.getString(cursorChannelItem.getColumnIndex(ChannelItemEntry.CHANNEL_ITEM_TITLE)));
 			channelItem.setSubtitle(cursorChannelItem.getString(cursorChannelItem.getColumnIndex(ChannelItemEntry.CHANNEL_ITEM_SUBTITLE)));
 			channelItem.setLink(cursorChannelItem.getString(cursorChannelItem.getColumnIndex(ChannelItemEntry.CHANNEL_ITEM_LINK)));
 			if (null != channelItemPub) {
 				channelItem.setPubDate(new Date(channelItemPub));
-			}
-			if (null != channelItemUpdate) {
-				channelItem.setUpdateDate(new Date(channelItemUpdate));
 			}
 			channelItem.setRead(isLongBool(cursorChannelItem.getLong(cursorChannelItem.getColumnIndex(ChannelItemEntry.CHANNEL_ITEM_ISREAD))));
 			channelItems.add(channelItem);
@@ -194,9 +180,6 @@ public final class AtomRssChannelDbHelper extends SQLiteOpenHelper {
 			if (null != channelItem.getPubDate()) {
 				values.put(ChannelItemEntry.CHANNEL_ITEM_PUB_DATE, channelItem.getPubDate().toString());
 			}
-			if (null != channelItem.getUpdateDate()) {
-				values.put(ChannelItemEntry.CHANNEL_ITEM_UPDATE_DATE, channelItem.getUpdateDate().toString());
-			}
 			values.put(ChannelItemEntry.CHANNEL_ITEM_ISREAD, boolToLong(channelItem.isRead()));
 			values.put(ChannelEntry.CHANNEL_ID, id);
 			sqLiteDatabase.insert(ChannelItemEntry.TABLE_NAME, null, values);
@@ -213,14 +196,13 @@ public final class AtomRssChannelDbHelper extends SQLiteOpenHelper {
 		                                              + ChannelEntry.CHANNEL_LINK + "= '"
 		                                              + channel.getLink() + "'", null);
 		cursor.moveToFirst();
-		do {
-			final long id = cursor.getLong(cursor.getColumnIndex(ChannelEntry._ID));
+
+        while (!cursor.isAfterLast()) {
+            final long id = cursor.getLong(cursor.getColumnIndex(ChannelEntry._ID));
             deleteChannelItems(id, sqLiteDatabase);
             sqLiteDatabase.delete(ChannelEntry.TABLE_NAME, ChannelEntry._ID + "= " + id, null);
-            if (!cursor.isLast()) {
-				cursor.moveToNext();
-			}
-		} while (!cursor.isLast());
+            cursor.moveToNext();
+        }
 	}
 
 	private void deleteChannelItems(final long channelId, final SQLiteDatabase sqLiteDatabase) {
@@ -231,13 +213,11 @@ public final class AtomRssChannelDbHelper extends SQLiteOpenHelper {
                 + channelId + "'", null);
         cursor.moveToFirst();
 
-        do {
+        while (!cursor.isAfterLast()) {
             final long id = cursor.getLong(cursor.getColumnIndex(ChannelItemEntry._ID));
             sqLiteDatabase.delete(ChannelItemEntry.TABLE_NAME, ChannelItemEntry._ID + "= " + id, null);
-            if (!cursor.isLast()) {
-                cursor.moveToNext();
-            }
-        } while (!cursor.isLast());
+            cursor.moveToNext();
+        }
     }
 
 	public final void updateValueFromDb(@NonNull final String tableName
@@ -268,38 +248,6 @@ public final class AtomRssChannelDbHelper extends SQLiteOpenHelper {
 
 		return channel;
 	}
-
-    public ArrayList<Message> getAllMessages() {
-        final ArrayList<Message> result = new ArrayList<>();
-        @Cleanup
-        final SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
-        @Cleanup
-        final Cursor cursor = sqLiteDatabase.rawQuery("SELECT * FROM "
-                + MessagesQueue.TABLE_NAME + " ORDER BY "
-                + MessagesQueue._ID + " ASC", null);
-        cursor.moveToFirst();
-
-        while (!cursor.isAfterLast()) {
-            final String url = cursor.getString(cursor.getColumnIndex(MessagesQueue.MESSAGE_URL));
-            final String body = cursor.getString(cursor.getColumnIndex(MessagesQueue.MESSAGE_BODY));
-            result.add(new Message(url, body));
-            cursor.moveToNext();
-        }
-
-        return result;
-    }
-
-    public void saveMessage(@NonNull final Message message) {
-        final SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
-        sqLiteDatabase.delete(MessagesQueue.TABLE_NAME, MessagesQueue.MESSAGE_URL + " = ?"
-                , new String[] {message.getUrl()});
-
-        final ContentValues values = new ContentValues();
-        values.put(MessagesQueue.MESSAGE_URL, message.getUrl());
-        values.put(MessagesQueue.MESSAGE_BODY, message.getMessage());
-
-        sqLiteDatabase.insert(MessagesQueue.TABLE_NAME, null, values);
-    }
 
 	private boolean isLongBool(final long number) {
 		return number == 1;
