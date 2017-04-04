@@ -40,7 +40,7 @@ public final class ChannelActivity extends BaseActivity {
 
     public static void start(final Context context) {
         final Intent activityIntent = new Intent(context, ChannelActivity.class);
-        activityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
         activityIntent.setAction(ChannelActivityAndBroadcastObserver.getUpdateKey());
         context.startActivity(activityIntent);
     }

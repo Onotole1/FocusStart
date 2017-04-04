@@ -1,4 +1,4 @@
-package com.spitchenko.focusstart.userinterface.channellitem;
+package com.spitchenko.focusstart.userinterface.channellitemwindow;
 
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -52,9 +52,12 @@ public final class ChannelItemRecyclerAdapter extends RecyclerView.Adapter<Chann
 		final ChannelItem bindChannel = channelItems.get(position);
 
 		holder.getTitleChannel().setText(bindChannel.getTitle());
-        final String data = "<html><body style='margin:0;padding:0;'>" + bindChannel.getSubtitle() + "</body></html>";
-        holder.getSubtitleChannel().loadDataWithBaseURL("", data
+        final String data = "<html><body style='margin:0;padding:0;'>" + bindChannel.getSubtitle()
+                + "</body></html>";
+        final String head = "<head><meta name='viewport' content='target-densityDpi=device-dpi'/></head>";
+        holder.getSubtitleChannel().loadDataWithBaseURL(null, head + data
                 , "text/html", Xml.Encoding.UTF_8.toString(), null);
+        holder.getSubtitleChannel().setScrollBarStyle(View.SCROLLBARS_OUTSIDE_OVERLAY);
         if (null != bindChannel.getPubDate()) {
             final long edtTime = bindChannel.getPubDate().getTime();
             final long timezoneAlteredTime = edtTime + Calendar.getInstance().getTimeZone().getRawOffset();

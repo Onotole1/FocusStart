@@ -154,8 +154,8 @@ public final class RssChannelIntentService extends IntentService {
 
     private void notificationReload() {
         ChannelActivity.start(this);
-        ChannelBroadcastReceiver.start(null, ChannelBroadcastReceiver.getRefreshDialogKey()
-                , getPackageName(), this);
+        /*ChannelBroadcastReceiver.start(null, ChannelBroadcastReceiver.getRefreshDialogKey()
+                , getPackageName(), this);*/
     }
 
     private void refresh() {

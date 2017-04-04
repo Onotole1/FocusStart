@@ -10,7 +10,7 @@ import android.view.ViewGroup;
 import com.spitchenko.focusstart.R;
 import com.spitchenko.focusstart.controller.channelwindow.RssChannelIntentService;
 import com.spitchenko.focusstart.model.Channel;
-import com.spitchenko.focusstart.userinterface.channellitem.ChannelItemActivity;
+import com.spitchenko.focusstart.userinterface.channellitemwindow.ChannelItemActivity;
 
 import java.util.ArrayList;
 

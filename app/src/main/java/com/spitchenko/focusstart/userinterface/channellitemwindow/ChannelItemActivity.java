@@ -1,4 +1,4 @@
-package com.spitchenko.focusstart.userinterface.channellitem;
+package com.spitchenko.focusstart.userinterface.channellitemwindow;
 
 import android.content.Context;
 import android.content.Intent;

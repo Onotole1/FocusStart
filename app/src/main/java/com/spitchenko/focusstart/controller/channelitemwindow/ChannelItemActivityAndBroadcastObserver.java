@@ -19,7 +19,7 @@ import com.spitchenko.focusstart.controller.ActivityAndBroadcastObserver;
 import com.spitchenko.focusstart.model.ChannelItem;
 import com.spitchenko.focusstart.userinterface.base.ChannelRecyclerEmptyAdapter;
 import com.spitchenko.focusstart.userinterface.base.NoInternetDialog;
-import com.spitchenko.focusstart.userinterface.channellitem.ChannelItemRecyclerAdapter;
+import com.spitchenko.focusstart.userinterface.channellitemwindow.ChannelItemRecyclerAdapter;
 import com.spitchenko.focusstart.userinterface.channelwindow.ChannelAddDialogFragment;
 
 import java.util.ArrayList;

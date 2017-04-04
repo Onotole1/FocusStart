@@ -20,7 +20,6 @@
 		<activity
 			android:name="com.spitchenko.focusstart.userinterface.channelwindow.ChannelActivity"
 			android:theme="@style/AppTheme.NoActionBar"
-            android:launchMode="singleInstance"
             >
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />
@@ -29,7 +28,7 @@
 			</intent-filter>
 		</activity>
 		<activity
-			android:name="com.spitchenko.focusstart.userinterface.channellitem.ChannelItemActivity"
+			android:name="com.spitchenko.focusstart.userinterface.channellitemwindow.ChannelItemActivity"
 			android:theme="@style/AppTheme.NoActionBar" />
 		<activity
 			android:name="com.spitchenko.focusstart.userinterface.settingswindow.SettingsActivity"
