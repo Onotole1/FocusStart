@@ -22,6 +22,7 @@
     <string name="notifications_list_dialog">Задайте период проверки обновлений</string>
     <string name="notifications_entries_default_value" translatable="false">3600</string>
     <string name="notifications_entries_default">Один раз в час</string>
+    <string name="browser_missing">На вашем устройстве не установлен браузер</string>
 
     <plurals name="plurals_news">
 		<item quantity="zero">нет обновлений</item>

@@ -1,5 +1,6 @@
 package com.spitchenko.focusstart.userinterface.channellitem;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
@@ -10,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.spitchenko.focusstart.R;
 import com.spitchenko.focusstart.controller.channelitemwindow.RssChannelItemIntentService;
@@ -75,6 +77,7 @@ public final class ChannelItemRecyclerAdapter extends RecyclerView.Adapter<Chann
 				}
 				final Intent intent = new Intent(Intent.ACTION_VIEW
                         , Uri.parse(channelItems.get(holder.getAdapterPosition()).getLink()));
+
 				context.startActivity(intent);
 			}
 		});
@@ -91,7 +94,12 @@ public final class ChannelItemRecyclerAdapter extends RecyclerView.Adapter<Chann
                         }
                         final Intent intent = new Intent(Intent.ACTION_VIEW
                                 , Uri.parse(channelItems.get(holder.getAdapterPosition()).getLink()));
-                        context.startActivity(intent);
+                        try {
+                            context.startActivity(intent);
+                        } catch (final ActivityNotFoundException e) {
+                            Toast.makeText(v.getContext(), v.getContext()
+                                    .getString(R.string.browser_missing), Toast.LENGTH_SHORT).show();
+                        }
                         break;
                 }
                 return false;

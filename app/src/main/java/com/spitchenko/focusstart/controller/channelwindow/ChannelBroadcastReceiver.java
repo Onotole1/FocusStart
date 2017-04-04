@@ -141,7 +141,7 @@ public final class ChannelBroadcastReceiver extends BroadcastReceiver {
         broadcastIntent.setAction(action);
         broadcastIntent.setPackage(packageName);
         if (null != extra) {
-            broadcastIntent.putExtra(ChannelBroadcastReceiver.getReceiveChannelsKey(), extra);
+            broadcastIntent.putExtra(action, extra);
         }
         LocalBroadcastManager.getInstance(context).sendBroadcast(broadcastIntent);
     }

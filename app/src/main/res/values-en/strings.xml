@@ -21,6 +21,7 @@
     <string name="check_updates">Checking for updates</string>
     <string name="notifications_list_dialog">Set the check period for updates</string>
     <string name="notifications_entries_default">Once per hour</string>
+    <string name="browser_missing">Your device does not have a browser</string>
 
     <plurals name="plurals_news">
         <item quantity="one">has %1$d update</item>

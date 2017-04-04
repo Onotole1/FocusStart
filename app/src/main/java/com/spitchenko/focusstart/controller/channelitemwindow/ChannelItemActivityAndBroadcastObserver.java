@@ -200,14 +200,16 @@ public final class ChannelItemActivityAndBroadcastObserver implements ActivityAn
     }
 
     private void writeRecyclerScrollToPrefs() {
-        if (recyclerView != null) {
-            final SharedPreferences sharedPreferences = activity.getSharedPreferences(RECYCLER_STATE,
-                    Context.MODE_PRIVATE);
-            final SharedPreferences.Editor editor = sharedPreferences.edit();
-            final LinearLayoutManager linearLayoutManager
-                    = (LinearLayoutManager) recyclerView.getLayoutManager();
-            editor.putInt(RECYCLER_STATE, linearLayoutManager.findFirstVisibleItemPosition());
-            editor.apply();
+        if (null != recyclerView) {
+            if (null != recyclerView.getLayoutManager()) {
+                final SharedPreferences sharedPreferences = activity.getSharedPreferences(RECYCLER_STATE,
+                        Context.MODE_PRIVATE);
+                final SharedPreferences.Editor editor = sharedPreferences.edit();
+                final LinearLayoutManager linearLayoutManager
+                        = (LinearLayoutManager) recyclerView.getLayoutManager();
+                editor.putInt(RECYCLER_STATE, linearLayoutManager.findFirstVisibleItemPosition());
+                editor.apply();
+            }
         }
     }
 }

@@ -67,7 +67,8 @@ final class XmlParser {
                         nextTag.getAttributes().put(xpp.getAttributeName(i), xpp.getAttributeValue(i));
                     }
                     depth = xpp.getDepth();
-                } else if ((eventType == XmlPullParser.TEXT || eventType == XmlPullParser.CDSECT) && !xpp.isWhitespace() && null != nextTag) {
+                } else if ((eventType == XmlPullParser.TEXT || eventType == XmlPullParser.CDSECT)
+                        && null != xpp.getText() && null != nextTag) {
                     if (null != xpp.getText()) {
                         stringBuilder.append(xpp.getText());
                     }
@@ -79,7 +80,7 @@ final class XmlParser {
                     }
                 } else if (eventType == XmlPullParser.END_TAG) {
                     if (null != nextTag && !stringBuilder.toString().isEmpty()) {
-                        nextTag.setText(stringBuilder.toString());
+                        nextTag.setText(stringBuilder.toString().trim());
                         stringBuilder.delete(0, stringBuilder.length());
                     }
                 }

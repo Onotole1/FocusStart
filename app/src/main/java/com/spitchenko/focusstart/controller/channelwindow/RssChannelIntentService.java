@@ -214,7 +214,8 @@ public final class RssChannelIntentService extends IntentService {
 		final AtomRssChannelDbHelper channelDbHelper = new AtomRssChannelDbHelper(this);
 		final Channel inputChannel = intent.getParcelableExtra(REMOVE_CHANNEL);
 		channelDbHelper.deleteChannelFromDb(inputChannel);
-        ChannelBroadcastReceiver.start(inputChannel, REMOVE_CHANNEL, getPackageName(), this);
+        ChannelBroadcastReceiver.start(inputChannel, ChannelBroadcastReceiver.getRemoveAction()
+                , getPackageName(), this);
 	}
 
 	private void readWriteFromUrl(@NonNull final Intent intent, @Nullable final String action) {
