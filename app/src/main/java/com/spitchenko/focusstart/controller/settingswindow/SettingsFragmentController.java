@@ -42,6 +42,7 @@ public class SettingsFragmentController {
                 if (index != -1) {
                     alarmController.saveTimeSecondsToPreferences(Integer.parseInt(
                             timeList.getEntryValues()[index].toString()), fragment.getActivity());
+                    alarmController.restartAlarm();
                     timeList.setSummary(timeList.getEntries()[index]);
                     timeList.setValueIndex(index);
                 }

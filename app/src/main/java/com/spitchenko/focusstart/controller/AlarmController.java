@@ -43,7 +43,7 @@ public final class AlarmController {
         alarmManager.cancel(pendingIntent);
     }
 
-    void restartAlarm() {
+    public void restartAlarm() {
         stopAlarm();
         startAlarm();
     }
