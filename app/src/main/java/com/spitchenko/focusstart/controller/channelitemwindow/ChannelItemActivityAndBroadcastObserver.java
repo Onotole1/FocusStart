@@ -206,6 +206,9 @@ public final class ChannelItemActivityAndBroadcastObserver extends BaseActivityC
         if (swipeRefreshLayout.isShown()) {
             outState.putBoolean(SWIPE_LAYOUT_STATE, true);
         }
+        if (swipeRefreshLayout.isShown()) {
+            outState.putBoolean(SWIPE_LAYOUT_STATE, true);
+        }
     }
 
     private ArrayList<ChannelItem> convertObjectToChannelItemList(
