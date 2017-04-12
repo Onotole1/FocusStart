@@ -3,9 +3,12 @@ package com.spitchenko.focusstart.userinterface.channelwindow;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 
 import com.spitchenko.focusstart.controller.channelwindow.ChannelActivityAndBroadcastObserver;
 import com.spitchenko.focusstart.userinterface.base.BaseActivity;
+
+import lombok.NonNull;
 
 public final class ChannelActivity extends BaseActivity {
 
@@ -13,7 +16,7 @@ public final class ChannelActivity extends BaseActivity {
             = new ChannelActivityAndBroadcastObserver(this);
 
     @Override
-    public final void onCreate(final Bundle savedInstanceState) {
+    public final void onCreate(@Nullable final Bundle savedInstanceState) {
         this.addObserver(channelActivityAndBroadcastObserver);
         super.onCreate(savedInstanceState);
     }
@@ -33,12 +36,12 @@ public final class ChannelActivity extends BaseActivity {
 	}
 
     @Override
-	protected void onSaveInstanceState(final Bundle outState) {
+	protected void onSaveInstanceState(@NonNull final Bundle outState) {
 		super.onSaveInstanceState(outState);
         this.removeObserver(channelActivityAndBroadcastObserver);
 	}
 
-    public static void start(final Context context) {
+    public static void start(@NonNull final Context context) {
         final Intent activityIntent = new Intent(context, ChannelActivity.class);
         activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
         activityIntent.setAction(ChannelActivityAndBroadcastObserver.getUpdateKey());

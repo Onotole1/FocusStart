@@ -5,6 +5,8 @@ import android.support.annotation.Nullable;
 
 import java.util.ArrayList;
 
+import lombok.NonNull;
+
 /**
  * Date: 31.03.17
  * Time: 18:46
@@ -15,7 +17,7 @@ public interface ActivityAndBroadcastObserver {
     void updateOnCreate(@Nullable Bundle savedInstanceState);
     void updateOnResume();
     void updateOnPause();
-    void updateOnReceiveItems(final ArrayList<?> items, final String action);
-    void updateOnRestoreInstanceState(final Bundle savedInstanceState);
-    void updateOnSavedInstanceState(final Bundle outState);
+    void updateOnReceiveItems(@Nullable final ArrayList<?> items, @Nullable final String action);
+    void updateOnRestoreInstanceState(@NonNull final Bundle savedInstanceState);
+    void updateOnSavedInstanceState(@NonNull final Bundle outState);
 }

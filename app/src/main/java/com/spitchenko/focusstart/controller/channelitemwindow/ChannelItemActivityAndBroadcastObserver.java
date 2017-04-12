@@ -16,6 +16,11 @@ import android.support.v7.widget.Toolbar;
 
 import com.spitchenko.focusstart.R;
 import com.spitchenko.focusstart.controller.ActivityAndBroadcastObserver;
+import com.spitchenko.focusstart.controller.BaseActivityController;
+import com.spitchenko.focusstart.controller.KitkatHackController;
+import com.spitchenko.focusstart.controller.NetworkDialogShowController;
+import com.spitchenko.focusstart.controller.UpdateController;
+import com.spitchenko.focusstart.controller.VersionAndroidComparator;
 import com.spitchenko.focusstart.model.ChannelItem;
 import com.spitchenko.focusstart.userinterface.base.ChannelRecyclerEmptyAdapter;
 import com.spitchenko.focusstart.userinterface.base.NoInternetDialog;
@@ -32,12 +37,15 @@ import lombok.NonNull;
  *
  * @author anatoliy
  */
-public final class ChannelItemActivityAndBroadcastObserver implements ActivityAndBroadcastObserver {
+public final class ChannelItemActivityAndBroadcastObserver extends BaseActivityController
+        implements ActivityAndBroadcastObserver {
     private final static String CHANNEL_ITEM_ACTIVITY_OBSERVER
             = "com.spitchenko.focusstart.controller.channel_item_window.ChannelItemActivityAndBroadcastObserver";
     private final static String CHANNEL_ITEM_ACTIVITY_PREFS_URL
             = CHANNEL_ITEM_ACTIVITY_OBSERVER + ".sharedUrl";
-    private final static String RECYCLER_STATE = CHANNEL_ITEM_ACTIVITY_OBSERVER + ".state";
+    private final static String RECYCLER_STATE = CHANNEL_ITEM_ACTIVITY_OBSERVER + ".recyclerState";
+    private final static String SWIPE_LAYOUT_STATE = CHANNEL_ITEM_ACTIVITY_OBSERVER + ".swipeState";
+    private final static String LOCAL_THEME = CHANNEL_ITEM_ACTIVITY_OBSERVER + ".localTheme";
 
     private AppCompatActivity activity;
     private RecyclerView recyclerView;
@@ -46,7 +54,9 @@ public final class ChannelItemActivityAndBroadcastObserver implements ActivityAn
     private Parcelable recyclerState;
     private LocalBroadcastManager localBroadcastManager;
     private ChannelItemBroadcastReceiver channelItemBroadcastReceiver;
-    private int recyclerScroll = 0;
+    private UpdateController updateController;
+    private KitkatHackController kitkatHackController;
+    private NetworkDialogShowController networkDialogShowController;
 
 
     public ChannelItemActivityAndBroadcastObserver(final AppCompatActivity activity) {
@@ -55,6 +65,7 @@ public final class ChannelItemActivityAndBroadcastObserver implements ActivityAn
 
     @Override
     public void updateOnCreate(@Nullable final Bundle savedInstanceState) {
+        setThemeFromPrefs(activity);
         activity.setContentView(R.layout.activity_channel_item);
 
         final Toolbar toolbar = (Toolbar) activity.findViewById(R.id.activity_channel_item_toolbar);
@@ -65,7 +76,8 @@ public final class ChannelItemActivityAndBroadcastObserver implements ActivityAn
         }
 
         swipeRefreshLayout
-                = (SwipeRefreshLayout) activity.findViewById(R.id.activity_channel_item_swipe_refresh_layout);
+                = (SwipeRefreshLayout) activity
+                .findViewById(R.id.activity_channel_item_swipe_refresh_layout);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -74,7 +86,8 @@ public final class ChannelItemActivityAndBroadcastObserver implements ActivityAn
             }
         });
 
-        recyclerView = (RecyclerView) activity.findViewById(R.id.activity_channel_item_recycler_view);
+        recyclerView = (RecyclerView) activity
+                .findViewById(R.id.activity_channel_item_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(activity));
         recyclerView.setAdapter(new ChannelRecyclerEmptyAdapter());
 
@@ -82,14 +95,38 @@ public final class ChannelItemActivityAndBroadcastObserver implements ActivityAn
             readUrlFromIntent();
         }
 
-        channelUrl = readIdFromPreferences();
+        channelUrl = readUrlFromPreferences();
+
+        updateController = new UpdateController(activity);
+        updateController.turnOnUpdate();
+
+        networkDialogShowController = new NetworkDialogShowController(activity);
+        if (VersionAndroidComparator.isAndroidOld()) {
+            kitkatHackController = new KitkatHackController(activity);
+        }
     }
 
     @Override
     public void updateOnResume() {
-        recyclerScroll = getRecyclerScrollFromPreferences();
-        RssChannelItemIntentService.start(null, channelUrl
-                , RssChannelItemIntentService.getReadChannelsKey(), activity);
+        if (readLocalThemeIdFromPrefs() != readThemeIdOrNullFromPrefs(activity)) {
+            activity.recreate();
+            if (VersionAndroidComparator.isAndroidOld()) {
+                kitkatHackController.turnOnHackController();
+            }
+            return;
+        }
+
+        subscribe();
+
+        if (updateController.isUpdate()) {
+            RssChannelItemIntentService.start(null, channelUrl
+                    , RssChannelItemIntentService.getReadChannelsKey(), activity);
+
+            updateController.turnOffUpdate();
+        }
+    }
+
+    private void subscribe() {
         localBroadcastManager = LocalBroadcastManager.getInstance(activity);
         channelItemBroadcastReceiver = new ChannelItemBroadcastReceiver();
         final IntentFilter intentFilter = new IntentFilter();
@@ -102,6 +139,23 @@ public final class ChannelItemActivityAndBroadcastObserver implements ActivityAn
 
     @Override
     public void updateOnPause() {
+        if (VersionAndroidComparator.isAndroidOld()) {
+            if (kitkatHackController.isHack() &&
+                    1 == kitkatHackController.getOnPauseSequence()) {
+                kitkatHackController.setNullOnPauseSequence();
+                kitkatHackController.turnOffHackController();
+            } else if (kitkatHackController.isHack()) {
+                unSubscribe();
+                kitkatHackController.onPauseSequenceIncrement();
+            } else {
+                unSubscribe();
+            }
+        } else {
+            unSubscribe();
+        }
+    }
+
+    private void unSubscribe() {
         localBroadcastManager.unregisterReceiver(channelItemBroadcastReceiver);
         channelItemBroadcastReceiver.removeObserver(this);
     }
@@ -116,14 +170,12 @@ public final class ChannelItemActivityAndBroadcastObserver implements ActivityAn
                 recyclerView.setLayoutManager(layoutManager);
             }
             if (!receivedChannels.isEmpty()) {
-                final ChannelItemRecyclerAdapter channelAdapter = new ChannelItemRecyclerAdapter(receivedChannels);
+                final ChannelItemRecyclerAdapter channelAdapter
+                        = new ChannelItemRecyclerAdapter(receivedChannels);
                 recyclerView.setAdapter(channelAdapter);
 
                 if (null != recyclerState) {
                     recyclerView.getLayoutManager().onRestoreInstanceState(recyclerState);
-                } else {
-                    final RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
-                    layoutManager.scrollToPosition(recyclerScroll);
                 }
             } else {
                 recyclerView.setAdapter(new ChannelRecyclerEmptyAdapter());
@@ -132,24 +184,32 @@ public final class ChannelItemActivityAndBroadcastObserver implements ActivityAn
             showNetworkDialog();
         }
         swipeRefreshLayout.setRefreshing(false);
+        updateController.turnOffUpdate();
     }
 
     @Override
     public void updateOnRestoreInstanceState(final Bundle savedInstanceState) {
         if (null != savedInstanceState) {
             recyclerState = savedInstanceState.getParcelable(RECYCLER_STATE);
+            if (savedInstanceState.getBoolean(SWIPE_LAYOUT_STATE)) {
+                swipeRefreshLayout.setRefreshing(true);
+            }
         }
     }
 
     @Override
     public void updateOnSavedInstanceState(final Bundle outState) {
-        writeRecyclerScrollToPrefs();
         if (null != recyclerView) {
-            outState.putParcelable(RECYCLER_STATE, recyclerView.getLayoutManager().onSaveInstanceState());
+            outState.putParcelable(RECYCLER_STATE, recyclerView.getLayoutManager()
+                    .onSaveInstanceState());
+        }
+        if (swipeRefreshLayout.isShown()) {
+            outState.putBoolean(SWIPE_LAYOUT_STATE, true);
         }
     }
 
-    private ArrayList<ChannelItem> convertObjectToChannelItemList(@NonNull final ArrayList<?> list) {
+    private ArrayList<ChannelItem> convertObjectToChannelItemList(
+            @NonNull final ArrayList<?> list) {
         final ArrayList<ChannelItem> result = new ArrayList<>();
         for (final Object object:list) {
             if (object instanceof ChannelItem) {
@@ -161,15 +221,17 @@ public final class ChannelItemActivityAndBroadcastObserver implements ActivityAn
 
     private void writeToPreferences(@NonNull final String channelUrl) {
         final SharedPreferences sharedPreferences
-                = activity.getSharedPreferences(CHANNEL_ITEM_ACTIVITY_PREFS_URL, Context.MODE_PRIVATE);
+                = activity.getSharedPreferences(CHANNEL_ITEM_ACTIVITY_PREFS_URL
+                , Context.MODE_PRIVATE);
         final SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(CHANNEL_ITEM_ACTIVITY_PREFS_URL, channelUrl);
         editor.apply();
     }
 
-    private String readIdFromPreferences() {
+    private String readUrlFromPreferences() {
         final SharedPreferences sharedPreferences
-                = activity.getSharedPreferences(CHANNEL_ITEM_ACTIVITY_PREFS_URL, Context.MODE_PRIVATE);
+                = activity.getSharedPreferences(CHANNEL_ITEM_ACTIVITY_PREFS_URL
+                , Context.MODE_PRIVATE);
         return sharedPreferences.getString(CHANNEL_ITEM_ACTIVITY_PREFS_URL, null);
     }
 
@@ -179,6 +241,7 @@ public final class ChannelItemActivityAndBroadcastObserver implements ActivityAn
                 = activity.getFragmentManager().beginTransaction();
         fragmentTransaction.add(noInternetDialog, ChannelAddDialogFragment.getDialogFragmentTag());
         fragmentTransaction.commitAllowingStateLoss();
+        networkDialogShowController.turnOnNetworkDialog();
     }
 
     private void readUrlFromIntent() {
@@ -193,23 +256,19 @@ public final class ChannelItemActivityAndBroadcastObserver implements ActivityAn
         return CHANNEL_ITEM_ACTIVITY_PREFS_URL;
     }
 
-    private int getRecyclerScrollFromPreferences() {
-        final SharedPreferences sharedPreferences = activity.getSharedPreferences(RECYCLER_STATE
-                , Context.MODE_PRIVATE);
-        return sharedPreferences.getInt(RECYCLER_STATE, 0);
+    @Override
+    protected void saveLocalThemeIdToPrefs(final int themeId) {
+        final SharedPreferences preferences
+                = activity.getSharedPreferences(LOCAL_THEME, Context.MODE_PRIVATE);
+        final SharedPreferences.Editor editor = preferences.edit();
+        editor.putInt(LOCAL_THEME, themeId);
+        editor.apply();
     }
 
-    private void writeRecyclerScrollToPrefs() {
-        if (null != recyclerView) {
-            if (null != recyclerView.getLayoutManager()) {
-                final SharedPreferences sharedPreferences = activity.getSharedPreferences(RECYCLER_STATE,
-                        Context.MODE_PRIVATE);
-                final SharedPreferences.Editor editor = sharedPreferences.edit();
-                final LinearLayoutManager linearLayoutManager
-                        = (LinearLayoutManager) recyclerView.getLayoutManager();
-                editor.putInt(RECYCLER_STATE, linearLayoutManager.findFirstVisibleItemPosition());
-                editor.apply();
-            }
-        }
+    @Override
+    protected int readLocalThemeIdFromPrefs() {
+        final SharedPreferences preferences
+                = activity.getSharedPreferences(LOCAL_THEME, Context.MODE_PRIVATE);
+        return preferences.getInt(LOCAL_THEME, 0);
     }
 }

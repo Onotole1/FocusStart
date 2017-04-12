@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +15,8 @@ import android.widget.EditText;
 
 import com.spitchenko.focusstart.R;
 import com.spitchenko.focusstart.controller.channelwindow.RssChannelIntentService;
+
+import lombok.NonNull;
 
 /**
  * Date: 19.03.17
@@ -35,17 +38,17 @@ public final class ChannelAddDialogFragment extends DialogFragment {
 
     @SuppressLint("InflateParams")
     @Override
-    public Dialog onCreateDialog(final Bundle savedInstanceState) {
+    public final Dialog onCreateDialog(@Nullable final Bundle savedInstanceState) {
         final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         final LayoutInflater inflater = getActivity().getLayoutInflater();
         final View promptsView = inflater.inflate(R.layout.add_channel_dialog, null);
-        final EditText userInput = (EditText) promptsView.findViewById(R.id.input_text);
+        final EditText userInput = (EditText) promptsView.findViewById(R.id.add_channel_dialog_input_edittext);
         final SharedPreferences sharedPreferences
                 = getActivity().getSharedPreferences(CHANNELS_PREFERENCES_KEY, Context.MODE_PRIVATE);
 
         readFromPreferences(sharedPreferences, userInput);
         builder.setView(promptsView)
-                .setPositiveButton(R.string.add, new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.channel_add_dialog_add_button, new DialogInterface.OnClickListener() {
                     public void onClick(final DialogInterface dialog, final int id) {
                         writeToPreferences(userInput.getText().toString(), sharedPreferences);
 
@@ -54,7 +57,7 @@ public final class ChannelAddDialogFragment extends DialogFragment {
                                 , userInput.getText().toString());
                     }
                 })
-                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.dialog_cancel_button, new DialogInterface.OnClickListener() {
                     public void onClick(final DialogInterface dialog, final int id) {
                         writeToPreferences(userInput.getText().toString(), sharedPreferences);
                     }
@@ -62,13 +65,15 @@ public final class ChannelAddDialogFragment extends DialogFragment {
         return builder.create();
     }
 
-    private void writeToPreferences(final String input, final SharedPreferences sharedPreferences) {
+    private void writeToPreferences(@NonNull final String input
+            , @NonNull final SharedPreferences sharedPreferences) {
         final SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(CHANNELS_PREFERENCES_KEY, input);
         editor.apply();
     }
 
-    private void readFromPreferences(final SharedPreferences sharedPreferences, final EditText editText) {
+    private void readFromPreferences(@NonNull final SharedPreferences sharedPreferences
+            , @NonNull final EditText editText) {
         final String sharedString = sharedPreferences.getString(CHANNELS_PREFERENCES_KEY, "");
         editText.setText(sharedString);
         editText.setSelection(sharedString.length());

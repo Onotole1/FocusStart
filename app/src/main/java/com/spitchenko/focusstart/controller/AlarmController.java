@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 
+import lombok.NonNull;
+
 /**
  * Date: 26.03.17
  * Time: 14:51
@@ -18,7 +20,7 @@ public final class AlarmController {
 
     private Context context;
 
-    public AlarmController(final Context context) {
+    public AlarmController(@NonNull final Context context) {
         this.context = context;
     }
 
@@ -48,7 +50,7 @@ public final class AlarmController {
         startAlarm();
     }
 
-    public void saveTimeSecondsToPreferences(final int seconds, final Context context) {
+    public void saveTimeSecondsToPreferences(final int seconds, @NonNull final Context context) {
         final SharedPreferences preferences
                 = context.getSharedPreferences(ALARM_CONTROLLER, Context.MODE_PRIVATE);
         final SharedPreferences.Editor editor = preferences.edit();

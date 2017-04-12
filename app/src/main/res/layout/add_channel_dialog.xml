@@ -9,7 +9,7 @@
 		android:id="@+id/tv"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:text="@string/add_url"
+		android:text="@string/channel_add_dialog_add_url"
 		android:textAppearance="?android:attr/textAppearanceLarge" />
 	
 	<LinearLayout
@@ -20,10 +20,10 @@
 		<TextView
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="@string/http_or_https" />
+			android:text="@string/channel_add_dialog_add_channel_dialog_http_or_https_textview" />
 		
 		<EditText
-			android:id="@+id/input_text"
+			android:id="@+id/add_channel_dialog_input_edittext"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:inputType="textUri">

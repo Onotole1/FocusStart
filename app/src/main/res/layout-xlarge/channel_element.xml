@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:id="@+id/channel_element_layout"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:orientation="vertical">
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/channel_element_card_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        app:cardCornerRadius="@dimen/card_corner_radius">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/channel_element_tittle_text_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/padding_card_left"
+                android:paddingRight="@dimen/padding_card_right"
+                android:paddingTop="@dimen/padding_card_top"
+                android:textSize="@dimen/title_text_size"
+                tools:ignore="RtlHardcoded"
+                tools:text="Яндекс.Новости: Главные новости"
+                android:layout_alignBottom="@+id/channel_element_image_channel"
+                android:layout_centerHorizontal="true"/>
+
+            <ImageView
+                android:id="@+id/channel_element_image_channel"
+                android:layout_width="@dimen/image_channel_width"
+                android:layout_height="@dimen/image_channel_height"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:contentDescription="@string/activity_channel_channel_image_image_description"
+                android:paddingRight="@dimen/padding_card_right"
+                android:paddingTop="@dimen/padding_card_top"
+                app:srcCompat="@drawable/ic_rss_feed_amber_50_36dp"
+                tools:ignore="RtlHardcoded,RtlSymmetry"/>
+
+            <TextView
+                android:id="@+id/channel_element_subtitle_text_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_below="@+id/channel_element_tittle_text_view"
+                android:layout_toLeftOf="@+id/channel_element_image_channel"
+                android:layout_toStartOf="@+id/channel_element_image_channel"
+                android:paddingBottom="@dimen/padding_card_bottom"
+                android:paddingLeft="@dimen/padding_card_left"
+                android:paddingRight="@dimen/padding_card_right"
+                android:textSize="@dimen/subtitle_text_size"
+                tools:ignore="RtlHardcoded"
+                tools:text="Первая в России служба автоматической обработки и систематизации новостей. Сообщения ведущих российских и мировых СМИ. Обновление в режиме реального времени 24 часа в сутки."/>
+        </RelativeLayout>
+
+    </android.support.v7.widget.CardView>
+
+</LinearLayout>

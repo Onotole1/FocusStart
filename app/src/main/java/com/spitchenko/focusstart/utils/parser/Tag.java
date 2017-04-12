@@ -1,11 +1,14 @@
 package com.spitchenko.focusstart.utils.parser;
 
+import android.support.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 
 /**
@@ -22,7 +25,7 @@ final class Tag {
 	@Getter @Setter List<Tag> children = new ArrayList<>();
 	@Getter @Setter Map<String, String> attributes = new HashMap<>();
 
-	Tag(final String name, final Tag parent, final int depth) {
+	Tag(@NonNull final String name, @Nullable final Tag parent, final int depth) {
 		this.name = name;
 		this.parent = parent;
 		this.depth = depth;

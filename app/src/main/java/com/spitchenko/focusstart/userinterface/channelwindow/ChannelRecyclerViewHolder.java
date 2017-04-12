@@ -8,6 +8,7 @@ import android.widget.TextView;
 import com.spitchenko.focusstart.R;
 
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 
 /**
@@ -22,7 +23,7 @@ final class ChannelRecyclerViewHolder extends RecyclerView.ViewHolder {
 	private @Getter @Setter	TextView subtitleChannel;
 	private @Getter @Setter	ImageView imageChannel;
 
-	ChannelRecyclerViewHolder(final View itemView) {
+	ChannelRecyclerViewHolder(@NonNull final View itemView) {
 		super(itemView);
 		titleChannel = (TextView)itemView.findViewById(R.id.channel_element_tittle_text_view);
 		subtitleChannel = (TextView)itemView.findViewById(R.id.channel_element_subtitle_text_view);

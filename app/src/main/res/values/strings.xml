@@ -1,35 +1,47 @@
 <resources>
-	<string name="app_name" translatable="false">FocusStart</string>
-	<string name="title_activity_example" translatable="false">ExampleActivity</string>
-	<string name="add_url">Введите URL канала:</string>
-	<string name="action_settings">Настройки</string>
-	<string name="add">Добавить</string>
-	<string name="cancel">Отмена</string>
-    <string name="reload">Обновить</string>
-	<string name="http_or_https" translatable="false">http(s)://</string>
-	<string name="notification_checkbox" translatable="false">notif</string>
-	<string name="notifications_list" translatable="false">time</string>
-    <string name="plural_prefix">В канале</string>
-    <string name="internet_exception">Интернет-соединение отсутствует</string>
-    <string name="turn_on_internet">Включить интернет</string>
-    <string name="io_exception">Ошибка при вводе URL, проверьте правильность и повторите</string>
-    <string name="turn_on_notifications">Включить уведомления</string>
-    <string name="notifications">Уведомления</string>
-    <string name="period_notifications">Задать период проверки обновлений</string>
-    <string name="period">Периодичность</string>
-    <string name="check_updates">Уведомления</string>
-    <string name="channel_image_image_description">channel_image</string>
-    <string name="notifications_list_dialog">Задайте период проверки обновлений</string>
-    <string name="notifications_entries_default_value" translatable="false">3600</string>
-    <string name="notifications_entries_default">Один раз в час</string>
-    <string name="browser_missing">На вашем устройстве не установлен браузер</string>
+    <string name="app_name" translatable="false">FocusStart</string>
 
-    <plurals name="plurals_news">
-		<item quantity="zero">нет обновлений</item>
-		<item quantity="one">имеется %1$d обновление</item>
-		<item quantity="two">имеется %1$d обновления</item>
-		<item quantity="few">имеется %1$d обновления</item>
-		<item quantity="many">имеется %1$d обновлений</item>
-		<item quantity="other">имеется %1$d обновлений</item>
-	</plurals>
+    <string name="settings_activity_title">Настройки</string>
+
+    <string name="channel_add_dialog_add_url">Введите URL канала:</string>
+    <string name="channel_add_dialog_add_button">Добавить</string>
+    <string name="channel_add_dialog_add_channel_dialog_http_or_https_textview" translatable="false">http(s)://</string>
+
+    <string name="dialog_cancel_button">Отмена</string>
+
+    <string name="channel_refresh_dialog_reload_button">Обновить</string>
+
+    <string name="rss_channel_intent_service_plural_prefix">В канале</string>
+
+    <string name="no_internet_dialog_internet_message">Интернет-соединение отсутствует</string>
+    <string name="no_internet_dialog_turn_on_internet">Включить интернет</string>
+
+    <string name="activity_channel_controller_io_exception">Ошибка при вводе URL, проверьте правильность и повторите</string>
+    <string name="activity_channel_channel_image_image_description">channel_image</string>
+
+    <string name="settings_fragment_notification_checkbox" translatable="false">notif</string>
+    <string name="settings_fragment_notifications_list" translatable="false">time</string>
+    <string name="settings_fragment_turn_on_notifications">Включить уведомления</string>
+    <string name="settings_fragment_notifications">Уведомления</string>
+    <string name="settings_fragment_period_notifications">Задать период проверки обновлений</string>
+    <string name="settings_fragment_notification_list_title">Периодичность</string>
+    <string name="settings_fragment_check_updates">Уведомления</string>
+    <string name="settings_fragment_notifications_list_dialog">Задайте период проверки обновлений</string>
+    <string name="settings_fragment_notifications_entries_default_value" translatable="false">3600</string>
+    <string name="settings_fragment_notifications_entries_default">Один раз в час</string>
+    <string name="settings_fragment_theme_list_default_value" translatable="false">R.style.AppTheme</string>
+    <string name="settings_fragment_theme_list_title">Тема</string>
+    <string name="settings_fragment_theme_list_dialog">Выберите тему</string>
+    <string name="settings_fragment_theme_list">theme_list</string>
+
+    <string name="channel_item_recycler_adapter_browser_missing">На вашем устройстве не установлен браузер</string>
+
+    <plurals name="rss_channel_intent_service_plurals_news">
+        <item quantity="zero">нет обновлений</item>
+        <item quantity="one">имеется %1$d обновление</item>
+        <item quantity="two">имеется %1$d обновления</item>
+        <item quantity="few">имеется %1$d обновления</item>
+        <item quantity="many">имеется %1$d обновлений</item>
+        <item quantity="other">имеется %1$d обновлений</item>
+    </plurals>
 </resources>

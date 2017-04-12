@@ -15,6 +15,7 @@ import com.spitchenko.focusstart.userinterface.channellitemwindow.ChannelItemAct
 import java.util.ArrayList;
 
 import lombok.Getter;
+import lombok.NonNull;
 
 import static com.spitchenko.focusstart.controller.channelitemwindow.ChannelItemActivityAndBroadcastObserver.getPrefsUrlKey;
 
@@ -33,14 +34,16 @@ public final class ChannelRecyclerAdapter extends RecyclerView.Adapter<ChannelRe
 	}
 
 	@Override
-	public final ChannelRecyclerViewHolder onCreateViewHolder(final ViewGroup parent, final int viewType) {
+	public final ChannelRecyclerViewHolder onCreateViewHolder(@NonNull final ViewGroup parent
+            , final int viewType) {
 		context = parent.getContext();
 		final View channelElement = LayoutInflater.from(parent.getContext()).inflate(R.layout.channel_element, parent, false);
 		return new ChannelRecyclerViewHolder(channelElement);
 	}
 
 	@Override
-	public final void onBindViewHolder(final ChannelRecyclerViewHolder holder, final int position) {
+	public final void onBindViewHolder(@NonNull final ChannelRecyclerViewHolder holder
+            , final int position) {
 		final Channel bindChannel = channels.get(position);
 
 		holder.getTitleChannel().setText(bindChannel.getTitle());
@@ -53,11 +56,14 @@ public final class ChannelRecyclerAdapter extends RecyclerView.Adapter<ChannelRe
 
 		if (!bindChannel.isRead()) {
 			holder.getTitleChannel().setTypeface(null, Typeface.BOLD);
-		}
+		} else {
+            holder.getTitleChannel().setTypeface(null, Typeface.NORMAL);
+        }
 
 		holder.itemView.setOnClickListener (new View.OnClickListener() {
 			@Override
-			public void onClick(final View v) {
+			public void onClick(@NonNull final View v) {
+                holder.getTitleChannel().setTypeface(null, Typeface.NORMAL);
 				if (!channels.get(holder.getAdapterPosition()).isRead()) {
                     RssChannelIntentService.start(RssChannelIntentService.getReadCurrentChannelKey()
                             , context, channels.get(holder.getAdapterPosition()), null);

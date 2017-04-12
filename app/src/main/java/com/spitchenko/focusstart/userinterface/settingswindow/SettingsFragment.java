@@ -2,10 +2,13 @@ package com.spitchenko.focusstart.userinterface.settingswindow;
 
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
+import android.support.annotation.Nullable;
 
 import com.spitchenko.focusstart.controller.settingswindow.SettingsFragmentController;
 
 import java.util.ArrayList;
+
+import lombok.NonNull;
 
 /**
  * Date: 21.03.17
@@ -18,14 +21,14 @@ public final class SettingsFragment extends PreferenceFragment {
     private SettingsFragmentController settingsFragmentController = new SettingsFragmentController(this);
 
 	@Override
-	public void onCreate(final Bundle savedInstanceState) {
+	public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addObserver(settingsFragmentController);
         notifyOnCreate();
 	}
 
 	@Override
-	public void onSaveInstanceState(final Bundle outState) {
+	public void onSaveInstanceState(@Nullable final Bundle outState) {
         removeObserver(settingsFragmentController);
         super.onSaveInstanceState(outState);
     }
@@ -38,13 +41,13 @@ public final class SettingsFragment extends PreferenceFragment {
         }
     }
 
-    private void addObserver(final SettingsFragmentController observer) {
+    private void addObserver(@NonNull final SettingsFragmentController observer) {
         if (!observers.contains(observer)) {
             observers.add(observer);
         }
     }
 
-    private void removeObserver(final SettingsFragmentController observer) {
+    private void removeObserver(@NonNull final SettingsFragmentController observer) {
         if (observers.contains(observer)) {
             observers.remove(observer);
         }

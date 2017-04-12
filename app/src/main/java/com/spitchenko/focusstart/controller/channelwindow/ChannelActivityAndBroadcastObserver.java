@@ -1,6 +1,8 @@
 package com.spitchenko.focusstart.controller.channelwindow;
 
+import android.app.FragmentManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -15,10 +17,17 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.spitchenko.focusstart.R;
 import com.spitchenko.focusstart.controller.ActivityAndBroadcastObserver;
+import com.spitchenko.focusstart.controller.BaseActivityController;
+import com.spitchenko.focusstart.controller.KitkatHackController;
+import com.spitchenko.focusstart.controller.NetworkDialogShowController;
+import com.spitchenko.focusstart.controller.UpdateController;
+import com.spitchenko.focusstart.controller.VersionAndroidComparator;
 import com.spitchenko.focusstart.model.Channel;
 import com.spitchenko.focusstart.userinterface.base.ChannelRecyclerEmptyAdapter;
 import com.spitchenko.focusstart.userinterface.base.NoInternetDialog;
@@ -36,11 +45,14 @@ import lombok.NonNull;
  *
  * @author anatoliy
  */
-public class ChannelActivityAndBroadcastObserver implements ActivityAndBroadcastObserver {
+public final class ChannelActivityAndBroadcastObserver extends BaseActivityController
+        implements ActivityAndBroadcastObserver {
     private final static String CHANNEL_BROADCAST_OBSERVER
             = "com.spitchenko.focusstart.controller.channel_window.ChannelActivityAndBroadcastObserver";
     private final static String RECYCLER_STATE = CHANNEL_BROADCAST_OBSERVER + ".recyclerState";
     private final static String UPDATE = CHANNEL_BROADCAST_OBSERVER + ".update";
+    private final static String REFRESHING = CHANNEL_BROADCAST_OBSERVER + ".refreshing";
+    private final static String LOCAL_THEME = CHANNEL_BROADCAST_OBSERVER + ".localTHeme";
 
     private final ChannelBroadcastReceiver channelBroadcastReceiver = new ChannelBroadcastReceiver();
     private LocalBroadcastManager localBroadcastManager;
@@ -50,7 +62,11 @@ public class ChannelActivityAndBroadcastObserver implements ActivityAndBroadcast
     private Parcelable recyclerState;
     private boolean isUpdate;
     private final ArrayList<Channel> receivedChannels = new ArrayList<>();
-    private int recyclerScroll = 0;
+    private UpdateController updateController;
+    private NetworkDialogShowController networkDialogShowController;
+    private KitkatHackController kitkatHackController;
+    private LinearLayout stubLayout;
+    private ProgressBar progressBar;
 
     public ChannelActivityAndBroadcastObserver(final AppCompatActivity context) {
         this.activity = context;
@@ -62,6 +78,7 @@ public class ChannelActivityAndBroadcastObserver implements ActivityAndBroadcast
             isUpdate = true;
         }
 
+        setThemeFromPrefs(activity);
         activity.setContentView(R.layout.activity_channel);
 
         final Toolbar toolbar = (Toolbar) activity.findViewById(R.id.activity_channel_toolbar);
@@ -71,16 +88,36 @@ public class ChannelActivityAndBroadcastObserver implements ActivityAndBroadcast
             activity.getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
 
-        recyclerView = (RecyclerView) activity.findViewById(R.id.activity_channel_recycler_view);
-        swipeRefreshLayout
-                = (SwipeRefreshLayout) activity.findViewById(R.id.activity_channel_swipe_refresh_layout);
-        final FloatingActionButton fab = (FloatingActionButton) activity.findViewById(R.id.fab);
+        final FloatingActionButton fab = (FloatingActionButton) activity
+                .findViewById(R.id.activity_channel_fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
                 showAddChannelDialog();
             }
         });
+
+        recyclerView = (RecyclerView) activity.findViewById(R.id.activity_channel_recycler_view);
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener(){
+            @Override
+            public void onScrolled(final RecyclerView recyclerView, final int dx, final int dy){
+                if (dy > 0 ||dy<0 && fab.isShown()) {
+                    fab.hide();
+                }
+            }
+
+            @Override
+            public void onScrollStateChanged(final RecyclerView recyclerView, final int newState) {
+
+                if (newState == RecyclerView.SCROLL_STATE_IDLE){
+                    fab.show();
+                }
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+        });
+
+        swipeRefreshLayout
+                = (SwipeRefreshLayout) activity.findViewById(R.id.activity_channel_swipe_refresh_layout);
 
         final ItemTouchHelper.SimpleCallback simpleItemTouchCallback
                 = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
@@ -113,11 +150,42 @@ public class ChannelActivityAndBroadcastObserver implements ActivityAndBroadcast
                         , activity, null, null);
             }
         });
+
+        stubLayout = (LinearLayout) activity.findViewById(R.id.activity_channel_stub);
+        progressBar = (ProgressBar) activity.findViewById(R.id.activity_channel_progressBar);
+
+        updateController = new UpdateController(activity);
+        updateController.turnOnUpdate();
+
+        networkDialogShowController = new NetworkDialogShowController(activity);
+
+        if (VersionAndroidComparator.isAndroidOld()) {
+            kitkatHackController = new KitkatHackController(activity);
+        }
     }
 
     @Override
     public void updateOnResume() {
-        recyclerScroll = getRecyclerScrollFromPreferences();
+        if (readLocalThemeIdFromPrefs() != readThemeIdOrNullFromPrefs(activity)) {
+            activity.recreate();
+            if (VersionAndroidComparator.isAndroidOld()) {
+                kitkatHackController.turnOnHackController();
+            }
+            return;
+        }
+
+        subscribe();
+
+        if (updateController.isUpdate()) {
+
+            RssChannelIntentService.start(RssChannelIntentService.getReadChannelsKey(), activity, null
+                    , null);
+
+            updateController.turnOffUpdate();
+        }
+    }
+
+    private void subscribe() {
         localBroadcastManager = LocalBroadcastManager.getInstance(activity);
         final IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(ChannelBroadcastReceiver.getReceiveChannelsKey());
@@ -125,21 +193,44 @@ public class ChannelActivityAndBroadcastObserver implements ActivityAndBroadcast
         intentFilter.addAction(ChannelBroadcastReceiver.getRemoveAction());
         intentFilter.addAction(ChannelBroadcastReceiver.getIoExceptionAction());
         intentFilter.addAction(ChannelBroadcastReceiver.getNoInternetAction());
+        intentFilter.addAction(ChannelBroadcastReceiver.getLoadingAction());
+        intentFilter.addCategory(Intent.CATEGORY_DEFAULT);
         localBroadcastManager.registerReceiver(channelBroadcastReceiver, intentFilter);
-        channelBroadcastReceiver.addObserver(this);
 
-        RssChannelIntentService.start(RssChannelIntentService.getReadChannelsKey(), activity, null
-                , null);
+        channelBroadcastReceiver.addObserver(this);
     }
 
+
+    //В андроиде 4.4.4 и 5.0.0 этот метод зачем-то вызывается через цепочку activity.recreate
+    // -> onCreate() -> onResume() -> onPause()
+    // Для обработки этого состояния был создан класс KitkatHackController
     @Override
     public void updateOnPause() {
+        if (VersionAndroidComparator.isAndroidOld()) {
+            if (kitkatHackController.isHack() &&
+                    1 == kitkatHackController.getOnPauseSequence()) {
+                kitkatHackController.setNullOnPauseSequence();
+                kitkatHackController.turnOffHackController();
+            } else if (kitkatHackController.isHack()) {
+                unSubscribe();
+                kitkatHackController.onPauseSequenceIncrement();
+            } else {
+                unSubscribe();
+            }
+        } else {
+            unSubscribe();
+        }
+    }
+
+    private void unSubscribe() {
         localBroadcastManager.unregisterReceiver(channelBroadcastReceiver);
         channelBroadcastReceiver.removeObserver(this);
+        isUpdate = false;
     }
 
     @Override
-    public void updateOnReceiveItems(final ArrayList<?> items, final String action) {
+    public void updateOnReceiveItems(@NonNull final ArrayList<?> items
+            , @Nullable final String action) {
         receivedChannels.clear();
         receivedChannels.addAll(convertArrayListToChannelList(items));
         if (null == recyclerView.getLayoutManager()) {
@@ -147,36 +238,49 @@ public class ChannelActivityAndBroadcastObserver implements ActivityAndBroadcast
             recyclerView.setLayoutManager(layoutManager);
         }
         if (!receivedChannels.isEmpty()) {
-            final ChannelRecyclerAdapter channelAdapter = new ChannelRecyclerAdapter(receivedChannels);
+            stopLoading();
+            final ChannelRecyclerAdapter channelAdapter
+                    = new ChannelRecyclerAdapter(receivedChannels);
             recyclerView.setAdapter(channelAdapter);
 
             if (null != recyclerState) {
                 recyclerView.getLayoutManager().onRestoreInstanceState(recyclerState);
-            } else {
-                final RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
-                layoutManager.scrollToPosition(recyclerScroll);
             }
-
             if (isUpdate) {
                 checkUpdates(receivedChannels);
-                isUpdate = false;
             }
 
         } else {
+            stopLoading();
             recyclerView.setAdapter(new ChannelRecyclerEmptyAdapter());
         }
         if (null != action) {
             if (action.equals(ChannelBroadcastReceiver.getNoInternetAction())) {
+                stopLoading();
                 showNetworkDialog();
             } else if (action.equals(ChannelBroadcastReceiver.getIoExceptionAction())) {
-                final String toastContent = activity.getResources().getString(R.string.io_exception);
+                stopLoading();
+                final String toastContent = activity.getResources().getString(R.string.activity_channel_controller_io_exception);
                 Toast.makeText(activity, toastContent, Toast.LENGTH_LONG).show();
+            } else if (action.equals(ChannelBroadcastReceiver.getLoadingAction())) {
+                startLoading();
             }
         }
         swipeRefreshLayout.setRefreshing(false);
+        updateController.turnOffUpdate();
     }
 
-    private void checkUpdates(final ArrayList<Channel> receivedChannels) {
+    private void startLoading() {
+        stubLayout.setVisibility(View.VISIBLE);
+        progressBar.setVisibility(View.VISIBLE);
+    }
+
+    private void stopLoading() {
+        stubLayout.setVisibility(View.GONE);
+        progressBar.setVisibility(View.GONE);
+    }
+
+    private void checkUpdates(@NonNull final ArrayList<Channel> receivedChannels) {
         final SharedPreferences preferences
                 = RssChannelIntentService.getReadMessagesPreferences(activity);
         for (final Channel channel:receivedChannels) {
@@ -195,14 +299,23 @@ public class ChannelActivityAndBroadcastObserver implements ActivityAndBroadcast
     public void updateOnRestoreInstanceState(@Nullable final Bundle savedInstanceState) {
         if (null != savedInstanceState) {
             recyclerState = savedInstanceState.getParcelable(RECYCLER_STATE);
+            if (savedInstanceState.getBoolean(UPDATE)) {
+                swipeRefreshLayout.setRefreshing(true);
+            }
+            if (savedInstanceState.getBoolean(REFRESHING)) {
+                startLoading();
+            }
         }
     }
 
     @Override
-    public void updateOnSavedInstanceState(final Bundle outState) {
-        writeRecyclerScrollToPrefs();
+    public void updateOnSavedInstanceState(@NonNull final Bundle outState) {
         if (null != recyclerView && null != outState && null != recyclerView.getLayoutManager()) {
             outState.putParcelable(RECYCLER_STATE, recyclerView.getLayoutManager().onSaveInstanceState());
+            outState.putBoolean(UPDATE, swipeRefreshLayout.isRefreshing());
+            if (progressBar.isShown()) {
+                outState.putBoolean(REFRESHING, true);
+            }
         }
     }
 
@@ -224,11 +337,15 @@ public class ChannelActivityAndBroadcastObserver implements ActivityAndBroadcast
     }
 
     private void showNetworkDialog() {
-        final NoInternetDialog noInternetDialog = new NoInternetDialog();
-        final android.app.FragmentTransaction fragmentTransaction
-                = activity.getFragmentManager().beginTransaction();
-        fragmentTransaction.add(noInternetDialog, ChannelAddDialogFragment.getDialogFragmentTag());
-        fragmentTransaction.commitAllowingStateLoss();
+        if (!networkDialogShowController.isNetworkDialogShow()) {
+            final NoInternetDialog noInternetDialog = new NoInternetDialog();
+            final FragmentManager fragmentManager = activity.getFragmentManager();
+            final android.app.FragmentTransaction fragmentTransaction
+                    = fragmentManager.beginTransaction();
+            fragmentTransaction.add(noInternetDialog, NoInternetDialog.getNoInternetDialogKey());
+            fragmentTransaction.commitAllowingStateLoss();
+            networkDialogShowController.turnOnNetworkDialog();
+        }
     }
 
     private void showRefreshDialog(@NonNull final String url, @NonNull final String message) {
@@ -249,27 +366,23 @@ public class ChannelActivityAndBroadcastObserver implements ActivityAndBroadcast
         fragmentTransaction.commitAllowingStateLoss();
     }
 
-    private int getRecyclerScrollFromPreferences() {
-        final SharedPreferences sharedPreferences = activity.getSharedPreferences(RECYCLER_STATE
-                , Context.MODE_PRIVATE);
-        return sharedPreferences.getInt(RECYCLER_STATE, 0);
-    }
-
-    private void writeRecyclerScrollToPrefs() {
-        if (null != recyclerView) {
-            if (null != recyclerView.getLayoutManager()) {
-                final SharedPreferences sharedPreferences = activity.getSharedPreferences(RECYCLER_STATE,
-                        Context.MODE_PRIVATE);
-                final SharedPreferences.Editor editor = sharedPreferences.edit();
-                final LinearLayoutManager linearLayoutManager
-                        = (LinearLayoutManager) recyclerView.getLayoutManager();
-                editor.putInt(RECYCLER_STATE, linearLayoutManager.findFirstVisibleItemPosition());
-                editor.apply();
-            }
-        }
-    }
-
     public static String getUpdateKey() {
         return UPDATE;
+    }
+
+    @Override
+    protected void saveLocalThemeIdToPrefs(final int themeId) {
+        final SharedPreferences preferences
+                = activity.getSharedPreferences(LOCAL_THEME, Context.MODE_PRIVATE);
+        final SharedPreferences.Editor editor = preferences.edit();
+        editor.putInt(LOCAL_THEME, themeId);
+        editor.apply();
+    }
+
+    @Override
+    protected int readLocalThemeIdFromPrefs() {
+        final SharedPreferences preferences
+                = activity.getSharedPreferences(LOCAL_THEME, Context.MODE_PRIVATE);
+        return preferences.getInt(LOCAL_THEME, 0);
     }
 }

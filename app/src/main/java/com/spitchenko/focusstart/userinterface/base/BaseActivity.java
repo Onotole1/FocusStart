@@ -69,30 +69,30 @@ public abstract class BaseActivity extends AppCompatActivity {
 	}
 
     @Override
-    protected void onRestoreInstanceState(final Bundle savedInstanceState) {
+    protected void onRestoreInstanceState(@Nullable final Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         notifyOnRestoreInstanceState(savedInstanceState);
     }
 
     @Override
-    protected void onSaveInstanceState(final Bundle outState) {
+    protected void onSaveInstanceState(@Nullable final Bundle outState) {
         super.onSaveInstanceState(outState);
         notifyOnSavedInstanceState(outState);
     }
 
-    protected void addObserver(final ActivityAndBroadcastObserver observer) {
+    protected void addObserver(@NonNull final ActivityAndBroadcastObserver observer) {
         if (!observers.contains(observer)) {
             observers.add(observer);
         }
     }
 
-    protected void removeObserver(final ActivityAndBroadcastObserver observer) {
+    protected void removeObserver(@NonNull final ActivityAndBroadcastObserver observer) {
         if (!observers.isEmpty()) {
             observers.remove(observer);
         }
     }
 
-    private void notifyOnCreate(final Bundle savedInstanceState) {
+    private void notifyOnCreate(@Nullable final Bundle savedInstanceState) {
         for (final ActivityAndBroadcastObserver observer:observers) {
             observer.updateOnCreate(savedInstanceState);
         }
@@ -104,13 +104,13 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
     }
 
-    private void notifyOnSavedInstanceState(final Bundle outState) {
+    private void notifyOnSavedInstanceState(@NonNull final Bundle outState) {
         for (final ActivityAndBroadcastObserver observer:observers) {
             observer.updateOnSavedInstanceState(outState);
         }
     }
 
-    private void notifyOnRestoreInstanceState(final Bundle savedInstanceState) {
+    private void notifyOnRestoreInstanceState(@NonNull final Bundle savedInstanceState) {
         for (final ActivityAndBroadcastObserver observer:observers) {
             observer.updateOnRestoreInstanceState(savedInstanceState);
         }

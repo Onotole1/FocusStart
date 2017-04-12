@@ -38,7 +38,7 @@
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentTop="true"
-                android:contentDescription="@string/channel_image_image_description"
+                android:contentDescription="@string/activity_channel_channel_image_image_description"
                 android:paddingRight="@dimen/padding_card_right"
                 android:paddingTop="@dimen/padding_card_top"
                 app:srcCompat="@drawable/ic_rss_feed_amber_50_36dp"

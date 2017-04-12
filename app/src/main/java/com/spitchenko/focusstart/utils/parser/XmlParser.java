@@ -9,6 +9,7 @@ import org.xmlpull.v1.XmlPullParserFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
 
 import lombok.NonNull;
 
@@ -19,9 +20,12 @@ import lombok.NonNull;
  * @author anatoliy
  */
 final class XmlParser {
+    private final static int MAX_DEPTH = 5;
+    private final static String XML_PULL_PARSER = "com.spitchenko.focusstart.utils.parser.XmlParser";
+    private final static String DEPTH_EXCEPTION = XML_PULL_PARSER + ".depthException";
 	private XmlPullParser xpp;
 
-	XmlParser(final String url) throws IOException, XmlPullParserException {
+	XmlParser(@NonNull final String url) throws IOException, XmlPullParserException {
         final XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
         factory.setNamespaceAware(true);
         xpp = factory.newPullParser();
@@ -41,21 +45,22 @@ final class XmlParser {
             final StringBuilder stringBuilder = new StringBuilder();
             while (eventType != XmlPullParser.END_DOCUMENT) {
 
-                if (eventType == XmlPullParser.START_TAG) {//Проверка на тип
-                    nextTag = new Tag(xpp.getName(), parent, xpp.getDepth());
+                if (eventType == XmlPullParser.START_TAG) {
+                    final int currentDepth = xpp.getDepth();
+                    nextTag = new Tag(xpp.getName(), parent, currentDepth);
                     if (null == parent) {
                         parent = nextTag;
-                    } else if (xpp.getDepth() > depth) {
+                    } else if (currentDepth > depth) {
                         parent.children.add(nextTag);
                         parent = nextTag;
-                    } else if (xpp.getDepth() < depth) {
-                        while (xpp.getDepth() - parent.getDepth() != 1) {
+                    } else if (currentDepth < depth) {
+                        while (currentDepth - parent.getDepth() != 1) {
                             parent = parent.parent;
                         }
                         nextTag.setParent(parent);
                         parent.children.add(nextTag);
                         parent = nextTag;
-                    } else if (xpp.getDepth() == depth) {
+                    } else if (currentDepth == depth) {
                         if (parent.getDepth() == nextTag.getDepth()) {
                             parent = parent.parent;
                             nextTag.setParent(parent);
@@ -75,16 +80,17 @@ final class XmlParser {
                 } else if (eventType == XmlPullParser.ENTITY_REF && null != xpp.getText() && null != nextTag) {
                     if (null != xpp.getText()) {
                         stringBuilder.append(xpp.getText());
-                        stringBuilder.append(xpp.getName());
-                        stringBuilder.append(";");
                     }
                 } else if (eventType == XmlPullParser.END_TAG) {
-                    if (null != nextTag && !stringBuilder.toString().isEmpty()) {
+                    if (null != nextTag && !stringBuilder.toString().trim().isEmpty()) {
                         nextTag.setText(stringBuilder.toString().trim());
                         stringBuilder.delete(0, stringBuilder.length());
                     }
                 }
                 eventType = xpp.nextToken();
+                if (depth > MAX_DEPTH) {
+                    throw new XmlPullParserException(DEPTH_EXCEPTION);
+                }
             }
 
             parent = getRoot(parent);
@@ -92,7 +98,7 @@ final class XmlParser {
         return parent;
     }
 
-	private InputStream getInputStream(final URL url) {
+	private InputStream getInputStream(@NonNull final URL url) {
 		try {
 			return url.openConnection().getInputStream();
 		} catch (final IOException e) {
@@ -102,39 +108,49 @@ final class XmlParser {
 	}
 
 	private Tag getRoot(@NonNull final Tag tag) {
-		Tag result = tag;
-		if (null != tag.getParent()) {
-			result = getRoot(tag.getParent());
-		}
-		return result;
+		Tag workingTag = tag;
+		while (null != workingTag.getParent()) {
+            workingTag = workingTag.getParent();
+        }
+		return workingTag;
 	}
 
-	String getValueTag(final String inputTag, final String parentTag, final Tag tag) {
+	String getValueTag(@NonNull final String inputTag, @NonNull final String parentTag
+            , @NonNull final Tag tag) {
 		final Tag parent = getCurrentTagByParent(parentTag, tag);
 		if (null != parent && null != parent.getChildren()) {
-			for (final Tag t : parent.getChildren()) {
-				if (t.getName().equals(inputTag)) {
-					return t.getText();
+			for (final Tag tagChild : parent.getChildren()) {
+				if (tagChild.getName().equals(inputTag)) {
+					return tagChild.getText();
 				}
 			}
 		}
 		return null;
 	}
 
-	Tag getCurrentTagByParent(final String inputTag, final Tag tag) {
-		Tag result = null;
-		if (inputTag.equals(tag.getName())) {
-			return tag;
-		} else {
-			for (final Tag t : tag.getChildren()) {
-				if (t.getName().equals(inputTag)) {
-					return t;
-				}
-			}
-			for (final Tag t : tag.getChildren()) {
-				result = getCurrentTagByParent(inputTag, t);
-			}
-		}
-		return result;
+	Tag getCurrentTagByParent(@NonNull final String inputTag, @NonNull final Tag tag) {
+        final ArrayList<Tag> tagsQueue = new ArrayList<>();
+        if (inputTag.equals(tag.getName())) {
+            return tag;
+        } else {
+            for (final Tag tagChild : tag.getChildren()) {
+                if (tagChild.getName().equals(inputTag)) {
+                    return tagChild;
+                } else {
+                    tagsQueue.add(tagChild);
+                }
+            }
+
+            for (final Tag tagFromQueue:tagsQueue) {
+                if (null != tagFromQueue.getChildren()) {
+                    for (final Tag childOfTagFromQueue:tagFromQueue.getChildren()) {
+                        if (childOfTagFromQueue.getName().equals(inputTag)) {
+                            return childOfTagFromQueue;
+                        }
+                    }
+                }
+            }
+        }
+        return null;
 	}
 }

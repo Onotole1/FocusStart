@@ -55,7 +55,7 @@ public final class ChannelItem implements Parcelable {
 	}
 
 	@Override
-	public void writeToParcel(final Parcel dest, final int flags) {
+	public void writeToParcel(@NonNull final Parcel dest, final int flags) {
 		dest.writeString(title);
 		dest.writeString(subtitle);
 		dest.writeSerializable(pubDate);
@@ -73,7 +73,7 @@ public final class ChannelItem implements Parcelable {
         return clone;
     }
 
-    public static Integer countMatches(final ArrayList<ChannelItem> input) {
+    public static Integer countMatches(@NonNull final ArrayList<ChannelItem> input) {
         Integer result = 0;
         final Iterator<ChannelItem> iterator = input.iterator();
         while (iterator.hasNext()) {

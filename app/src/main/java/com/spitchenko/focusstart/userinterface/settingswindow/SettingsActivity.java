@@ -8,6 +8,8 @@ import com.spitchenko.focusstart.controller.settingswindow.SettingsActivityContr
 
 import java.util.ArrayList;
 
+import lombok.NonNull;
+
 /**
  * Date: 23.03.17
  * Time: 9:29
@@ -19,32 +21,44 @@ public final class SettingsActivity extends AppCompatActivity {
     SettingsActivityController settingsActivityController = new SettingsActivityController(this);
 
 	@Override
-    protected void onCreate(@Nullable final Bundle savedInstanceState) {
+    protected final void onCreate(@Nullable final Bundle savedInstanceState) {
         addObserver(settingsActivityController);
 		super.onCreate(savedInstanceState);
         notifyOnCreate(savedInstanceState);
-        removeObserver(settingsActivityController);
 	}
 
     @Override
-	public boolean onSupportNavigateUp() {
+    protected final void onResume() {
+        super.onResume();
+        notifyOnResume();
+        removeObserver(settingsActivityController);
+    }
+
+    @Override
+	public final boolean onSupportNavigateUp() {
 		onBackPressed();
 		return true;
 	}
 
-	private void notifyOnCreate(final Bundle savedInstanceState) {
+	private void notifyOnCreate(@Nullable final Bundle savedInstanceState) {
         for (final SettingsActivityController controller: observers) {
             controller.updateOnCreate(savedInstanceState);
         }
     }
 
-	private void addObserver(final SettingsActivityController observer) {
+    private void notifyOnResume() {
+        for (final SettingsActivityController controller: observers) {
+            controller.updateOnResume();
+        }
+    }
+
+	private void addObserver(@NonNull final SettingsActivityController observer) {
         if (!observers.contains(observer)) {
             observers.add(observer);
         }
     }
 
-    private void removeObserver(final SettingsActivityController observer) {
+    private void removeObserver(@NonNull final SettingsActivityController observer) {
         if (observers.contains(observer)) {
             observers.remove(observer);
         }

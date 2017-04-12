@@ -41,7 +41,8 @@ public final class ChannelItemActivity extends BaseActivity {
         this.removeObserver(channelItemActivityAndBroadcastObserver);
 	}
 
-    public static void start(final String key, final String link, final Context context) {
+    public static void start(@NonNull final String key, @NonNull final String link
+            , @NonNull final Context context) {
         final Intent intentBrowser = new Intent(context, ChannelItemActivity.class);
         intentBrowser.putExtra(key, link);
         context.startActivity(intentBrowser);

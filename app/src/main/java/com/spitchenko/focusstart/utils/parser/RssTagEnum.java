@@ -1,5 +1,7 @@
 package com.spitchenko.focusstart.utils.parser;
 
+import lombok.NonNull;
+
 /**
  * Date: 26.02.17
  * Time: 16:45
@@ -22,7 +24,7 @@ final class RssTagEnum {
 
 		final String text;
 
-		RssTagEnumeration(final String text) {
+		RssTagEnumeration(@NonNull final String text) {
 			this.text = text;
 		}
 

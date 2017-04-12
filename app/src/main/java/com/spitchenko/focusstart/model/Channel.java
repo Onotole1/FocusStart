@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 
 /**
@@ -32,7 +33,7 @@ public final class Channel implements Parcelable {
 	}
 
 
-    private Channel(final Parcel in) {
+    private Channel(@NonNull final Parcel in) {
         title = in.readString();
         subtitle = in.readString();
         link = in.readString();
@@ -43,7 +44,7 @@ public final class Channel implements Parcelable {
 
     public static final Creator<Channel> CREATOR = new Creator<Channel>() {
         @Override
-        public Channel createFromParcel(final Parcel in) {
+        public Channel createFromParcel(@NonNull final Parcel in) {
             return new Channel(in);
         }
 
@@ -59,7 +60,7 @@ public final class Channel implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(final Parcel dest, final int flags) {
+    public void writeToParcel(@NonNull final Parcel dest, final int flags) {
         dest.writeString(title);
         dest.writeString(subtitle);
         dest.writeString(link);
