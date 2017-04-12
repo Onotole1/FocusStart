@@ -53,11 +53,14 @@ public final class ChannelRecyclerAdapter extends RecyclerView.Adapter<ChannelRe
 
 		if (!bindChannel.isRead()) {
 			holder.getTitleChannel().setTypeface(null, Typeface.BOLD);
-		}
+		} else {
+            holder.getTitleChannel().setTypeface(null, Typeface.NORMAL);
+        }
 
 		holder.itemView.setOnClickListener (new View.OnClickListener() {
 			@Override
 			public void onClick(final View v) {
+                holder.getTitleChannel().setTypeface(null, Typeface.NORMAL);
 				if (!channels.get(holder.getAdapterPosition()).isRead()) {
                     RssChannelIntentService.start(RssChannelIntentService.getReadCurrentChannelKey()
                             , context, channels.get(holder.getAdapterPosition()), null);

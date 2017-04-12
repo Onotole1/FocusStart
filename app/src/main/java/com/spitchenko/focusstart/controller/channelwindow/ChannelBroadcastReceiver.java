@@ -29,6 +29,7 @@ public final class ChannelBroadcastReceiver extends BroadcastReceiver {
     private final static String NO_INTERNET_ACTION = CHANNEL_BROADCAST_RECEIVER + ".noInet";
     private final static String IO_EXCEPTION_ACTION = CHANNEL_BROADCAST_RECEIVER + ".IOException";
     private static final String REMOVE_ACTION = CHANNEL_BROADCAST_RECEIVER + ".remove";
+    private static final String LOADING_ACTION = CHANNEL_BROADCAST_RECEIVER + ".load";
 
     private final ArrayList<ChannelActivityAndBroadcastObserver> observers = new ArrayList<>();
 	private final ArrayList<Channel> receivedChannels = new ArrayList<>();
@@ -66,6 +67,9 @@ public final class ChannelBroadcastReceiver extends BroadcastReceiver {
                 break;
             case IO_EXCEPTION_ACTION:
                 notifyObservers(IO_EXCEPTION_ACTION);
+                break;
+            case LOADING_ACTION:
+                notifyObservers(LOADING_ACTION);
                 break;
         }
 	}
@@ -135,11 +139,16 @@ public final class ChannelBroadcastReceiver extends BroadcastReceiver {
         return REMOVE_ACTION;
     }
 
+    public static String getLoadingAction() {
+        return LOADING_ACTION;
+    }
+
     public static void start(@Nullable final Parcelable extra, @NonNull final String action
             , @NonNull final String packageName, @NonNull final Context context) {
         final Intent broadcastIntent = new Intent();
         broadcastIntent.setAction(action);
         broadcastIntent.setPackage(packageName);
+        broadcastIntent.addCategory(Intent.CATEGORY_DEFAULT);
         if (null != extra) {
             broadcastIntent.putExtra(action, extra);
         }

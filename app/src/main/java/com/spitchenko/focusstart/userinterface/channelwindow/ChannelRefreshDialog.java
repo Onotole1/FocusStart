@@ -28,13 +28,13 @@ public final class ChannelRefreshDialog extends DialogFragment {
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setMessage(input.getString(MESSAGE))
-                .setPositiveButton(R.string.reload, new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.channel_refresh_dialog_reload_button, new DialogInterface.OnClickListener() {
                     public void onClick(final DialogInterface dialog, final int id) {
                         RssChannelIntentService.start(RssChannelIntentService.getRefreshCurrentChannelKey()
                                 , getActivity(), null, channelUrl);
                     }
                 })
-                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.dialog_cancel_button, new DialogInterface.OnClickListener() {
                     public void onClick(final DialogInterface dialog, final int id) {
 
                     }

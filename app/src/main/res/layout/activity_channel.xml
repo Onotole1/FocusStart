@@ -7,6 +7,12 @@
                 android:layout_height="match_parent"
                 tools:context=".userinterface.channelwindow.ChannelActivity">
 
+    <FrameLayout
+        android:id="@+id/activity_channel_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        />
+
     <android.support.design.widget.AppBarLayout
         android:id="@+id/activity_channel_app_bar"
         android:layout_width="match_parent"
@@ -38,8 +44,27 @@
             android:scrollbars="vertical"/>
     </android.support.v4.widget.SwipeRefreshLayout>
 
+    <ProgressBar
+        android:id="@+id/activity_channel_progressBar"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:indeterminate="true"
+        android:visibility="gone"/>
+
+    <LinearLayout
+        android:id="@+id/activity_channel_stub"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="true"
+        android:orientation="horizontal"
+        android:visibility="gone">
+    </LinearLayout>
+
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
+        android:id="@+id/activity_channel_fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
@@ -47,11 +72,6 @@
         android:layout_alignParentRight="true"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
-        app:backgroundTint="@color/colorPrimary"
         app:srcCompat="@android:drawable/ic_input_add"/>
 
-    <FrameLayout
-        android:id="@+id/activity_channel_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
 </RelativeLayout>

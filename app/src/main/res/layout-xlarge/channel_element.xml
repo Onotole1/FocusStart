@@ -22,14 +22,14 @@
                 android:id="@+id/channel_element_tittle_text_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_toLeftOf="@+id/channel_element_image_channel"
-                android:layout_toStartOf="@+id/channel_element_image_channel"
                 android:paddingLeft="@dimen/padding_card_left"
                 android:paddingRight="@dimen/padding_card_right"
                 android:paddingTop="@dimen/padding_card_top"
                 android:textSize="@dimen/title_text_size"
                 tools:ignore="RtlHardcoded"
-                tools:text="Яндекс.Новости: Главные новости"/>
+                tools:text="Яндекс.Новости: Главные новости"
+                android:layout_alignBottom="@+id/channel_element_image_channel"
+                android:layout_centerHorizontal="true"/>
 
             <ImageView
                 android:id="@+id/channel_element_image_channel"

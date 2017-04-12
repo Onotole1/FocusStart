@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="channel_element_subtitle_text_size">25sp</dimen>
+    <dimen name="channel_element_title_text_size">35sp</dimen>
+    <dimen name="channel_element_web_view_text_size">14sp</dimen>
+    <dimen name="date_text_size">20sp</dimen>
+    <dimen name="padding_card_left">32dp</dimen>
+    <dimen name="padding_card_right">32dp</dimen>
+    <dimen name="padding_card_top">48dp</dimen>
+    <dimen name="padding_card_bottom">32dp</dimen>
+    <dimen name="channel_element_image_size">100dp</dimen>
+    <dimen name="title_text_size">30sp</dimen>
+    <dimen name="subtitle_text_size">25sp</dimen>
+    <dimen name="image_channel_height">100dp</dimen>
+    <dimen name="image_channel_width">100dp</dimen>
+</resources>

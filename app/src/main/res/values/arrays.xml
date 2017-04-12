@@ -16,4 +16,12 @@
         <item>604800</item>
         <item>2592000</item>
     </string-array>
+    <string-array name="themes_entry">
+        <item>Светлая</item>
+        <item>Тёмная</item>
+    </string-array>
+    <string-array name="theme_entries_values">
+        <item>R.style.AppTheme</item>
+        <item>R.style.AppTheme.Dark</item>
+    </string-array>
 </resources>

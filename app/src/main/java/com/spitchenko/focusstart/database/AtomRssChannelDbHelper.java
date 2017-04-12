@@ -240,7 +240,9 @@ public final class AtomRssChannelDbHelper extends SQLiteOpenHelper {
 		}
 		channel.setLink(cursor.getString(cursor.getColumnIndex(ChannelEntry.CHANNEL_LINK)));
         final byte[] imageCode = cursor.getBlob(cursor.getColumnIndex(ChannelEntry.CHANNEL_IMAGE));
-		channel.setImage(BitmapFactory.decodeByteArray(imageCode, 0, imageCode.length));
+        if (null != imageCode) {
+            channel.setImage(BitmapFactory.decodeByteArray(imageCode, 0, imageCode.length));
+        }
 
 		final ArrayList<ChannelItem> channelItems =
 				readChannelItemsFromDb(cursor.getLong(cursor.getColumnIndex(ChannelEntry._ID)));

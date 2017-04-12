@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebSettings;
 import android.widget.Toast;
 
 import com.spitchenko.focusstart.R;
@@ -31,33 +32,38 @@ import lombok.NonNull;
  * @author anatoliy
  */
 public final class ChannelItemRecyclerAdapter extends RecyclerView.Adapter<ChannelItemRecyclerViewHolder> {
-	private final ArrayList<ChannelItem> channelItems;
-	private Context context;
+    private final ArrayList<ChannelItem> channelItems;
+    private Context context;
     private SimpleDateFormat formatter = new SimpleDateFormat("HH:mm dd.MM.yyyy", Locale.ENGLISH);
 
-	public ChannelItemRecyclerAdapter(@NonNull final ArrayList<ChannelItem> channelItems) {
-		this.channelItems = channelItems;
-	}
+    public ChannelItemRecyclerAdapter(@NonNull final ArrayList<ChannelItem> channelItems) {
+        this.channelItems = channelItems;
+    }
 
-	@Override
-	public final ChannelItemRecyclerViewHolder onCreateViewHolder(final ViewGroup parent, final int viewType) {
-		context = parent.getContext();
-		final View channelElement = LayoutInflater.from(parent.getContext()).inflate(R.layout.channel_item_element, parent, false);
-		return new ChannelItemRecyclerViewHolder(channelElement);
-	}
+    @Override
+    public final ChannelItemRecyclerViewHolder onCreateViewHolder(final ViewGroup parent, final int viewType) {
+        context = parent.getContext();
+        final View channelElement = LayoutInflater.from(parent.getContext()).inflate(R.layout.channel_item_element, parent, false);
+        return new ChannelItemRecyclerViewHolder(channelElement);
+    }
 
-	@Override
-	public final void onBindViewHolder(@NonNull final ChannelItemRecyclerViewHolder holder
+    @Override
+    public final void onBindViewHolder(@NonNull final ChannelItemRecyclerViewHolder holder
             , final int position) {
-		final ChannelItem bindChannel = channelItems.get(position);
+        final ChannelItem bindChannel = channelItems.get(position);
 
-		holder.getTitleChannel().setText(bindChannel.getTitle());
+        holder.getTitleChannel().setText(bindChannel.getTitle());
         final String data = "<html><body style='margin:0;padding:0;'>" + bindChannel.getSubtitle()
                 + "</body></html>";
         final String head = "<head><meta name='viewport' content='target-densityDpi=device-dpi'/></head>";
         holder.getSubtitleChannel().loadDataWithBaseURL(null, head + data
                 , "text/html", Xml.Encoding.UTF_8.toString(), null);
-        holder.getSubtitleChannel().setScrollBarStyle(View.SCROLLBARS_OUTSIDE_OVERLAY);
+
+        final float fontSize
+                = context.getResources().getDimension(R.dimen.channel_element_web_view_text_size);
+        final WebSettings settings = holder.getSubtitleChannel().getSettings();
+        settings.setDefaultFontSize((int) fontSize);
+
         if (null != bindChannel.getPubDate()) {
             final long edtTime = bindChannel.getPubDate().getTime();
             final long timezoneAlteredTime = edtTime + Calendar.getInstance().getTimeZone().getRawOffset();
@@ -68,12 +74,15 @@ public final class ChannelItemRecyclerAdapter extends RecyclerView.Adapter<Chann
         }
 		if (!bindChannel.isRead()) {
 			holder.getTitleChannel().setTypeface(null, Typeface.BOLD);
-		}
+		} else {
+            holder.getTitleChannel().setTypeface(null, Typeface.NORMAL);
+        }
 
 		holder.itemView.setOnClickListener (new View.OnClickListener() {
 			@Override
 			public void onClick(@NonNull final View v) {
 				if (!channelItems.get(holder.getAdapterPosition()).isRead()) {
+                    holder.getTitleChannel().setTypeface(null, Typeface.NORMAL);
                     RssChannelItemIntentService.start(channelItems.get(holder.getAdapterPosition())
                             , null
                             , RssChannelItemIntentService.getReadCurrentChannelKey(), context);
@@ -91,6 +100,7 @@ public final class ChannelItemRecyclerAdapter extends RecyclerView.Adapter<Chann
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_UP:
                         if (!channelItems.get(holder.getAdapterPosition()).isRead()) {
+                            holder.getTitleChannel().setTypeface(null, Typeface.NORMAL);
                             RssChannelItemIntentService.start(channelItems.get(holder.getAdapterPosition())
                                     , null
                                     , RssChannelItemIntentService.getReadCurrentChannelKey(), context);
@@ -101,7 +111,7 @@ public final class ChannelItemRecyclerAdapter extends RecyclerView.Adapter<Chann
                             context.startActivity(intent);
                         } catch (final ActivityNotFoundException e) {
                             Toast.makeText(v.getContext(), v.getContext()
-                                    .getString(R.string.browser_missing), Toast.LENGTH_SHORT).show();
+                                    .getString(R.string.channel_item_recycler_adapter_browser_missing), Toast.LENGTH_SHORT).show();
                         }
                         break;
                 }

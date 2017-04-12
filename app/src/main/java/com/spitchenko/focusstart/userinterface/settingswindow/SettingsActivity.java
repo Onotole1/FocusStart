@@ -23,8 +23,14 @@ public final class SettingsActivity extends AppCompatActivity {
         addObserver(settingsActivityController);
 		super.onCreate(savedInstanceState);
         notifyOnCreate(savedInstanceState);
-        removeObserver(settingsActivityController);
 	}
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        notifyOnResume();
+        removeObserver(settingsActivityController);
+    }
 
     @Override
 	public boolean onSupportNavigateUp() {
@@ -35,6 +41,12 @@ public final class SettingsActivity extends AppCompatActivity {
 	private void notifyOnCreate(final Bundle savedInstanceState) {
         for (final SettingsActivityController controller: observers) {
             controller.updateOnCreate(savedInstanceState);
+        }
+    }
+
+    private void notifyOnResume() {
+        for (final SettingsActivityController controller: observers) {
+            controller.updateOnResume();
         }
     }
 

@@ -1,18 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 	xmlns:android="http://schemas.android.com/apk/res/android">
-	<PreferenceCategory android:title="@string/check_updates">
+	<PreferenceCategory android:title="@string/settings_fragment_check_updates">
 		<CheckBoxPreference
-			android:key="@string/notification_checkbox"
-			android:summary="@string/turn_on_notifications"
-			android:title="@string/notifications" />
+			android:key="@string/settings_fragment_notification_checkbox"
+			android:summary="@string/settings_fragment_turn_on_notifications"
+			android:title="@string/settings_fragment_notifications" />
 		<ListPreference
-            android:dependency="@string/notification_checkbox"
-			android:key="@string/notifications_list"
-			android:title="@string/period"
-            android:dialogTitle="@string/notifications_list_dialog"
+            android:dependency="@string/settings_fragment_notification_checkbox"
+			android:key="@string/settings_fragment_notifications_list"
+			android:title="@string/settings_fragment_notification_list_title"
+            android:dialogTitle="@string/settings_fragment_notifications_list_dialog"
             android:entries="@array/notifications_entries"
             android:entryValues="@array/notifications_entries_values_seconds"
-            android:defaultValue="@string/notifications_entries_default_value"/>
+            android:defaultValue="@string/settings_fragment_notifications_entries_default_value"/>
+        <ListPreference
+            android:key="@string/settings_fragment_theme_list"
+            android:title="@string/settings_fragment_theme_list_title"
+            android:dialogTitle="@string/settings_fragment_theme_list_dialog"
+            android:entries="@array/themes_entry"
+            android:entryValues="@array/theme_entries_values"
+            android:defaultValue="@string/settings_fragment_theme_list_default_value"
+            />
 	</PreferenceCategory>
 </PreferenceScreen>

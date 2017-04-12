@@ -17,6 +17,7 @@ final class AtomTagEnum {
 		UPDATED("updated"),
 		TITLE("title"),
 		SUBTITLE("subtitle"),
+        CONTENT("content"),
 		DATE_PATTERN("yyyy-MM-dd'T'HH:mm:ssZ");
 
 		final String text;

@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.annotation.Nullable;
 
+import com.spitchenko.focusstart.controller.UpdateController;
 import com.spitchenko.focusstart.database.AtomRssChannelDbHelper;
 import com.spitchenko.focusstart.database.AtomRssDataBase;
 import com.spitchenko.focusstart.model.Channel;
@@ -33,12 +34,17 @@ public final class RssChannelItemIntentService extends IntentService {
 	private final static String READ_CHANNELS = NAME_ITEM_SERVICE + ".channelsDb";
     private final static String REFRESH_CHANNEL_ITEMS = NAME_ITEM_SERVICE + ".refresh";
 
+    private UpdateController updateController;
+
 	public RssChannelItemIntentService() {
 		super(NAME_ITEM_SERVICE);
 	}
 
 	@Override
 	protected final void onHandleIntent(@Nullable final Intent intent) {
+        if (null == updateController) {
+            updateController = new UpdateController(this);
+        }
 		if (null != intent) {
             switch (intent.getAction()) {
                 case READ_CHANNELS:
@@ -82,6 +88,7 @@ public final class RssChannelItemIntentService extends IntentService {
                         atomRssDbHelper.deleteChannelFromDb(readableChannel);
                         atomRssDbHelper.writeChannelToDb(readableChannel);
                     }
+                    updateController.turnOnUpdate();
                 }
                 final Channel result = atomRssDbHelper.readChannelFromDb(channelFromDb.getLink());
                 if (null != result) {

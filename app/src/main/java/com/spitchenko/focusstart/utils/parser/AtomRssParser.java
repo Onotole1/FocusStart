@@ -143,26 +143,32 @@ public final class AtomRssParser {
 
 		final Tag channel = xmlParser.getCurrentTagByParent(AtomTagEnum.AtomTags.FEED.text, tag);
 
-		for (final Tag t:channel.getChildren()) {
-			ChannelItem channelItem = null;
-			if (t.getName().equals(AtomTagEnum.AtomTags.ENTRY.text)) {
-				channelItem = new ChannelItem();
-				for (final Tag t1:t.getChildren()) {
-					if (t1.getName().equals(AtomTagEnum.AtomTags.TITLE.text)) {
-						channelItem.setTitle(t1.getText());
-					} else if (t1.getName().equals(AtomTagEnum.AtomTags.LINK.text)) {
-						channelItem.setLink(t1.getAttributes().get(AtomTagEnum.AtomTags.LINK_HREF.text));
-					} else if (t1.getName().equals(AtomTagEnum.AtomTags.PUBLISHED.text)) {
-						channelItem.setSubtitle(t1.getText());
-					} else if (t1.getName().equals(AtomTagEnum.AtomTags.UPDATED.text)) {
-						channelItem.setPubDate(parseAtomRssDate(t1.getText(), AtomTagEnum.AtomTags.DATE_PATTERN.text));
-					}
-				}
-			}
-			if (null != channelItem) {
-				channelItems.add(channelItem);
-			}
-		}
+        if (null != channel) {
+            for (final Tag t : channel.getChildren()) {
+                ChannelItem channelItem = null;
+                if (t.getName().equals(AtomTagEnum.AtomTags.ENTRY.text)) {
+                    channelItem = new ChannelItem();
+                    for (final Tag t1 : t.getChildren()) {
+                        if (t1.getName().equals(AtomTagEnum.AtomTags.TITLE.text)) {
+                            channelItem.setTitle(t1.getText());
+                        } else if (t1.getName().equals(AtomTagEnum.AtomTags.LINK.text)) {
+                            channelItem.setLink(t1.getAttributes().get(AtomTagEnum.AtomTags
+                                    .LINK_HREF.text));
+                        } else if (t1.getName().equals(AtomTagEnum.AtomTags.PUBLISHED.text)) {
+                            channelItem.setSubtitle(t1.getText());
+                        } else if (t1.getName().equals(AtomTagEnum.AtomTags.CONTENT.text)) {
+                            channelItem.setSubtitle(t1.getText());
+                        } else if (t1.getName().equals(AtomTagEnum.AtomTags.UPDATED.text)) {
+                            channelItem.setPubDate(parseAtomRssDate(t1.getText(), AtomTagEnum
+                                    .AtomTags.DATE_PATTERN.text));
+                        }
+                    }
+                }
+                if (null != channelItem) {
+                    channelItems.add(channelItem);
+                }
+            }
+        }
 		return channelItems;
 	}
 }

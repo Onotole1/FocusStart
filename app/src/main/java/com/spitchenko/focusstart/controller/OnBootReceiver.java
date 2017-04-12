@@ -22,7 +22,7 @@ public final class OnBootReceiver extends BroadcastReceiver {
         || intent.getAction().equals(Intent.ACTION_PACKAGE_RESTARTED)) {
             final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
             if (sharedPreferences.getBoolean(context.getResources()
-                    .getString(R.string.notification_checkbox), false)) {
+                    .getString(R.string.settings_fragment_notification_checkbox), false)) {
                 final AlarmController alarmController = new AlarmController(context);
                 alarmController.restartAlarm();
             }

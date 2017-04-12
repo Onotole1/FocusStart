@@ -39,13 +39,13 @@ public final class ChannelAddDialogFragment extends DialogFragment {
         final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         final LayoutInflater inflater = getActivity().getLayoutInflater();
         final View promptsView = inflater.inflate(R.layout.add_channel_dialog, null);
-        final EditText userInput = (EditText) promptsView.findViewById(R.id.input_text);
+        final EditText userInput = (EditText) promptsView.findViewById(R.id.add_channel_dialog_input_edittext);
         final SharedPreferences sharedPreferences
                 = getActivity().getSharedPreferences(CHANNELS_PREFERENCES_KEY, Context.MODE_PRIVATE);
 
         readFromPreferences(sharedPreferences, userInput);
         builder.setView(promptsView)
-                .setPositiveButton(R.string.add, new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.channel_add_dialog_add_button, new DialogInterface.OnClickListener() {
                     public void onClick(final DialogInterface dialog, final int id) {
                         writeToPreferences(userInput.getText().toString(), sharedPreferences);
 
@@ -54,7 +54,7 @@ public final class ChannelAddDialogFragment extends DialogFragment {
                                 , userInput.getText().toString());
                     }
                 })
-                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.dialog_cancel_button, new DialogInterface.OnClickListener() {
                     public void onClick(final DialogInterface dialog, final int id) {
                         writeToPreferences(userInput.getText().toString(), sharedPreferences);
                     }

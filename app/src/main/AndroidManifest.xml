@@ -2,7 +2,7 @@
 <manifest package="com.spitchenko.focusstart"
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:tools="http://schemas.android.com/tools">
-	
+	<!-- Зарегистрировать как оработчик URL-->'
 	<uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 	
