@@ -97,6 +97,8 @@ public final class RssChannelIntentService extends IntentService {
     }
 
     private void refreshCurrentChannel(@NonNull final Intent intent) {
+        ChannelBroadcastReceiver.start(null, ChannelBroadcastReceiver.getLoadingAction()
+                , getPackageName(), this);
         final AtomRssChannelDbHelper channelDbHelper = new AtomRssChannelDbHelper(this);
         final AtomRssParser atomRssParser = new AtomRssParser();
         final String inputUrl = formatHttp(intent.getStringExtra(REFRESH_CURRENT_CHANNEL));
