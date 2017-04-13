@@ -1,4 +1,4 @@
-package com.spitchenko.focusstart.userinterface.base;
+package com.spitchenko.focusstart.controller;
 
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -10,7 +10,6 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 
 import com.spitchenko.focusstart.R;
-import com.spitchenko.focusstart.controller.NetworkDialogShowController;
 
 /**
  * Date: 26.03.17
@@ -20,7 +19,7 @@ import com.spitchenko.focusstart.controller.NetworkDialogShowController;
  */
 public final class NoInternetDialog extends DialogFragment {
     private static final String NO_INTERNET_DIALOG_KEY
-            = "com.spitchenko.focusstart.userinterface.base.NoInternetDialog";
+            = "com.spitchenko.focusstart.controller.NoInternetDialog";
 
     @Override
     public final Dialog onCreateDialog(@Nullable final Bundle savedInstanceState) {

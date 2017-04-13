@@ -1,4 +1,4 @@
-package com.spitchenko.focusstart.userinterface.channelwindow;
+package com.spitchenko.focusstart.controller.channelwindow;
 
 import android.content.Context;
 import android.graphics.Typeface;
@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.spitchenko.focusstart.R;
-import com.spitchenko.focusstart.controller.channelwindow.RssChannelIntentService;
 import com.spitchenko.focusstart.model.Channel;
 import com.spitchenko.focusstart.userinterface.channellitemwindow.ChannelItemActivity;
 
@@ -25,11 +24,11 @@ import static com.spitchenko.focusstart.controller.channelitemwindow.ChannelItem
  *
  * @author anatoliy
  */
-public final class ChannelRecyclerAdapter extends RecyclerView.Adapter<ChannelRecyclerViewHolder> {
+final class ChannelRecyclerAdapter extends RecyclerView.Adapter<ChannelRecyclerViewHolder> {
 	private final @Getter ArrayList<Channel> channels;
 	private Context context;
 
-	public ChannelRecyclerAdapter(final ArrayList<Channel> channels) {
+	ChannelRecyclerAdapter(final ArrayList<Channel> channels) {
 		this.channels = channels;
 	}
 
@@ -79,7 +78,7 @@ public final class ChannelRecyclerAdapter extends RecyclerView.Adapter<ChannelRe
 		return channels == null ? 0 : channels.size();
 	}
 
-	public void removeItem(final int index) {
+	void removeItem(final int index) {
 		channels.remove(index);
 	}
 }

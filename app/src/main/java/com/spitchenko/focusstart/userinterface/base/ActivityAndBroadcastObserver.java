@@ -1,4 +1,4 @@
-package com.spitchenko.focusstart.controller;
+package com.spitchenko.focusstart.userinterface.base;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;

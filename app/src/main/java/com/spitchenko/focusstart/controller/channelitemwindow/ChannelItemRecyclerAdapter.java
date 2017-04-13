@@ -1,4 +1,4 @@
-package com.spitchenko.focusstart.userinterface.channellitemwindow;
+package com.spitchenko.focusstart.controller.channelitemwindow;
 
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -15,7 +15,6 @@ import android.webkit.WebSettings;
 import android.widget.Toast;
 
 import com.spitchenko.focusstart.R;
-import com.spitchenko.focusstart.controller.channelitemwindow.RssChannelItemIntentService;
 import com.spitchenko.focusstart.model.ChannelItem;
 
 import java.text.SimpleDateFormat;
@@ -31,12 +30,12 @@ import lombok.NonNull;
  *
  * @author anatoliy
  */
-public final class ChannelItemRecyclerAdapter extends RecyclerView.Adapter<ChannelItemRecyclerViewHolder> {
+final class ChannelItemRecyclerAdapter extends RecyclerView.Adapter<ChannelItemRecyclerViewHolder> {
     private final ArrayList<ChannelItem> channelItems;
     private Context context;
     private SimpleDateFormat formatter = new SimpleDateFormat("HH:mm dd.MM.yyyy", Locale.ENGLISH);
 
-    public ChannelItemRecyclerAdapter(@NonNull final ArrayList<ChannelItem> channelItems) {
+    ChannelItemRecyclerAdapter(@NonNull final ArrayList<ChannelItem> channelItems) {
         this.channelItems = channelItems;
     }
 

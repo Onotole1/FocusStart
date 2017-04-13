@@ -1,4 +1,4 @@
-package com.spitchenko.focusstart.userinterface.base;
+package com.spitchenko.focusstart.controller;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;

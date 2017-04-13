@@ -1,4 +1,4 @@
-package com.spitchenko.focusstart.userinterface.channellitemwindow;
+package com.spitchenko.focusstart.controller.channelitemwindow;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
