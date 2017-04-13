@@ -27,7 +27,7 @@ public class NetworkDialogShowController {
         editor.apply();
     }
 
-    public void turnOffNetworkDialog() {
+    void turnOffNetworkDialog() {
         final SharedPreferences.Editor editor = preferences.edit();
         editor.putBoolean(NETWORK_DIALOG_CONTROLLER, false);
         editor.apply();

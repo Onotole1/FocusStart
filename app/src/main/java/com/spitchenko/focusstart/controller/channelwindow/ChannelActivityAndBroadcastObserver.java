@@ -22,18 +22,15 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.spitchenko.focusstart.R;
-import com.spitchenko.focusstart.controller.ActivityAndBroadcastObserver;
 import com.spitchenko.focusstart.controller.BaseActivityController;
+import com.spitchenko.focusstart.controller.ChannelRecyclerEmptyAdapter;
 import com.spitchenko.focusstart.controller.KitkatHackController;
 import com.spitchenko.focusstart.controller.NetworkDialogShowController;
+import com.spitchenko.focusstart.controller.NoInternetDialog;
 import com.spitchenko.focusstart.controller.UpdateController;
 import com.spitchenko.focusstart.controller.VersionAndroidComparator;
 import com.spitchenko.focusstart.model.Channel;
-import com.spitchenko.focusstart.userinterface.base.ChannelRecyclerEmptyAdapter;
-import com.spitchenko.focusstart.userinterface.base.NoInternetDialog;
-import com.spitchenko.focusstart.userinterface.channelwindow.ChannelAddDialogFragment;
-import com.spitchenko.focusstart.userinterface.channelwindow.ChannelRecyclerAdapter;
-import com.spitchenko.focusstart.userinterface.channelwindow.ChannelRefreshDialog;
+import com.spitchenko.focusstart.observer.ActivityAndBroadcastObserver;
 
 import java.util.ArrayList;
 
@@ -78,7 +75,12 @@ public final class ChannelActivityAndBroadcastObserver extends BaseActivityContr
             isUpdate = true;
         }
 
-        setThemeFromPrefs(activity);
+        if (activity.getIntent().getAction().equals(Intent.ACTION_VIEW)) {
+            showAddChannelDialog(activity.getIntent().getData().toString());
+        }
+
+
+            setThemeFromPrefs(activity);
         activity.setContentView(R.layout.activity_channel);
 
         final Toolbar toolbar = (Toolbar) activity.findViewById(R.id.activity_channel_toolbar);
@@ -93,7 +95,7 @@ public final class ChannelActivityAndBroadcastObserver extends BaseActivityContr
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
-                showAddChannelDialog();
+                showAddChannelDialog(null);
             }
         });
 
@@ -223,8 +225,10 @@ public final class ChannelActivityAndBroadcastObserver extends BaseActivityContr
     }
 
     private void unSubscribe() {
-        localBroadcastManager.unregisterReceiver(channelBroadcastReceiver);
-        channelBroadcastReceiver.removeObserver(this);
+        if (null != localBroadcastManager) {
+            localBroadcastManager.unregisterReceiver(channelBroadcastReceiver);
+            channelBroadcastReceiver.removeObserver(this);
+        }
         isUpdate = false;
     }
 
@@ -329,8 +333,13 @@ public final class ChannelActivityAndBroadcastObserver extends BaseActivityContr
         return result;
     }
 
-    private void showAddChannelDialog() {
+    private void showAddChannelDialog(@Nullable final String url) {
         final ChannelAddDialogFragment dialogFragment = new ChannelAddDialogFragment();
+        if (null != url) {
+            final Bundle addDialogBundle = new Bundle();
+            addDialogBundle.putString(ChannelAddDialogFragment.getChannelUrlKey(), url);
+            dialogFragment.setArguments(addDialogBundle);
+        }
         final android.app.FragmentTransaction fragmentTransaction = activity.getFragmentManager().beginTransaction();
         fragmentTransaction.add(dialogFragment, ChannelAddDialogFragment.getDialogFragmentTag());
         fragmentTransaction.commitAllowingStateLoss();
@@ -357,8 +366,8 @@ public final class ChannelActivityAndBroadcastObserver extends BaseActivityContr
 
         final ChannelRefreshDialog channelRefreshDialog = new ChannelRefreshDialog();
         final Bundle refreshBundle = new Bundle();
-        refreshBundle.putString(ChannelRefreshDialog.CHANNEL_URL, url);
-        refreshBundle.putString(ChannelRefreshDialog.MESSAGE, message);
+        refreshBundle.putString(ChannelRefreshDialog.getChannelUrlKey(), url);
+        refreshBundle.putString(ChannelRefreshDialog.getMessageKey(), message);
         channelRefreshDialog.setArguments(refreshBundle);
         final android.app.FragmentTransaction fragmentTransaction
                 = activity.getFragmentManager().beginTransaction();

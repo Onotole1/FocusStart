@@ -7,7 +7,7 @@ import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 
-import com.spitchenko.focusstart.controller.ActivityAndBroadcastObserver;
+import com.spitchenko.focusstart.observer.ActivityAndBroadcastObserver;
 import com.spitchenko.focusstart.model.Channel;
 
 import java.util.ArrayList;

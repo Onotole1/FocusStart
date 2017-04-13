@@ -1,4 +1,4 @@
-package com.spitchenko.focusstart.userinterface.channelwindow;
+package com.spitchenko.focusstart.controller.channelwindow;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
@@ -14,7 +14,6 @@ import android.view.View;
 import android.widget.EditText;
 
 import com.spitchenko.focusstart.R;
-import com.spitchenko.focusstart.controller.channelwindow.RssChannelIntentService;
 
 import lombok.NonNull;
 
@@ -25,8 +24,12 @@ import lombok.NonNull;
  * @author anatoliy
  */
 public final class ChannelAddDialogFragment extends DialogFragment {
-    private final static String DIALOG_FRAGMENT_TAG = "dialogTag";
-    private final static String CHANNELS_PREFERENCES_KEY = "channels_preferences";
+    private final static String CHANNEL_ADD_DIALOG
+            = "com.spitchenko.focusstart.controller.channelwindow.DialogFragment";
+    private final static String DIALOG_FRAGMENT_TAG = CHANNEL_ADD_DIALOG + ".dialogTag";
+    private final static String CHANNELS_PREFERENCES_KEY
+            = CHANNEL_ADD_DIALOG + "channels_preferences";
+    private final static String CHANNEL_URL = CHANNEL_ADD_DIALOG + ".channelUrl";
 
     @Override
     public void onDestroyView() {
@@ -46,7 +49,11 @@ public final class ChannelAddDialogFragment extends DialogFragment {
         final SharedPreferences sharedPreferences
                 = getActivity().getSharedPreferences(CHANNELS_PREFERENCES_KEY, Context.MODE_PRIVATE);
 
-        readFromPreferences(sharedPreferences, userInput);
+        if (null == getArguments()) {
+            readFromPreferences(sharedPreferences, userInput);
+        } else {
+            readFromBundle(getArguments(), userInput);
+        }
         builder.setView(promptsView)
                 .setPositiveButton(R.string.channel_add_dialog_add_button, new DialogInterface.OnClickListener() {
                     public void onClick(final DialogInterface dialog, final int id) {
@@ -79,7 +86,19 @@ public final class ChannelAddDialogFragment extends DialogFragment {
         editText.setSelection(sharedString.length());
     }
 
+    private void readFromBundle(@NonNull final Bundle arguments, @NonNull final EditText editText) {
+        final String channelUrl = arguments.getString(CHANNEL_URL);
+        if (null != channelUrl) {
+            editText.setText(channelUrl);
+            editText.setSelection(channelUrl.length());
+        }
+    }
+
     public static String getDialogFragmentTag() {
         return DIALOG_FRAGMENT_TAG;
+    }
+
+    public static String getChannelUrlKey() {
+        return CHANNEL_URL;
     }
 }

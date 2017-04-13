@@ -8,7 +8,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.spitchenko.focusstart.R;
-import com.spitchenko.focusstart.controller.ActivityAndBroadcastObserver;
+import com.spitchenko.focusstart.observer.ActivityAndBroadcastObserver;
 import com.spitchenko.focusstart.userinterface.settingswindow.SettingsActivity;
 
 import java.util.ArrayList;

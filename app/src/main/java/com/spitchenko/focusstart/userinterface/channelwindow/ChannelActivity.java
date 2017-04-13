@@ -6,13 +6,14 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 
 import com.spitchenko.focusstart.controller.channelwindow.ChannelActivityAndBroadcastObserver;
+import com.spitchenko.focusstart.observer.ActivityAndBroadcastObserver;
 import com.spitchenko.focusstart.userinterface.base.BaseActivity;
 
 import lombok.NonNull;
 
 public final class ChannelActivity extends BaseActivity {
 
-    private ChannelActivityAndBroadcastObserver channelActivityAndBroadcastObserver
+    private ActivityAndBroadcastObserver channelActivityAndBroadcastObserver
             = new ChannelActivityAndBroadcastObserver(this);
 
     @Override

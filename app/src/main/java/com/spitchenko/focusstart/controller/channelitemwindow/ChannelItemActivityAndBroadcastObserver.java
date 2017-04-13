@@ -15,17 +15,16 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 
 import com.spitchenko.focusstart.R;
-import com.spitchenko.focusstart.controller.ActivityAndBroadcastObserver;
+import com.spitchenko.focusstart.observer.ActivityAndBroadcastObserver;
 import com.spitchenko.focusstart.controller.BaseActivityController;
 import com.spitchenko.focusstart.controller.KitkatHackController;
 import com.spitchenko.focusstart.controller.NetworkDialogShowController;
 import com.spitchenko.focusstart.controller.UpdateController;
 import com.spitchenko.focusstart.controller.VersionAndroidComparator;
 import com.spitchenko.focusstart.model.ChannelItem;
-import com.spitchenko.focusstart.userinterface.base.ChannelRecyclerEmptyAdapter;
-import com.spitchenko.focusstart.userinterface.base.NoInternetDialog;
-import com.spitchenko.focusstart.userinterface.channellitemwindow.ChannelItemRecyclerAdapter;
-import com.spitchenko.focusstart.userinterface.channelwindow.ChannelAddDialogFragment;
+import com.spitchenko.focusstart.controller.ChannelRecyclerEmptyAdapter;
+import com.spitchenko.focusstart.controller.NoInternetDialog;
+import com.spitchenko.focusstart.controller.channelwindow.ChannelAddDialogFragment;
 
 import java.util.ArrayList;
 

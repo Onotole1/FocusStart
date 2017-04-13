@@ -15,6 +15,9 @@ import lombok.NonNull;
  * @author anatoliy
  */
 public abstract class BaseActivityController {
+    private static final String SEPARATOR = "\\.";
+    private static final String DOT = ".";
+    private static final int BEGIN_NAME_POSITION = 2;
     protected abstract void saveLocalThemeIdToPrefs(final int themeId);
 
     protected int readThemeIdOrNullFromPrefs(@NonNull final Context context) {
@@ -23,7 +26,7 @@ public abstract class BaseActivityController {
         final String themeIdString = preferences.getString(
                 context.getString(R.string.settings_fragment_theme_list), null);
         if (null != themeIdString) {
-            final String[] themeIdStringDotArray = themeIdString.split("\\.");
+            final String[] themeIdStringDotArray = themeIdString.split(SEPARATOR);
             if (themeIdStringDotArray.length > 1) {
                 final String resourceName = themeIdStringDotArray[1];
                 final String themeName = getThemeName(themeIdStringDotArray);
@@ -40,9 +43,9 @@ public abstract class BaseActivityController {
 
     private String getThemeName(@NonNull final String[] input) {
         final StringBuilder builder = new StringBuilder();
-        for (int i = 2; i < input.length; i++) {
-            if (i != 2) {
-                builder.append(".");
+        for (int i = BEGIN_NAME_POSITION; i < input.length; i++) {
+            if (i != BEGIN_NAME_POSITION) {
+                builder.append(DOT);
             }
             builder.append(input[i]);
         }
