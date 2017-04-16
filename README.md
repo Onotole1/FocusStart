@@ -20,29 +20,17 @@
 1. Разработать агрегатор новостей для Андроида. 
 Разработанное приложение получает данные по средствам протоколов RSS и Atom. Для однажды загруженного материала обеспечена его доступность при отсутствии подключения к интернету. Программа с заданной пользователем периодичностью проверяет обновления новостей. Реализована функции управления списком каналов: добавление, удаление, просмотр новостей данного канала.
 
-## Главный экран приложения: <br>
-
-</br>
+## Главный экран приложения:
 ![ScreenShot](https://github.com/Onotole1/FocusStart/blob/master/Screenshot%20from%202017-04-16%2015-04-59.png)
-## Добавление: <br>
-
-</br>
+## Добавление:
 ![ScreenShot](https://github.com/Onotole1/FocusStart/blob/master/Screenshot%20from%202017-04-16%2016-09-31.png)
-## Удаление: <br>
-
-</br>
+## Удаление:
 ![ScreenShot](https://github.com/Onotole1/FocusStart/blob/master/Screenshot%20from%202017-04-16%2016-09-42.png)
-## Экран настроек: <br>
-
-</br>
+## Экран настроек:
 ![ScreenShot](https://github.com/Onotole1/FocusStart/blob/master/Screenshot%20from%202017-04-16%2015-05-30.png)
-## Выбор периода проверки обновлений: <br>
-
-</br>
+## Выбор периода проверки обновлений:
 ![ScreenShot](https://github.com/Onotole1/FocusStart/blob/master/Screenshot%20from%202017-04-16%2015-05-23.png)
-## Диалоговое окно обнвления канала: <br>
-
-</br>
+## Диалоговое окно обнвления канала:
 ![ScreenShot](https://github.com/Onotole1/FocusStart/blob/master/Screenshot%20from%202017-04-16%2015-06-46.png)
 
 2. Требования к организации проекта
@@ -55,26 +43,12 @@
 
 Дополнительные задания
 1. Приложение локализовано на второй язык (английский).
-2. Реализована специальная вёрстка интерфейса для планшетов. <br>
-
-</br>
+2. Реализована специальная вёрстка интерфейса для планшетов.
 ![ScreenShot](https://github.com/Onotole1/FocusStart/blob/master/Screenshot%20from%202017-04-16%2015-25-11.png)
-<br>
-
-</br>
 ![ScreenShot](https://github.com/Onotole1/FocusStart/blob/master/Screenshot%20from%202017-04-16%2015-28-54.png)
 3. Уведомление пользователя о новостях выполнено через механизм «notifications».
-<br>
-
-</br>
 ![ScreenShot](https://github.com/Onotole1/FocusStart/blob/master/Screenshot%20from%202017-04-16%2015-06-39.png)
 4. Реализована дополнительная цветовая тема оформления интерфейса.
-<br>
-
-</br>
 ![ScreenShot](https://github.com/Onotole1/FocusStart/blob/master/Screenshot%20from%202017-04-16%2015-05-47.png)
 5. Идикация процесса выгрузки новых данных.
-<br>
-
-</br>
 ![ScreenShot](https://github.com/Onotole1/FocusStart/blob/master/Screenshot%20from%202017-04-16%2015-21-11.png)
