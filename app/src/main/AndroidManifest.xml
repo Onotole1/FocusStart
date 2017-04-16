@@ -1,34 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest package="com.spitchenko.focusstart"
-	xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:tools="http://schemas.android.com/tools">
-	<!-- Зарегистрировать как оработчик URL-->'
-	<uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-	
-	<application
-		android:allowBackup="true"
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:tools="http://schemas.android.com/tools"
+          package="com.spitchenko.focusstart">
+    <!-- Зарегистрировать как оработчик URL-->'
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+
+    <application
         android:name="com.spitchenko.focusstart.FocusStartApplication"
-		android:icon="@drawable/ic_rss_feed_amber_50_36dp"
-		android:label="@string/app_name"
-		android:supportsRtl="true"
-		android:theme="@android:style/Theme.Holo"
-		tools:ignore="AllowBackup,GoogleAppIndexingWarning">
-		<service android:name="com.spitchenko.focusstart.controller.channelwindow.RssChannelIntentService" />
-		<service android:name="com.spitchenko.focusstart.controller.channelitemwindow.RssChannelItemIntentService" />
-		
-		<activity
-			android:name="com.spitchenko.focusstart.userinterface.channelwindow.ChannelActivity"
-			android:theme="@style/AppTheme.NoActionBar"
+        android:allowBackup="true"
+        android:icon="@drawable/ic_rss_feed_amber_50_36dp"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@android:style/Theme.Holo"
+        tools:ignore="AllowBackup,GoogleAppIndexingWarning">
+        <service android:name=".channelwindow.controller.RssChannelIntentService"/>
+        <service android:name=".channelitemwindow.controller.RssChannelItemIntentService"/>
+
+        <activity
+            android:name=".channelwindow.view.ChannelActivity"
+            android:theme="@style/AppTheme.NoActionBar"
             >
-			<intent-filter>
-				<action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-			</intent-filter>
             <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
+
                 <data android:scheme="http"/>
                 <data android:scheme="https"/>
                 <data android:host="*"/>
@@ -38,9 +40,11 @@
             </intent-filter>
 
             <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.VIEW"/>
+
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
+
                 <data android:scheme="http"/>
                 <data android:scheme="https"/>
                 <data android:mimeType="text/xml"/>
@@ -48,22 +52,24 @@
                 <data android:mimeType="application/atom+xml"/>
                 <data android:mimeType="application/xml"/>
             </intent-filter>
-		</activity>
-		<activity
-			android:name="com.spitchenko.focusstart.userinterface.channellitemwindow.ChannelItemActivity"
-			android:theme="@style/AppTheme.NoActionBar" />
-		<activity
-			android:name="com.spitchenko.focusstart.userinterface.settingswindow.SettingsActivity"
-			android:theme="@style/AppTheme.NoActionBar" />
+        </activity>
+        <activity
+            android:name=".channelitemwindow.view.ChannelItemActivity"
+            android:launchMode="singleInstance"
+            android:theme="@style/AppTheme.NoActionBar"/>
+        <activity
+            android:name=".settingswindow.view.SettingsActivity"
+            android:launchMode="singleInstance"
+            android:theme="@style/AppTheme.NoActionBar"/>
 
-        <receiver android:name="com.spitchenko.focusstart.controller.RefreshBroadcastReceiver"/>
-        <receiver android:name="com.spitchenko.focusstart.controller.OnBootReceiver">
+        <receiver android:name="com.spitchenko.focusstart.base.controller.RefreshBroadcastReceiver"/>
+        <receiver android:name="com.spitchenko.focusstart.base.controller.OnBootReceiver">
             <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
                 <action android:name="android.intent.action.PACKAGE_RESTARTED"/>
                 <action android:name="android.intent.action.PACKAGE_FIRST_LAUNCH"/>
             </intent-filter>
         </receiver>
-	</application>
+    </application>
 
 </manifest>

@@ -1,35 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="match_parent"
-	android:layout_height="match_parent"
-	android:orientation="vertical"
-	android:padding="@dimen/dialog_padding">
-	
-	<TextView
-		android:id="@+id/tv"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:text="@string/channel_add_dialog_add_url"
-		android:textAppearance="?android:attr/textAppearanceLarge" />
-	
-	<LinearLayout
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:orientation="horizontal">
-		
-		<TextView
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:text="@string/channel_add_dialog_add_channel_dialog_http_or_https_textview" />
-		
-		<EditText
-			android:id="@+id/add_channel_dialog_input_edittext"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:inputType="textUri">
-			
-			<requestFocus />
-		</EditText>
-	</LinearLayout>
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical"
+              android:padding="@dimen/dialog_padding">
+
+    <TextView
+        android:id="@+id/tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/channel_add_dialog_add_url"
+        android:textAppearance="?android:attr/textAppearanceLarge"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/channel_add_dialog_add_channel_dialog_http_or_https_textview"/>
+
+        <EditText
+            android:id="@+id/add_channel_dialog_input_edittext"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textUri">
+
+            <requestFocus/>
+        </EditText>
+    </LinearLayout>
 
 </LinearLayout>

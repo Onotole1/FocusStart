@@ -24,12 +24,13 @@ final class XmlParser {
     private final static String XML_PULL_PARSER = "com.spitchenko.focusstart.utils.parser.XmlParser";
     private final static String DEPTH_EXCEPTION = XML_PULL_PARSER + ".depthException";
 	private XmlPullParser xpp;
+    private InputStream inputStream;
 
 	XmlParser(@NonNull final String url) throws IOException, XmlPullParserException {
         final XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
         factory.setNamespaceAware(true);
         xpp = factory.newPullParser();
-        final InputStream inputStream = getInputStream(new URL(url));
+        inputStream = getInputStream(new URL(url));
         if (null != inputStream) {
             xpp.setInput(inputStream, null);
         } else {
@@ -95,6 +96,7 @@ final class XmlParser {
 
             parent = getRoot(parent);
 
+        inputStream.close();
         return parent;
     }
 
