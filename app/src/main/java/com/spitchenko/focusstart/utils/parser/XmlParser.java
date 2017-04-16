@@ -21,7 +21,8 @@ import lombok.NonNull;
  */
 final class XmlParser {
     private final static int MAX_DEPTH = 5;
-    private final static String XML_PULL_PARSER = "com.spitchenko.focusstart.utils.parser.XmlParser";
+    private final static String XML_PULL_PARSER
+            = "com.spitchenko.focusstart.utils.parser.XmlParser";
     private final static String DEPTH_EXCEPTION = XML_PULL_PARSER + ".depthException";
 	private XmlPullParser xpp;
     private InputStream inputStream;
@@ -70,7 +71,8 @@ final class XmlParser {
                         parent = nextTag;
                     }
                     for (int i = 0; i < xpp.getAttributeCount(); i++) {
-                        nextTag.getAttributes().put(xpp.getAttributeName(i), xpp.getAttributeValue(i));
+                        nextTag.getAttributes().put(xpp.getAttributeName(i)
+                                , xpp.getAttributeValue(i));
                     }
                     depth = xpp.getDepth();
                 } else if ((eventType == XmlPullParser.TEXT || eventType == XmlPullParser.CDSECT)
@@ -78,7 +80,8 @@ final class XmlParser {
                     if (null != xpp.getText()) {
                         stringBuilder.append(xpp.getText());
                     }
-                } else if (eventType == XmlPullParser.ENTITY_REF && null != xpp.getText() && null != nextTag) {
+                } else if (eventType == XmlPullParser.ENTITY_REF && null != xpp.getText()
+                        && null != nextTag) {
                     if (null != xpp.getText()) {
                         stringBuilder.append(xpp.getText());
                     }

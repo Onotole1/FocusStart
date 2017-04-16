@@ -10,15 +10,14 @@ import android.media.RingtoneManager;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
-import android.webkit.URLUtil;
 
 import com.spitchenko.focusstart.R;
 import com.spitchenko.focusstart.base.controller.UpdateController;
+import com.spitchenko.focusstart.channelwindow.view.ChannelActivity;
 import com.spitchenko.focusstart.database.AtomRssChannelDbHelper;
 import com.spitchenko.focusstart.database.AtomRssDataBase;
 import com.spitchenko.focusstart.model.Channel;
 import com.spitchenko.focusstart.model.ChannelItem;
-import com.spitchenko.focusstart.channelwindow.view.ChannelActivity;
 import com.spitchenko.focusstart.utils.logger.LogCatHandler;
 import com.spitchenko.focusstart.utils.parser.AtomRssParser;
 
@@ -54,6 +53,8 @@ public final class RssChannelIntentService extends IntentService {
     private final static String REFRESH_CURRENT_CHANNEL = NAME_CHANNEL_SERVICE + ".refreshCurrent";
     private final static String REFRESH_ALL_CHANNELS = NAME_CHANNEL_SERVICE + ".refreshAll";
     private final static int NOTIFICATION_ID = 100500;
+    private static final String HTTP = "http://";
+    private static final String HTTPS = "https://";
 
     private UpdateController updateController;
 
@@ -263,8 +264,9 @@ public final class RssChannelIntentService extends IntentService {
 
     private boolean checkConnection() {
         try {
-            final URL httpsLink = new URL("https://www.google.ru/");
-            final HttpURLConnection httpURLConnection = (HttpURLConnection) httpsLink.openConnection();
+            final URL httpsLink = new URL("HTTPS://www.google.ru/");
+            final HttpURLConnection httpURLConnection
+                    = (HttpURLConnection) httpsLink.openConnection();
             httpURLConnection.connect();
             if (HttpURLConnection.HTTP_OK == httpURLConnection.getResponseCode()) {
                 httpURLConnection.disconnect();
@@ -284,7 +286,8 @@ public final class RssChannelIntentService extends IntentService {
 		final Channel inputChannel = intent.getParcelableExtra(READ_CURRENT_CHANNEL);
 		if (!inputChannel.isRead()) {
 			final AtomRssChannelDbHelper channelDbHelper = new AtomRssChannelDbHelper(this);
-			channelDbHelper.updateValueFromDb(AtomRssDataBase.ChannelEntry.TABLE_NAME, AtomRssDataBase.ChannelEntry.CHANNEL_IS_READ
+			channelDbHelper.updateValueFromDb(AtomRssDataBase.ChannelEntry.TABLE_NAME
+                    , AtomRssDataBase.ChannelEntry.CHANNEL_IS_READ
 					, Long.toString(channelDbHelper.boolToLong(true))
 					, AtomRssDataBase.ChannelEntry.CHANNEL_LINK, inputChannel.getLink());
 			inputChannel.setRead(true);
@@ -303,32 +306,54 @@ public final class RssChannelIntentService extends IntentService {
 	}
 
 	private String formatHttp(@NonNull final String input) {
-        if (!URLUtil.isHttpUrl(input) || !URLUtil.isHttpsUrl(input)) {
+        if (!((input.startsWith(HTTP)) || (input.startsWith(HTTPS)))) {
             try {
-                final URL httpLink = new URL("http://" + input);
-                final URL httpsLink = new URL("https://" + input);
+                final URL httpLink = new URL(HTTP + input);
+                final URL httpsLink = new URL(HTTPS + input);
 
-                final HttpURLConnection httpURLConnection = (HttpURLConnection) httpLink.openConnection();
-                httpURLConnection.connect();
-                if (HttpURLConnection.HTTP_OK == httpURLConnection.getResponseCode()) {
-                    httpURLConnection.disconnect();
+                final HttpURLConnection httpUrlConnection
+                        = (HttpURLConnection) httpLink.openConnection();
+                httpUrlConnection.connect();
+                if (HttpURLConnection.HTTP_OK == httpUrlConnection.getResponseCode()) {
+                    httpUrlConnection.disconnect();
                     return httpLink.toString();
                 }
 
-                final HttpsURLConnection httpsURLConnection = (HttpsURLConnection) httpsLink.openConnection();
-                httpsURLConnection.connect();
-                if (HttpURLConnection.HTTP_OK == httpsURLConnection.getResponseCode()) {
-                    httpsURLConnection.disconnect();
+                final HttpsURLConnection httpsUrlConnection
+                        = (HttpsURLConnection) httpsLink.openConnection();
+                httpsUrlConnection.connect();
+                if (HttpURLConnection.HTTP_OK == httpsUrlConnection.getResponseCode()) {
+                    httpsUrlConnection.disconnect();
                     return httpsLink.toString();
                 }
 
-                httpURLConnection.disconnect();
-                httpsURLConnection.disconnect();
+                httpUrlConnection.disconnect();
+                httpsUrlConnection.disconnect();
+            } catch (final IOException e) {
+                LogCatHandler.publishInfoRecord(e.getMessage());
+            }
+        } else {
+            try {
+                final URL inputUrl = new URL(input);
+                final HttpURLConnection urlConnection
+                        = (HttpURLConnection) inputUrl.openConnection();
+
+                urlConnection.connect();
+                if (HttpURLConnection.HTTP_MOVED_TEMP == urlConnection.getResponseCode()
+                        || HttpURLConnection.HTTP_MOVED_PERM == urlConnection.getResponseCode()) {
+                    if (input.startsWith(HTTP)) {
+                        urlConnection.disconnect();
+                        return input.replace(HTTP, HTTPS);
+                    } else if (input.startsWith(HTTPS)) {
+                        urlConnection.disconnect();
+                        return input.replace(HTTPS, HTTP);
+                    }
+                }
             } catch (final IOException e) {
                 LogCatHandler.publishInfoRecord(e.getMessage());
             }
         }
-		return input;
+        return input;
 	}
 
     private String makeText(@NonNull final HashMap<Channel, Integer> input) {
