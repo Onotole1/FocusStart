@@ -36,7 +36,8 @@ final class ChannelRecyclerAdapter extends RecyclerView.Adapter<ChannelRecyclerV
 	public final ChannelRecyclerViewHolder onCreateViewHolder(@NonNull final ViewGroup parent
             , final int viewType) {
 		context = parent.getContext();
-		final View channelElement = LayoutInflater.from(parent.getContext()).inflate(R.layout.channel_element, parent, false);
+		final View channelElement = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.channel_element, parent, false);
 		return new ChannelRecyclerViewHolder(channelElement);
 	}
 

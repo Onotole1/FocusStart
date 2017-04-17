@@ -93,31 +93,36 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
 
     private void notifyOnCreate(@Nullable final Bundle savedInstanceState) {
-        for (final ActivityAndBroadcastObserver observer:observers) {
+        for (int i = 0, size = observers.size(); i < size; i++) {
+            final ActivityAndBroadcastObserver observer = observers.get(i);
             observer.updateOnCreate(savedInstanceState);
         }
     }
 
     private void notifyOnResume() {
-        for (final ActivityAndBroadcastObserver observer:observers) {
+        for (int i = 0, size = observers.size(); i < size; i++) {
+            final ActivityAndBroadcastObserver observer = observers.get(i);
             observer.updateOnResume();
         }
     }
 
     private void notifyOnSavedInstanceState(@NonNull final Bundle outState) {
-        for (final ActivityAndBroadcastObserver observer:observers) {
+        for (int i = 0, size = observers.size(); i < size; i++) {
+            final ActivityAndBroadcastObserver observer = observers.get(i);
             observer.updateOnSavedInstanceState(outState);
         }
     }
 
     private void notifyOnRestoreInstanceState(@NonNull final Bundle savedInstanceState) {
-        for (final ActivityAndBroadcastObserver observer:observers) {
+        for (int i = 0, size = observers.size(); i < size; i++) {
+            final ActivityAndBroadcastObserver observer = observers.get(i);
             observer.updateOnRestoreInstanceState(savedInstanceState);
         }
     }
 
     private void notifyOnPause() {
-        for (final ActivityAndBroadcastObserver observer:observers) {
+        for (int i = 0, size = observers.size(); i < size; i++) {
+            final ActivityAndBroadcastObserver observer = observers.get(i);
             observer.updateOnPause();
         }
     }

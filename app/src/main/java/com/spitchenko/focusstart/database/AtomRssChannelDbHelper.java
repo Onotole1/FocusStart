@@ -121,21 +121,26 @@ public final class AtomRssChannelDbHelper extends SQLiteOpenHelper {
 		final ArrayList<ChannelItem> channelItems = new ArrayList<>();
 		@Cleanup
 		final Cursor cursorChannelItem = sqLiteDatabase.rawQuery("SELECT *  FROM  "
-		                                                         + ChannelItemEntry.TABLE_NAME + " WHERE "
-		                                                         + ChannelEntry.CHANNEL_ID + "= '"
-		                                                         + channelId + "' ORDER BY "
+                + ChannelItemEntry.TABLE_NAME + " WHERE "
+                + ChannelEntry.CHANNEL_ID + "= '"
+                + channelId + "' ORDER BY "
                 + ChannelItemEntry._ID, null);
 		cursorChannelItem.moveToFirst();
         while (!cursorChannelItem.isAfterLast()) {
 			final ChannelItem channelItem = new ChannelItem();
-			final String channelItemPub = cursorChannelItem.getString(cursorChannelItem.getColumnIndex(ChannelItemEntry.CHANNEL_ITEM_PUB_DATE));
-			channelItem.setTitle(cursorChannelItem.getString(cursorChannelItem.getColumnIndex(ChannelItemEntry.CHANNEL_ITEM_TITLE)));
-			channelItem.setSubtitle(cursorChannelItem.getString(cursorChannelItem.getColumnIndex(ChannelItemEntry.CHANNEL_ITEM_SUBTITLE)));
-			channelItem.setLink(cursorChannelItem.getString(cursorChannelItem.getColumnIndex(ChannelItemEntry.CHANNEL_ITEM_LINK)));
+			final String channelItemPub = cursorChannelItem.getString(cursorChannelItem
+                    .getColumnIndex(ChannelItemEntry.CHANNEL_ITEM_PUB_DATE));
+			channelItem.setTitle(cursorChannelItem.getString(cursorChannelItem
+                    .getColumnIndex(ChannelItemEntry.CHANNEL_ITEM_TITLE)));
+			channelItem.setSubtitle(cursorChannelItem.getString(cursorChannelItem
+                    .getColumnIndex(ChannelItemEntry.CHANNEL_ITEM_SUBTITLE)));
+			channelItem.setLink(cursorChannelItem.getString(cursorChannelItem
+                    .getColumnIndex(ChannelItemEntry.CHANNEL_ITEM_LINK)));
 			if (null != channelItemPub) {
 				channelItem.setPubDate(new Date(channelItemPub));
 			}
-			channelItem.setRead(isLongBool(cursorChannelItem.getLong(cursorChannelItem.getColumnIndex(ChannelItemEntry.CHANNEL_ITEM_ISREAD))));
+			channelItem.setRead(isLongBool(cursorChannelItem.getLong(cursorChannelItem
+                    .getColumnIndex(ChannelItemEntry.CHANNEL_ITEM_ISREAD))));
 			channelItems.add(channelItem);
             cursorChannelItem.moveToNext();
 		}
@@ -166,25 +171,28 @@ public final class AtomRssChannelDbHelper extends SQLiteOpenHelper {
 
 		@Cleanup
 		final Cursor cursor = sqLiteDatabase.rawQuery("SELECT " + ChannelEntry._ID + "  FROM  "
-		                                              + ChannelEntry.TABLE_NAME + " WHERE "
-		                                              + ChannelEntry.CHANNEL_LINK + "= '"
-		                                              + channel.getLink() + "' ORDER BY "
-		                                              + ChannelEntry._ID + " DESC", null);
+                + ChannelEntry.TABLE_NAME + " WHERE "
+                + ChannelEntry.CHANNEL_LINK + "= '"
+                + channel.getLink() + "' ORDER BY "
+                + ChannelEntry._ID + " DESC", null);
 		cursor.moveToFirst();
 		final long id = cursor.getLong(cursor.getColumnIndex(ChannelEntry._ID));
 
-		for (final ChannelItem channelItem:channel.getChannelItems()) {
-			values.put(ChannelItemEntry.CHANNEL_ITEM_TITLE, channelItem.getTitle());
-			values.put(ChannelItemEntry.CHANNEL_ITEM_SUBTITLE, channelItem.getSubtitle());
-			values.put(ChannelItemEntry.CHANNEL_ITEM_LINK, channelItem.getLink());
-			if (null != channelItem.getPubDate()) {
-				values.put(ChannelItemEntry.CHANNEL_ITEM_PUB_DATE, channelItem.getPubDate().toString());
-			}
-			values.put(ChannelItemEntry.CHANNEL_ITEM_ISREAD, boolToLong(channelItem.isRead()));
-			values.put(ChannelEntry.CHANNEL_ID, id);
-			sqLiteDatabase.insert(ChannelItemEntry.TABLE_NAME, null, values);
-			values.clear();
-		}
+        final ArrayList<ChannelItem> channelItems = channel.getChannelItems();
+        for (int i = 0, size = channelItems.size(); i < size; i++) {
+            final ChannelItem channelItem = channelItems.get(i);
+            values.put(ChannelItemEntry.CHANNEL_ITEM_TITLE, channelItem.getTitle());
+            values.put(ChannelItemEntry.CHANNEL_ITEM_SUBTITLE, channelItem.getSubtitle());
+            values.put(ChannelItemEntry.CHANNEL_ITEM_LINK, channelItem.getLink());
+            if (null != channelItem.getPubDate()) {
+                values.put(ChannelItemEntry.CHANNEL_ITEM_PUB_DATE, channelItem.getPubDate()
+                        .toString());
+            }
+            values.put(ChannelItemEntry.CHANNEL_ITEM_ISREAD, boolToLong(channelItem.isRead()));
+            values.put(ChannelEntry.CHANNEL_ID, id);
+            sqLiteDatabase.insert(ChannelItemEntry.TABLE_NAME, null, values);
+            values.clear();
+        }
 	}
 
 	public final void deleteChannelFromDb(@NonNull final Channel channel) {
@@ -192,9 +200,9 @@ public final class AtomRssChannelDbHelper extends SQLiteOpenHelper {
 		final SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
 		@Cleanup
 		final Cursor cursor = sqLiteDatabase.rawQuery("SELECT " + ChannelEntry._ID + "  FROM  "
-		                                              + ChannelEntry.TABLE_NAME + " WHERE "
-		                                              + ChannelEntry.CHANNEL_LINK + "= '"
-		                                              + channel.getLink() + "'", null);
+                + ChannelEntry.TABLE_NAME + " WHERE "
+                + ChannelEntry.CHANNEL_LINK + "= '"
+                + channel.getLink() + "'", null);
 		cursor.moveToFirst();
 
         while (!cursor.isAfterLast()) {
@@ -215,7 +223,8 @@ public final class AtomRssChannelDbHelper extends SQLiteOpenHelper {
 
         while (!cursor.isAfterLast()) {
             final long id = cursor.getLong(cursor.getColumnIndex(ChannelItemEntry._ID));
-            sqLiteDatabase.delete(ChannelItemEntry.TABLE_NAME, ChannelItemEntry._ID + "= " + id, null);
+            sqLiteDatabase.delete(ChannelItemEntry.TABLE_NAME, ChannelItemEntry._ID + "= " + id
+                    , null);
             cursor.moveToNext();
         }
     }
@@ -225,16 +234,19 @@ public final class AtomRssChannelDbHelper extends SQLiteOpenHelper {
             , @NonNull final String whereColumn, @NonNull final String whereValue) {
 		@Cleanup
 		final SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
-		sqLiteDatabase.execSQL("UPDATE " + tableName + " SET " + columnValue + "=" + value + " WHERE " + whereColumn + "='" + whereValue + "'");
+		sqLiteDatabase.execSQL("UPDATE " + tableName + " SET " + columnValue + "=" + value
+                + " WHERE " + whereColumn + "='" + whereValue + "'");
 	}
 
 	private Channel readChannelFromCursor(@NonNull final Cursor cursor) {
 		final Channel channel = new Channel();
 		channel.setTitle(cursor.getString(cursor.getColumnIndex(ChannelEntry.CHANNEL_TITLE)));
 		channel.setSubtitle(cursor.getString(cursor.getColumnIndex(ChannelEntry.CHANNEL_SUBTITLE)));
-		channel.setRead(isLongBool(cursor.getLong(cursor.getColumnIndex(ChannelEntry.CHANNEL_IS_READ))));
+		channel.setRead(isLongBool(cursor.getLong(cursor.getColumnIndex(ChannelEntry
+                .CHANNEL_IS_READ))));
 		try {
-			channel.setLastBuildDate(new Date(cursor.getString(cursor.getColumnIndex(ChannelEntry.CHANNEL_BUILD_DATE))));
+			channel.setLastBuildDate(new Date(cursor.getString(cursor.getColumnIndex(ChannelEntry
+                    .CHANNEL_BUILD_DATE))));
 		} catch (final IllegalArgumentException e) {
             LogCatHandler.publishInfoRecord(e.getMessage());
 		}
@@ -261,10 +273,14 @@ public final class AtomRssChannelDbHelper extends SQLiteOpenHelper {
 
     public void refreshCurrentChannel(final Channel oldChannel, final Channel newChannel) {
         final ArrayList<ChannelItem> resultItems = new ArrayList<>();
-        for (final ChannelItem newItem:newChannel.getChannelItems()) {
+        final ArrayList<ChannelItem> itemsFromNewChannel = newChannel.getChannelItems();
+        for (int i = 0, size = itemsFromNewChannel.size(); i < size; i++) {
+            final ChannelItem newItem = itemsFromNewChannel.get(i);
             ChannelItem match = null;
-            for (final ChannelItem oldItem:oldChannel.getChannelItems()) {
-                if (oldItem.getLink().equals(newItem.getLink()) ) {
+            final ArrayList<ChannelItem> itemsFromOldChannel = oldChannel.getChannelItems();
+            for (int i1 = 0, size1 = itemsFromOldChannel.size(); i1 < size1; i1++) {
+                final ChannelItem oldItem = itemsFromOldChannel.get(i1);
+                if (oldItem.getLink().equals(newItem.getLink())) {
                     if (oldItem.isRead()) {
                         newItem.setRead(true);
                         match = newItem;

@@ -42,7 +42,8 @@ public class SettingsFragmentController {
                     , @NonNull final Object newValue) {
                 final int index = timeList.findIndexOfValue(newValue.toString());
                 if (index != -1) {
-                    alarmController.saveTimeSecondsToPreferences(Integer.parseInt(newValue.toString())
+                    alarmController.saveTimeSecondsToPreferences(Integer.parseInt(newValue
+                                    .toString())
                             , fragment.getActivity());
                     alarmController.restartAlarm();
                     timeList.setSummary(timeList.getEntries()[index]);

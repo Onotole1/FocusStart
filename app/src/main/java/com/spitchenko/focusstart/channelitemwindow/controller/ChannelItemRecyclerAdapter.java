@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
-import android.util.Xml;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -31,6 +30,10 @@ import lombok.NonNull;
  * @author anatoliy
  */
 final class ChannelItemRecyclerAdapter extends RecyclerView.Adapter<ChannelItemRecyclerViewHolder> {
+    private final static String ENCODING = "utf-8";
+    private final static String START_TAGS = "<html><body style='margin:0;padding:0;'>";
+    private final static String END_TAGS = "</body></html>";
+    private final static String MIME_TYPE = "text/html";
     private final ArrayList<ChannelItem> channelItems;
     private Context context;
     private SimpleDateFormat formatter = new SimpleDateFormat("HH:mm dd.MM.yyyy", Locale.ENGLISH);
@@ -53,15 +56,15 @@ final class ChannelItemRecyclerAdapter extends RecyclerView.Adapter<ChannelItemR
         final ChannelItem bindChannel = channelItems.get(position);
 
         holder.getTitleChannel().setText(bindChannel.getTitle());
-        final String data = "<html><body style='margin:0;padding:0;'>" + bindChannel.getSubtitle()
-                + "</body></html>";
-        final String head = "<head><meta name='viewport' content='target-densityDpi=device-dpi'/></head>";
-        holder.getSubtitleChannel().loadDataWithBaseURL(null, head + data
-                , "text/html", Xml.Encoding.UTF_8.toString(), null);
+        final String data = START_TAGS + bindChannel.getSubtitle()
+                + END_TAGS;
+        holder.getSubtitleChannel().loadDataWithBaseURL(null, data
+                , MIME_TYPE, ENCODING, null);
 
         final float fontSize
                 = context.getResources().getDimension(R.dimen.channel_element_web_view_text_size);
         final WebSettings settings = holder.getSubtitleChannel().getSettings();
+        settings.setDefaultTextEncodingName(ENCODING);
         settings.setDefaultFontSize((int) fontSize);
         holder.getSubtitleChannel().setScrollBarStyle(View.SCROLLBARS_OUTSIDE_OVERLAY);
 

@@ -41,13 +41,15 @@ public final class SettingsActivity extends AppCompatActivity {
 	}
 
 	private void notifyOnCreate(@Nullable final Bundle savedInstanceState) {
-        for (final SettingsActivityController controller: observers) {
+        for (int i = 0, size = observers.size(); i < size; i++) {
+            final SettingsActivityController controller = observers.get(i);
             controller.updateOnCreate(savedInstanceState);
         }
     }
 
     private void notifyOnResume() {
-        for (final SettingsActivityController controller: observers) {
+        for (int i = 0, size = observers.size(); i < size; i++) {
+            final SettingsActivityController controller = observers.get(i);
             controller.updateOnResume();
         }
     }

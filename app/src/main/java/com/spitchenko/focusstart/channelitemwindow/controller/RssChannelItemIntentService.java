@@ -29,7 +29,8 @@ import static com.spitchenko.focusstart.model.ChannelItem.countMatches;
  * @author anatoliy
  */
 public final class RssChannelItemIntentService extends IntentService {
-	private final static String NAME_ITEM_SERVICE = "com.spitchenko.focusstart.controller.channel_item_window.RssChannelItemIntentService";
+	private final static String NAME_ITEM_SERVICE
+            = "com.spitchenko.focusstart.controller.channel_item_window.RssChannelItemIntentService";
 	private final static String READ_CURRENT_CHANNEL = NAME_ITEM_SERVICE + ".readCurrentChannelDb";
 	private final static String READ_CHANNELS = NAME_ITEM_SERVICE + ".channelsDb";
     private final static String REFRESH_CHANNEL_ITEMS = NAME_ITEM_SERVICE + ".refresh";
@@ -73,10 +74,16 @@ public final class RssChannelItemIntentService extends IntentService {
                 final ArrayList<ChannelItem> itemsAll
                         = new ArrayList<>(channelFromDb.getChannelItems().size());
 
-                for (final ChannelItem item : channelFromDb.getChannelItems()) {
+                final ArrayList<ChannelItem> channelFromDbChannelItems = channelFromDb
+                        .getChannelItems();
+                for (int i = 0, size = channelFromDbChannelItems.size(); i < size; i++) {
+                    final ChannelItem item = channelFromDbChannelItems.get(i);
                     itemsAll.add(item.cloneChannelItem());
                 }
-                for (final ChannelItem item : channelFromUrl.getChannelItems()) {
+                final ArrayList<ChannelItem> channelFromUrlChannelItems = channelFromUrl
+                        .getChannelItems();
+                for (int i = 0, size = channelFromUrlChannelItems.size(); i < size; i++) {
+                    final ChannelItem item = channelFromUrlChannelItems.get(i);
                     itemsAll.add(item.cloneChannelItem());
                 }
 

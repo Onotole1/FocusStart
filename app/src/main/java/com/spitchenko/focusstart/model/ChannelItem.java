@@ -79,7 +79,8 @@ public final class ChannelItem implements Parcelable {
         while (iterator.hasNext()) {
             final ChannelItem current = iterator.next();
             iterator.remove();
-            for (final ChannelItem item:input) {
+            for (int i = 0, size = input.size(); i < size; i++) {
+                final ChannelItem item = input.get(i);
                 if (item.getLink().equals(current.getLink())) {
                     result++;
                 }

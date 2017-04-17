@@ -19,7 +19,8 @@ import lombok.NonNull;
  * @author anatoliy
  */
 public final class ChannelItemBroadcastReceiver extends BroadcastReceiver {
-	private final static String CHANNEL_ITEM_BROADCAST_RECEIVER = "com.spitchenko.focusstart.ChannelItemBroadcastReceiver";
+	private final static String CHANNEL_ITEM_BROADCAST_RECEIVER
+            = "com.spitchenko.focusstart.ChannelItemBroadcastReceiver";
     private final static String RECEIVE_CHANNEL_ITEMS = CHANNEL_ITEM_BROADCAST_RECEIVER + ".receive";
     private final static String NO_INTERNET_ACTION = CHANNEL_ITEM_BROADCAST_RECEIVER + ".noInet";
     private final static String CHANNEL_REFRESH = CHANNEL_ITEM_BROADCAST_RECEIVER + ".refresh";
@@ -53,9 +54,10 @@ public final class ChannelItemBroadcastReceiver extends BroadcastReceiver {
 	}
 
 	public void notifyObservers(@Nullable final String action) {
-		for (final ChannelItemActivityAndBroadcastObserver observer:observers) {
-			observer.updateOnReceiveItems(receivedChannels, action);
-		}
+        for (int i = 0, size = observers.size(); i < size; i++) {
+            final ChannelItemActivityAndBroadcastObserver observer = observers.get(i);
+            observer.updateOnReceiveItems(receivedChannels, action);
+        }
 	}
 
     public static String getNoInternetAction() {

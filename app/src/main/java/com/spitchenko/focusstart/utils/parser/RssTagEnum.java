@@ -20,7 +20,7 @@ final class RssTagEnum {
 		LAST_BUILD_DATE("lastBuildDate"),
 		PUB_DATE("pubDate"),
 		TITLE("title"),
-		DATE_PATTERN("dd MMM yyyy HH:mm:ss Z"); // 12 Mar 2017 10:07:58 +0300");
+		DATE_PATTERN("dd MMM yyyy HH:mm:ss Z");
 
 		final String text;
 

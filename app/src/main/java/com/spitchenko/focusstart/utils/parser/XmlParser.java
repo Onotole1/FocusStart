@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 
 import lombok.NonNull;
 
@@ -70,7 +71,7 @@ final class XmlParser {
                         parent.children.add(nextTag);
                         parent = nextTag;
                     }
-                    for (int i = 0; i < xpp.getAttributeCount(); i++) {
+                    for (int i = 0, size = xpp.getAttributeCount(); i < size; i++) {
                         nextTag.getAttributes().put(xpp.getAttributeName(i)
                                 , xpp.getAttributeValue(i));
                     }
@@ -124,11 +125,13 @@ final class XmlParser {
             , @NonNull final Tag tag) {
 		final Tag parent = getCurrentTagByParent(parentTag, tag);
 		if (null != parent && null != parent.getChildren()) {
-			for (final Tag tagChild : parent.getChildren()) {
-				if (tagChild.getName().equals(inputTag)) {
-					return tagChild.getText();
-				}
-			}
+            final List<Tag> children = parent.getChildren();
+            for (int i = 0, size = children.size(); i < size; i++) {
+                final Tag tagChild = children.get(i);
+                if (tagChild.getName().equals(inputTag)) {
+                    return tagChild.getText();
+                }
+            }
 		}
 		return null;
 	}
@@ -138,7 +141,9 @@ final class XmlParser {
         if (inputTag.equals(tag.getName())) {
             return tag;
         } else {
-            for (final Tag tagChild : tag.getChildren()) {
+            final List<Tag> children = tag.getChildren();
+            for (int i = 0, size = children.size(); i < size; i++) {
+                final Tag tagChild = children.get(i);
                 if (tagChild.getName().equals(inputTag)) {
                     return tagChild;
                 } else {
@@ -146,9 +151,12 @@ final class XmlParser {
                 }
             }
 
-            for (final Tag tagFromQueue:tagsQueue) {
+            for (int i = 0, size = tagsQueue.size(); i < size; i++) {
+                final Tag tagFromQueue = tagsQueue.get(i);
                 if (null != tagFromQueue.getChildren()) {
-                    for (final Tag childOfTagFromQueue:tagFromQueue.getChildren()) {
+                    final List<Tag> childrenOfTagFormQueue = tagFromQueue.getChildren();
+                    for (int j = 0, size1 = childrenOfTagFormQueue.size(); j < size1; j++) {
+                        final Tag childOfTagFromQueue = childrenOfTagFormQueue.get(j);
                         if (childOfTagFromQueue.getName().equals(inputTag)) {
                             return childOfTagFromQueue;
                         }

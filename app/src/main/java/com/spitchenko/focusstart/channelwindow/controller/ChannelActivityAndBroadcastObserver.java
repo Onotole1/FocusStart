@@ -43,7 +43,8 @@ import lombok.NonNull;
 public final class ChannelActivityAndBroadcastObserver extends BaseActivityController
         implements ActivityAndBroadcastObserver {
     private final static String CHANNEL_BROADCAST_OBSERVER
-            = "com.spitchenko.focusstart.controller.channel_window.ChannelActivityAndBroadcastObserver";
+            = "com.spitchenko.focusstart.controller.channel_window."
+            + "ChannelActivityAndBroadcastObserver";
     private final static String RECYCLER_STATE = CHANNEL_BROADCAST_OBSERVER + ".recyclerState";
     private final static String UPDATE = CHANNEL_BROADCAST_OBSERVER + ".update";
     private final static String REFRESHING = CHANNEL_BROADCAST_OBSERVER + ".refreshing";
@@ -266,7 +267,8 @@ public final class ChannelActivityAndBroadcastObserver extends BaseActivityContr
     private void checkUpdates(@NonNull final ArrayList<Channel> receivedChannels) {
         final SharedPreferences preferences
                 = RssChannelIntentService.getReadMessagesPreferences(activity);
-        for (final Channel channel:receivedChannels) {
+        for (int i = 0, size = receivedChannels.size(); i < size; i++) {
+            final Channel channel = receivedChannels.get(i);
             final String message = preferences.getString(channel.getLink(), null);
             if (null != message) {
                 showRefreshDialog(channel.getLink(), message);
@@ -310,7 +312,8 @@ public final class ChannelActivityAndBroadcastObserver extends BaseActivityContr
 
     private ArrayList<Channel> convertArrayListToChannelList(@NonNull final ArrayList<?> list) {
         final ArrayList<Channel> result = new ArrayList<>();
-        for (final Object object:list) {
+        for (int i = 0, size = list.size(); i < size; i++) {
+            final Object object = list.get(i);
             if (object instanceof Channel) {
                 result.add((Channel) object);
             }

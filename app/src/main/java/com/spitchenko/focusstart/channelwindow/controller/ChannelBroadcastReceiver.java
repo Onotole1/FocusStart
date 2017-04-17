@@ -22,7 +22,8 @@ import lombok.NonNull;
  * @author anatoliy
  */
 public final class ChannelBroadcastReceiver extends BroadcastReceiver {
-	private final static String CHANNEL_BROADCAST_RECEIVER = "com.spitchenko.focusstart.ChannelBroadcastReceiver";
+	private final static String CHANNEL_BROADCAST_RECEIVER
+            = "com.spitchenko.focusstart.ChannelBroadcastReceiver";
     private final static String RECEIVE_CHANNELS_KEY = CHANNEL_BROADCAST_RECEIVER + ".receive";
     private final static String REFRESH_DIALOG_KEY = CHANNEL_BROADCAST_RECEIVER + ".RefreshDialog";
     private final static String MESSAGE_KEY = CHANNEL_BROADCAST_RECEIVER + ".MessageKey";
@@ -86,20 +87,23 @@ public final class ChannelBroadcastReceiver extends BroadcastReceiver {
 	}
 
 	public void notifyObservers(@Nullable final String action) {
-		for (final ActivityAndBroadcastObserver observer:observers) {
-			observer.updateOnReceiveItems(receivedChannels, action);
-		}
+        for (int i = 0, size = observers.size(); i < size; i++) {
+            final ActivityAndBroadcastObserver observer = observers.get(i);
+            observer.updateOnReceiveItems(receivedChannels, action);
+        }
 	}
 
     public void notifyObserversUpdate() {
-        for (final ChannelActivityAndBroadcastObserver observer:observers) {
+        for (int i = 0, size = observers.size(); i < size; i++) {
+            final ChannelActivityAndBroadcastObserver observer = observers.get(i);
             observer.updateOnReceiveNotification();
         }
     }
 
     private boolean containsChannel(@NonNull final ArrayList<Channel> channels
             , @NonNull final Channel channel) {
-        for (final Channel received : channels) {
+        for (int i = 0, size = channels.size(); i < size; i++) {
+            final Channel received = channels.get(i);
             if (received.getLink().equals(channel.getLink())) {
                 channels.remove(received);
                 channels.add(channel);

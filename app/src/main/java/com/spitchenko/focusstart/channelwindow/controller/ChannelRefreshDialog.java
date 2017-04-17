@@ -30,7 +30,8 @@ public final class ChannelRefreshDialog extends DialogFragment {
         builder.setMessage(input.getString(MESSAGE))
                 .setPositiveButton(R.string.channel_refresh_dialog_reload_button, new DialogInterface.OnClickListener() {
                     public void onClick(final DialogInterface dialog, final int id) {
-                        RssChannelIntentService.start(RssChannelIntentService.getRefreshCurrentChannelKey()
+                        RssChannelIntentService.start(RssChannelIntentService
+                                        .getRefreshCurrentChannelKey()
                                 , getActivity(), null, channelUrl);
                     }
                 })

@@ -18,7 +18,8 @@ import lombok.NonNull;
  */
 public final class SettingsFragment extends PreferenceFragment {
     private ArrayList<SettingsFragmentController> observers = new ArrayList<>();
-    private SettingsFragmentController settingsFragmentController = new SettingsFragmentController(this);
+    private SettingsFragmentController settingsFragmentController
+            = new SettingsFragmentController(this);
 
 	@Override
 	public void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -36,7 +37,8 @@ public final class SettingsFragment extends PreferenceFragment {
 
 
 	private void notifyOnCreate() {
-        for (final SettingsFragmentController settingsFragmentController:observers) {
+        for (int i = 0, size = observers.size(); i < size; i++) {
+            final SettingsFragmentController settingsFragmentController = observers.get(i);
             settingsFragmentController.updateOnCreate();
         }
     }

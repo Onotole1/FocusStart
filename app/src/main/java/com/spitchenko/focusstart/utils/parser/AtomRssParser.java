@@ -16,6 +16,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import lombok.NonNull;
@@ -82,34 +83,38 @@ public final class AtomRssParser {
 
 		if (null != channel) {
 			if (null != channel.getChildren()) {
-				for (final Tag channelChildren : channel.getChildren()) {
-					ChannelItem channelItem = null;
-					if (channelChildren.getName().equals(RssTagEnumeration.ITEM.text)) {
-						channelItem = new ChannelItem();
-						for (final Tag childrenOfChannelChildren : channelChildren.getChildren()) {
+                final List<Tag> children = channel.getChildren();
+                for (int i = 0, size = children.size(); i < size; i++) {
+                    final Tag channelChildren = children.get(i);
+                    ChannelItem channelItem = null;
+                    if (channelChildren.getName().equals(RssTagEnumeration.ITEM.text)) {
+                        channelItem = new ChannelItem();
+                        final List<Tag> childrenOfChildren = channelChildren.getChildren();
+                        for (int i1 = 0, size1 = childrenOfChildren.size(); i1 < size1; i1++) {
+                            final Tag childrenOfChannelChildren = childrenOfChildren.get(i1);
                             final String childrenOfChannelChildrenName
                                     = childrenOfChannelChildren.getName();
-							if (childrenOfChannelChildrenName.equals(RssTagEnumeration
+                            if (childrenOfChannelChildrenName.equals(RssTagEnumeration
                                     .TITLE.text)) {
-								channelItem.setTitle(childrenOfChannelChildren.getText());
-							} else if (childrenOfChannelChildrenName.equals(RssTagEnumeration
+                                channelItem.setTitle(childrenOfChannelChildren.getText());
+                            } else if (childrenOfChannelChildrenName.equals(RssTagEnumeration
                                     .LINK.text)) {
-								channelItem.setLink(childrenOfChannelChildren.getText());
-							} else if (childrenOfChannelChildrenName.equals(RssTagEnumeration
+                                channelItem.setLink(childrenOfChannelChildren.getText());
+                            } else if (childrenOfChannelChildrenName.equals(RssTagEnumeration
                                     .DESCRIPTION.text)) {
-								channelItem.setSubtitle(childrenOfChannelChildren.getText());
-							} else if (childrenOfChannelChildrenName.equals(RssTagEnumeration
+                                channelItem.setSubtitle(childrenOfChannelChildren.getText());
+                            } else if (childrenOfChannelChildrenName.equals(RssTagEnumeration
                                     .PUB_DATE.text)) {
-								channelItem.setPubDate(parseAtomRssDate(childrenOfChannelChildren
+                                channelItem.setPubDate(parseAtomRssDate(childrenOfChannelChildren
                                                 .getText()
                                         , RssTagEnumeration.DATE_PATTERN.text));
-							}
-						}
-					}
-					if (null != channelItem) {
-						channelItems.add(channelItem);
-					}
-				}
+                            }
+                        }
+                    }
+                    if (null != channelItem) {
+                        channelItems.add(channelItem);
+                    }
+                }
 			}
 		}
 		return channelItems;
@@ -161,11 +166,15 @@ public final class AtomRssParser {
 		final Tag channel = xmlParser.getCurrentTagByParent(AtomTags.FEED.text, tag);
 
         if (null != channel) {
-            for (final Tag channelChildren : channel.getChildren()) {
+            final List<Tag> children = channel.getChildren();
+            for (int i = 0, size = children.size(); i < size; i++) {
+                final Tag channelChildren = children.get(i);
                 ChannelItem channelItem = null;
                 if (channelChildren.getName().equals(AtomTags.ENTRY.text)) {
                     channelItem = new ChannelItem();
-                    for (final Tag childrenOfChannelChildren : channelChildren.getChildren()) {
+                    final List<Tag> childrenOfChildren = channelChildren.getChildren();
+                    for (int i1 = 0, size1 = childrenOfChildren.size(); i1 < size1; i1++) {
+                        final Tag childrenOfChannelChildren = childrenOfChildren.get(i1);
                         final String childrenOfChannelChildrenName
                                 = childrenOfChannelChildren.getName();
                         if (childrenOfChannelChildrenName.equals(AtomTags.TITLE.text)) {
@@ -179,7 +188,7 @@ public final class AtomRssParser {
                             channelItem.setSubtitle(childrenOfChannelChildren.getText());
                         } else if (childrenOfChannelChildrenName.equals(AtomTags.UPDATED.text)) {
                             channelItem.setPubDate(parseAtomRssDate(childrenOfChannelChildren
-                                            .getText(), AtomTags.DATE_PATTERN.text));
+                                    .getText(), AtomTags.DATE_PATTERN.text));
                         }
                     }
                 }

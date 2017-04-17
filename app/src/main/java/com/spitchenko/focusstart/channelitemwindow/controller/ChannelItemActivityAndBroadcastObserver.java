@@ -37,7 +37,8 @@ import lombok.NonNull;
 public final class ChannelItemActivityAndBroadcastObserver extends BaseActivityController
         implements ActivityAndBroadcastObserver {
     private final static String CHANNEL_ITEM_ACTIVITY_OBSERVER
-            = "com.spitchenko.focusstart.controller.channel_item_window.ChannelItemActivityAndBroadcastObserver";
+            = "com.spitchenko.focusstart.controller.channel_item_window " +
+            ".ChannelItemActivityAndBroadcastObserver";
     private final static String CHANNEL_ITEM_ACTIVITY_PREFS_URL
             = CHANNEL_ITEM_ACTIVITY_OBSERVER + ".sharedUrl";
     private final static String RECYCLER_STATE = CHANNEL_ITEM_ACTIVITY_OBSERVER + ".recyclerState";
@@ -193,7 +194,8 @@ public final class ChannelItemActivityAndBroadcastObserver extends BaseActivityC
     private ArrayList<ChannelItem> convertObjectToChannelItemList(
             @NonNull final ArrayList<?> list) {
         final ArrayList<ChannelItem> result = new ArrayList<>();
-        for (final Object object:list) {
+        for (int i = 0, size = list.size(); i < size; i++) {
+            final Object object = list.get(i);
             if (object instanceof ChannelItem) {
                 result.add((ChannelItem) object);
             }

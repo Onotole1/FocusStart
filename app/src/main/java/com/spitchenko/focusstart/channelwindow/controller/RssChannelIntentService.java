@@ -43,8 +43,10 @@ import static com.spitchenko.focusstart.model.ChannelItem.countMatches;
  * @author anatoliy
  */
 public final class RssChannelIntentService extends IntentService {
-	private final static String NAME_CHANNEL_SERVICE = "com.spitchenko.focusstart.controller.channel_window.RssChannelIntentService";
-	private final static String READ_CURRENT_CHANNEL = NAME_CHANNEL_SERVICE + ".readCurrentChannelDb";
+	private final static String NAME_CHANNEL_SERVICE
+            = "com.spitchenko.focusstart.controller.channel_window.RssChannelIntentService";
+	private final static String READ_CURRENT_CHANNEL
+            = NAME_CHANNEL_SERVICE + ".readCurrentChannelDb";
 	private final static String READ_CHANNELS = NAME_CHANNEL_SERVICE + ".controller.channelsDb";
 	private final static String REMOVE_CHANNEL = NAME_CHANNEL_SERVICE + ".controller.removeChannel";
 	private final static String READ_WRITE_ACTION = NAME_CHANNEL_SERVICE + ".readWriteFromUrl";
@@ -53,12 +55,16 @@ public final class RssChannelIntentService extends IntentService {
     private final static String REFRESH_CURRENT_CHANNEL = NAME_CHANNEL_SERVICE + ".refreshCurrent";
     private final static String REFRESH_ALL_CHANNELS = NAME_CHANNEL_SERVICE + ".refreshAll";
     private final static int NOTIFICATION_ID = 100500;
-    private static final String HTTP = "http://";
-    private static final String HTTPS = "https://";
+    private final static long VIBRATE = 1000;
+    private final static String HTTP = "http://";
+    private final static String HTTPS = "https://";
+    private final static String GOOGLE_URL = "https://www.google.ru/";
+    private final static String SPACE = " ";
+    private final static String NEW_LINE = "\n";
 
     private UpdateController updateController;
 
-	public RssChannelIntentService() {
+    public RssChannelIntentService() {
 		super(NAME_CHANNEL_SERVICE);
 	}
 
@@ -69,14 +75,14 @@ public final class RssChannelIntentService extends IntentService {
         }
         if (null != intent && null != intent.getAction()) {
             switch (intent.getAction()) {
+                case READ_CHANNELS:
+                    readChannelsFromDb(ChannelBroadcastReceiver.getReceiveChannelsKey());
+                    break;
                 case READ_CURRENT_CHANNEL:
                     readCurrentChannelDb(intent, ChannelBroadcastReceiver.getReceiveChannelsKey());
                     break;
                 case READ_WRITE_ACTION:
                     readWriteFromUrl(intent, ChannelBroadcastReceiver.getReceiveChannelsKey());
-                    break;
-                case READ_CHANNELS:
-                    readChannelsFromDb(ChannelBroadcastReceiver.getReceiveChannelsKey());
                     break;
                 case REMOVE_CHANNEL:
                     removeChannel(intent);
@@ -129,17 +135,22 @@ public final class RssChannelIntentService extends IntentService {
         final ArrayList<Channel> channelsDb = channelDbHelper.readAllChannelsFromDb();
         final AtomRssParser atomRssParser = new AtomRssParser();
 
-        for (final Channel channel:channelsDb) {
+        for (int i = 0, size = channelsDb.size(); i < size; i++) {
+            final Channel channel = channelsDb.get(i);
             try {
                 final Channel channelUrl = atomRssParser.parseXml(channel.getLink());
 
                 final ArrayList<ChannelItem> itemsAll
                         = new ArrayList<>(channel.getChannelItems().size());
 
-                for (final ChannelItem item:channel.getChannelItems()) {
+                final ArrayList<ChannelItem> itemsFromDb = channel.getChannelItems();
+                for (int j = 0, size1 = itemsFromDb.size(); j < size1; j++) {
+                    final ChannelItem item = itemsFromDb.get(j);
                     itemsAll.add(item.cloneChannelItem());
                 }
-                for (final ChannelItem item:channelUrl.getChannelItems()) {
+                final ArrayList<ChannelItem> itemsFromUrl = channelUrl.getChannelItems();
+                for (int j = 0, size1 = itemsFromUrl.size(); j < size1; j++) {
+                    final ChannelItem item = itemsFromUrl.get(j);
                     itemsAll.add(item.cloneChannelItem());
                 }
 
@@ -177,7 +188,8 @@ public final class RssChannelIntentService extends IntentService {
             } catch (final IOException | XmlPullParserException e) {
                 if (!checkConnection()) {
                     ChannelBroadcastReceiver.start(null
-                            , ChannelBroadcastReceiver.getNoInternetAction(), getPackageName(), this);
+                            , ChannelBroadcastReceiver.getNoInternetAction(), getPackageName()
+                            , this);
                 } else {
                     ChannelBroadcastReceiver.start(null
                             , ChannelBroadcastReceiver.getIoExceptionAction(), getPackageName()
@@ -201,7 +213,8 @@ public final class RssChannelIntentService extends IntentService {
         while (channelIterator.hasNext()) {
             final Channel current = channelIterator.next();
             channelIterator.remove();
-            for (final Channel leftChannel:channels) {
+            for (int i = 0, size = channels.size(); i < size; i++) {
+                final Channel leftChannel = channels.get(i);
                 if (leftChannel.getLink().equals(current.getLink())) {
                     final ArrayList<ChannelItem> channelItems = current.getChannelItems();
                     channelItems.addAll(leftChannel.getChannelItems());
@@ -264,7 +277,7 @@ public final class RssChannelIntentService extends IntentService {
 
     private boolean checkConnection() {
         try {
-            final URL httpsLink = new URL("HTTPS://www.google.ru/");
+            final URL httpsLink = new URL(GOOGLE_URL);
             final HttpURLConnection httpURLConnection
                     = (HttpURLConnection) httpsLink.openConnection();
             httpURLConnection.connect();
@@ -300,9 +313,10 @@ public final class RssChannelIntentService extends IntentService {
 		final AtomRssChannelDbHelper channelDbHelper = new AtomRssChannelDbHelper(this);
 		final ArrayList<Channel> channels = channelDbHelper.readAllChannelsFromDb();
 
-		for (final Channel channel:channels) {
+        for (int i = 0, size = channels.size(); i < size; i++) {
+            final Channel channel = channels.get(i);
             ChannelBroadcastReceiver.start(channel, action, getPackageName(), this);
-		}
+        }
 	}
 
 	private String formatHttp(@NonNull final String input) {
@@ -363,9 +377,9 @@ public final class RssChannelIntentService extends IntentService {
             final String plural = this.getResources()
                     .getQuantityString(R.plurals.rss_channel_intent_service_plurals_news, input.get(key), input.get(key));
             result.append(getResources().getString(R.string.rss_channel_intent_service_plural_prefix));
-            result.append(" ").append(key.getTitle()).append(" ");
+            result.append(SPACE).append(key.getTitle()).append(SPACE);
             result.append(plural);
-            result.append("\n");
+            result.append(NEW_LINE);
         }
         return result.toString().trim();
     }
@@ -375,9 +389,9 @@ public final class RssChannelIntentService extends IntentService {
             final String plural = this.getResources()
                     .getQuantityString(R.plurals.rss_channel_intent_service_plurals_news, number, number);
             stringBuilder.append(getResources().getString(R.string.rss_channel_intent_service_plural_prefix));
-            stringBuilder.append(" ").append(title).append(" ");
+            stringBuilder.append(SPACE).append(title).append(SPACE);
             stringBuilder.append(plural);
-            stringBuilder.append("\n");
+            stringBuilder.append(NEW_LINE);
         return stringBuilder.toString().trim();
     }
 
@@ -390,7 +404,7 @@ public final class RssChannelIntentService extends IntentService {
                 .setContentText(content)
                 .setStyle(new NotificationCompat.BigTextStyle()
                 .bigText(content))
-                .setVibrate(new long[] { 1000, 1000, 1000, 1000, 1000 })
+                .setVibrate(new long[] { VIBRATE, VIBRATE, VIBRATE, VIBRATE, VIBRATE })
                 .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                 .setAutoCancel(true);
 
