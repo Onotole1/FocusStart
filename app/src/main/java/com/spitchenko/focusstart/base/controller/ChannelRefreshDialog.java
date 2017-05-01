@@ -1,4 +1,4 @@
-package com.spitchenko.focusstart.channelwindow.controller;
+package com.spitchenko.focusstart.base.controller;
 
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 
 import com.spitchenko.focusstart.R;
+import com.spitchenko.focusstart.channelwindow.controller.RssChannelIntentService;
 
 /**
  * Date: 24.03.17
@@ -17,7 +18,7 @@ import com.spitchenko.focusstart.R;
  */
 public final class ChannelRefreshDialog extends DialogFragment {
     private final static String REFRESH_DIALOG =
-            "com.spitchenko.focusstart.channelwindow.controller.ChannelRefreshDialog";
+            "com.spitchenko.focusstart.base.controller.ChannelRefreshDialog";
     private final static String MESSAGE = REFRESH_DIALOG + ".message";
     private final static String CHANNEL_URL = REFRESH_DIALOG + ".channelUrl";
 

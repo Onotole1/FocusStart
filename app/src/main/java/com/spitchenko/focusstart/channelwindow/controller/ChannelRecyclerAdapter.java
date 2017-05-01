@@ -8,15 +8,14 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.spitchenko.focusstart.R;
+import com.spitchenko.focusstart.base.view.BaseActivity;
+import com.spitchenko.focusstart.channelitemwindow.view.ChannelItemFragment;
 import com.spitchenko.focusstart.model.Channel;
-import com.spitchenko.focusstart.channelitemwindow.view.ChannelItemActivity;
 
 import java.util.ArrayList;
 
 import lombok.Getter;
 import lombok.NonNull;
-
-import static com.spitchenko.focusstart.channelitemwindow.controller.ChannelItemActivityAndBroadcastObserver.getPrefsUrlKey;
 
 /**
  * Date: 24.02.17
@@ -68,8 +67,9 @@ final class ChannelRecyclerAdapter extends RecyclerView.Adapter<ChannelRecyclerV
                     RssChannelIntentService.start(RssChannelIntentService.getReadCurrentChannelKey()
                             , context, channels.get(holder.getAdapterPosition()), null);
 				}
-				ChannelItemActivity.start(getPrefsUrlKey()
-                        , channels.get(holder.getAdapterPosition()).getLink(), context);
+
+				ChannelItemFragment.start((channels.get(holder.getAdapterPosition()))
+                        , (BaseActivity) context);
 			}
 		});
 	}

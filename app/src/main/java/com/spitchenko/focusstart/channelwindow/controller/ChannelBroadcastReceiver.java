@@ -7,7 +7,7 @@ import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 
-import com.spitchenko.focusstart.observer.ActivityAndBroadcastObserver;
+import com.spitchenko.focusstart.observer.FragmentAndBroadcastObserver;
 import com.spitchenko.focusstart.model.Channel;
 
 import java.util.ArrayList;
@@ -32,7 +32,7 @@ public final class ChannelBroadcastReceiver extends BroadcastReceiver {
     private static final String REMOVE_ACTION = CHANNEL_BROADCAST_RECEIVER + ".remove";
     private static final String LOADING_ACTION = CHANNEL_BROADCAST_RECEIVER + ".load";
 
-    private final ArrayList<ChannelActivityAndBroadcastObserver> observers = new ArrayList<>();
+    private final ArrayList<ChannelFragmentAndBroadcastObserver> observers = new ArrayList<>();
 	private final ArrayList<Channel> receivedChannels = new ArrayList<>();
 
 	@Override
@@ -75,11 +75,11 @@ public final class ChannelBroadcastReceiver extends BroadcastReceiver {
         }
 	}
 
-	public void addObserver(@NonNull final ChannelActivityAndBroadcastObserver observer) {
+	public void addObserver(@NonNull final ChannelFragmentAndBroadcastObserver observer) {
 		observers.add(observer);
 	}
 
-	public void removeObserver(@NonNull final ChannelActivityAndBroadcastObserver observer) {
+	public void removeObserver(@NonNull final ChannelFragmentAndBroadcastObserver observer) {
 		final int index = observers.indexOf(observer);
 		if (index >= 0) {
 			observers.remove(index);
@@ -88,14 +88,14 @@ public final class ChannelBroadcastReceiver extends BroadcastReceiver {
 
 	public void notifyObservers(@Nullable final String action) {
         for (int i = 0, size = observers.size(); i < size; i++) {
-            final ActivityAndBroadcastObserver observer = observers.get(i);
+            final FragmentAndBroadcastObserver observer = observers.get(i);
             observer.updateOnReceiveItems(receivedChannels, action);
         }
 	}
 
     public void notifyObserversUpdate() {
         for (int i = 0, size = observers.size(); i < size; i++) {
-            final ChannelActivityAndBroadcastObserver observer = observers.get(i);
+            final ChannelFragmentAndBroadcastObserver observer = observers.get(i);
             observer.updateOnReceiveNotification();
         }
     }

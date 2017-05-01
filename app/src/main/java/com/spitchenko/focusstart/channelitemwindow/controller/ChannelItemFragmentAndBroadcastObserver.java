@@ -1,7 +1,7 @@
 package com.spitchenko.focusstart.channelitemwindow.controller;
 
+import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -9,20 +9,20 @@ import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
+import android.view.View;
 
 import com.spitchenko.focusstart.R;
-import com.spitchenko.focusstart.base.controller.BaseActivityController;
 import com.spitchenko.focusstart.base.controller.ChannelRecyclerEmptyAdapter;
 import com.spitchenko.focusstart.base.controller.NetworkDialogShowController;
 import com.spitchenko.focusstart.base.controller.NoInternetDialog;
-import com.spitchenko.focusstart.base.controller.UpdateController;
+import com.spitchenko.focusstart.base.view.BaseActivity;
+import com.spitchenko.focusstart.channelitemwindow.view.ChannelItemFragment;
 import com.spitchenko.focusstart.channelwindow.controller.ChannelAddDialogFragment;
+import com.spitchenko.focusstart.model.Channel;
 import com.spitchenko.focusstart.model.ChannelItem;
-import com.spitchenko.focusstart.observer.ActivityAndBroadcastObserver;
+import com.spitchenko.focusstart.observer.FragmentAndBroadcastObserver;
 
 import java.util.ArrayList;
 
@@ -34,93 +34,110 @@ import lombok.NonNull;
  *
  * @author anatoliy
  */
-public final class ChannelItemActivityAndBroadcastObserver extends BaseActivityController
-        implements ActivityAndBroadcastObserver {
-    private final static String CHANNEL_ITEM_ACTIVITY_OBSERVER
+public final class ChannelItemFragmentAndBroadcastObserver implements FragmentAndBroadcastObserver {
+    private final static String CHANNEL_FRAGMENT_OBSERVER
             = "com.spitchenko.focusstart.controller.channel_item_window " +
-            ".ChannelItemActivityAndBroadcastObserver";
-    private final static String CHANNEL_ITEM_ACTIVITY_PREFS_URL
-            = CHANNEL_ITEM_ACTIVITY_OBSERVER + ".sharedUrl";
-    private final static String RECYCLER_STATE = CHANNEL_ITEM_ACTIVITY_OBSERVER + ".recyclerState";
-    private final static String SWIPE_LAYOUT_STATE = CHANNEL_ITEM_ACTIVITY_OBSERVER + ".swipeState";
-    private final static String LOCAL_THEME = CHANNEL_ITEM_ACTIVITY_OBSERVER + ".localTheme";
+            ".ChannelItemFragmentAndBroadcastObserver";
+    private final static String CHANNEL_ITEM_FRAGMENT_PREFS_URL
+            = CHANNEL_FRAGMENT_OBSERVER + ".channelPrefsUrl";
+    private final static String CHANNEL_ITEM_FRAGMENT_PREFS_TITLE
+            = CHANNEL_FRAGMENT_OBSERVER + ".channelPrefsTitle";
+    private final static String RECYCLER_STATE = CHANNEL_FRAGMENT_OBSERVER + ".recyclerState";
+    private final static String SWIPE_LAYOUT_STATE = CHANNEL_FRAGMENT_OBSERVER + ".swipeState";
 
-    private AppCompatActivity activity;
+    private android.app.Fragment fragment;
     private RecyclerView recyclerView;
     private SwipeRefreshLayout swipeRefreshLayout;
-    private String channelUrl;
+    private Channel channel;
     private Parcelable recyclerState;
     private LocalBroadcastManager localBroadcastManager;
     private ChannelItemBroadcastReceiver channelItemBroadcastReceiver;
-    private UpdateController updateController;
     private NetworkDialogShowController networkDialogShowController;
 
 
-    public ChannelItemActivityAndBroadcastObserver(final AppCompatActivity activity) {
-        this.activity = activity;
+    public ChannelItemFragmentAndBroadcastObserver(final android.app.Fragment fragment) {
+        this.fragment = fragment;
+    }
+
+    @Override
+    public void updateOnCreateView(final View view) {
+        initToolbar();
+        initSwipeRefreshLayout(view);
+        initRecyclerView(view);
+        initControllers();
     }
 
     @Override
     public void updateOnCreate(@Nullable final Bundle savedInstanceState) {
-        setThemeFromPrefs(activity);
-        activity.setContentView(R.layout.activity_channel_item);
 
-        final Toolbar toolbar = (Toolbar) activity.findViewById(R.id.activity_channel_item_toolbar);
-        activity.setSupportActionBar(toolbar);
+        if (null == savedInstanceState) {
+            readChannelFromBundle();
+        }
+
+    }
+
+    private void initToolbar() {
+        final BaseActivity activity = (BaseActivity) fragment.getActivity();
+
+        final android.support.v7.widget.Toolbar toolbar
+                = (android.support.v7.widget.Toolbar) activity
+                .findViewById(R.id.activity_main_toolbar);
+
+        if (null != channel) {
+            toolbar.setTitle(channel.getTitle());
+        } else {
+            toolbar.setTitle(readTitleFromPreferences(activity));
+        }
+
         if (null != activity.getSupportActionBar()) {
             activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             activity.getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
 
+        activity.setSupportActionBar(toolbar);
+    }
+
+    private void initSwipeRefreshLayout(final View view) {
         swipeRefreshLayout
-                = (SwipeRefreshLayout) activity
-                .findViewById(R.id.activity_channel_item_swipe_refresh_layout);
+                = (SwipeRefreshLayout) view
+                .findViewById(R.id.fragment_channel_item_swipe_refresh_layout);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                RssChannelItemIntentService.start(null, channelUrl
-                        , RssChannelItemIntentService.getRefreshChannelItemsKey(), activity);
+                RssChannelItemIntentService.start(null, channel.getLink()
+                        , RssChannelItemIntentService.getRefreshChannelItemsKey()
+                        , fragment.getActivity());
             }
         });
+    }
 
-        recyclerView = (RecyclerView) activity
-                .findViewById(R.id.activity_channel_item_recycler_view);
-        recyclerView.setLayoutManager(new LinearLayoutManager(activity));
-        recyclerView.setAdapter(new ChannelRecyclerEmptyAdapter());
-
-        if (null == savedInstanceState) {
-            readUrlFromIntent();
+    private void initRecyclerView(final View view) {
+        recyclerView = (RecyclerView) view
+                .findViewById(R.id.fragment_channel_item_recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(fragment.getActivity()));
+        if (null != channel) {
+            recyclerView.setAdapter(new ChannelItemRecyclerAdapter(channel.getChannelItems()));
+        } else {
+            recyclerView.setAdapter(new ChannelRecyclerEmptyAdapter());
+            RssChannelItemIntentService.start(null
+                    , readUrlFromPreferences((BaseActivity) fragment.getActivity())
+                    , RssChannelItemIntentService.getReadChannelKey(), fragment.getActivity());
         }
+    }
 
-        channelUrl = readUrlFromPreferences();
-
-        updateController = new UpdateController(activity);
-        updateController.turnOnUpdate();
+    private void initControllers() {
+        final Activity activity = fragment.getActivity();
 
         networkDialogShowController = new NetworkDialogShowController(activity);
     }
 
     @Override
     public void updateOnResume() {
-        if (readLocalThemeIdFromPrefs() != readThemeIdOrNullFromPrefs(activity)) {
-            final Intent activityStarter = activity.getIntent();
-            activity.finish();
-            activity.startActivity(activityStarter);
-            return;
-        }
-
         subscribe();
-
-        if (updateController.isUpdate()) {
-            RssChannelItemIntentService.start(null, channelUrl
-                    , RssChannelItemIntentService.getReadChannelsKey(), activity);
-
-            updateController.turnOffUpdate();
-        }
     }
 
     private void subscribe() {
-        localBroadcastManager = LocalBroadcastManager.getInstance(activity);
+        localBroadcastManager = LocalBroadcastManager.getInstance(fragment.getActivity());
         channelItemBroadcastReceiver = new ChannelItemBroadcastReceiver();
         final IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(ChannelItemBroadcastReceiver.getReceiveChannelItemsKey());
@@ -146,7 +163,8 @@ public final class ChannelItemActivityAndBroadcastObserver extends BaseActivityC
                 || action.equals(ChannelItemBroadcastReceiver.getChannelItemsRefresh())) {
             final ArrayList<ChannelItem> receivedChannels = convertObjectToChannelItemList(items);
             if (null == recyclerView.getLayoutManager()) {
-                final RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(activity);
+                final RecyclerView.LayoutManager layoutManager
+                        = new LinearLayoutManager(fragment.getActivity());
                 recyclerView.setLayoutManager(layoutManager);
             }
             if (!receivedChannels.isEmpty()) {
@@ -164,11 +182,11 @@ public final class ChannelItemActivityAndBroadcastObserver extends BaseActivityC
             showNetworkDialog();
         }
         swipeRefreshLayout.setRefreshing(false);
-        updateController.turnOffUpdate();
     }
 
     @Override
     public void updateOnRestoreInstanceState(final Bundle savedInstanceState) {
+        initToolbar();
         if (null != savedInstanceState) {
             recyclerState = savedInstanceState.getParcelable(RECYCLER_STATE);
             if (savedInstanceState.getBoolean(SWIPE_LAYOUT_STATE)) {
@@ -203,56 +221,54 @@ public final class ChannelItemActivityAndBroadcastObserver extends BaseActivityC
         return result;
     }
 
-    private void writeToPreferences(@NonNull final String channelUrl) {
-        final SharedPreferences sharedPreferences
-                = activity.getSharedPreferences(CHANNEL_ITEM_ACTIVITY_PREFS_URL
-                , Context.MODE_PRIVATE);
-        final SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(CHANNEL_ITEM_ACTIVITY_PREFS_URL, channelUrl);
-        editor.apply();
-    }
-
-    private String readUrlFromPreferences() {
-        final SharedPreferences sharedPreferences
-                = activity.getSharedPreferences(CHANNEL_ITEM_ACTIVITY_PREFS_URL
-                , Context.MODE_PRIVATE);
-        return sharedPreferences.getString(CHANNEL_ITEM_ACTIVITY_PREFS_URL, null);
-    }
-
     private void showNetworkDialog() {
         final NoInternetDialog noInternetDialog = new NoInternetDialog();
         final android.app.FragmentTransaction fragmentTransaction
-                = activity.getFragmentManager().beginTransaction();
+                = fragment.getFragmentManager().beginTransaction();
         fragmentTransaction.add(noInternetDialog, ChannelAddDialogFragment.getDialogFragmentTag());
         fragmentTransaction.commitAllowingStateLoss();
         networkDialogShowController.turnOnNetworkDialog();
     }
 
-    private void readUrlFromIntent() {
-        final Intent intent = activity.getIntent();
-        if (null != intent) {
-            writeToPreferences(intent.getStringExtra(CHANNEL_ITEM_ACTIVITY_PREFS_URL));
-            channelUrl = intent.getStringExtra(CHANNEL_ITEM_ACTIVITY_PREFS_URL);
+    private void readChannelFromBundle() {
+        final Channel channel
+                = fragment.getArguments().getParcelable(ChannelItemFragment.getChannelUrlKey());
+        if (null != channel) {
+            this.channel = channel;
+            writeUrlToPreferences(channel.getLink());
+            writeTitleToPreferences(channel.getTitle());
         }
     }
 
-    public static String getPrefsUrlKey() {
-        return CHANNEL_ITEM_ACTIVITY_PREFS_URL;
-    }
-
-    @Override
-    protected void saveLocalThemeIdToPrefs(final int themeId) {
-        final SharedPreferences preferences
-                = activity.getSharedPreferences(LOCAL_THEME, Context.MODE_PRIVATE);
-        final SharedPreferences.Editor editor = preferences.edit();
-        editor.putInt(LOCAL_THEME, themeId);
+    private void writeUrlToPreferences(@NonNull final String channelUrl) {
+        final SharedPreferences sharedPreferences
+                = fragment.getActivity().getSharedPreferences(CHANNEL_ITEM_FRAGMENT_PREFS_URL
+                , Context.MODE_PRIVATE);
+        final SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(CHANNEL_ITEM_FRAGMENT_PREFS_URL, channelUrl);
         editor.apply();
     }
 
-    @Override
-    protected int readLocalThemeIdFromPrefs() {
-        final SharedPreferences preferences
-                = activity.getSharedPreferences(LOCAL_THEME, Context.MODE_PRIVATE);
-        return preferences.getInt(LOCAL_THEME, 0);
+    private String readUrlFromPreferences(final BaseActivity baseActivity) {
+        final SharedPreferences sharedPreferences
+                = baseActivity.getSharedPreferences(CHANNEL_ITEM_FRAGMENT_PREFS_URL
+                , Context.MODE_PRIVATE);
+        return sharedPreferences.getString(CHANNEL_ITEM_FRAGMENT_PREFS_URL, null);
+    }
+
+    private void writeTitleToPreferences(@NonNull final String title) {
+        final SharedPreferences sharedPreferences
+                = fragment.getActivity().getSharedPreferences(CHANNEL_ITEM_FRAGMENT_PREFS_TITLE
+                , Context.MODE_PRIVATE);
+        final SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(CHANNEL_ITEM_FRAGMENT_PREFS_TITLE, title);
+        editor.apply();
+    }
+
+    private String readTitleFromPreferences(final BaseActivity baseActivity) {
+        final SharedPreferences sharedPreferences
+                = baseActivity.getSharedPreferences(CHANNEL_ITEM_FRAGMENT_PREFS_TITLE
+                , Context.MODE_PRIVATE);
+        return sharedPreferences.getString(CHANNEL_ITEM_FRAGMENT_PREFS_TITLE, null);
     }
 }

@@ -3,7 +3,6 @@ package com.spitchenko.focusstart.channelitemwindow.controller;
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.support.annotation.Nullable;
 
 import com.spitchenko.focusstart.base.controller.UpdateController;
@@ -31,8 +30,8 @@ import static com.spitchenko.focusstart.model.ChannelItem.countMatches;
 public final class RssChannelItemIntentService extends IntentService {
 	private final static String NAME_ITEM_SERVICE
             = "com.spitchenko.focusstart.controller.channel_item_window.RssChannelItemIntentService";
-	private final static String READ_CURRENT_CHANNEL = NAME_ITEM_SERVICE + ".readCurrentChannelDb";
-	private final static String READ_CHANNELS = NAME_ITEM_SERVICE + ".channelsDb";
+	private final static String READ_CURRENT_CHANNEL_ITEM = NAME_ITEM_SERVICE + ".readCurrentChannelDb";
+	private final static String READ_CHANNEL = NAME_ITEM_SERVICE + ".channelsDb";
     private final static String REFRESH_CHANNEL_ITEMS = NAME_ITEM_SERVICE + ".refresh";
 
     private UpdateController updateController;
@@ -48,10 +47,10 @@ public final class RssChannelItemIntentService extends IntentService {
         }
 		if (null != intent) {
             switch (intent.getAction()) {
-                case READ_CHANNELS:
+                case READ_CHANNEL:
                     readChannelItemsFromDb(intent);
                     break;
-                case READ_CURRENT_CHANNEL:
+                case READ_CURRENT_CHANNEL_ITEM:
                     readCurrentChannelFromDb(intent);
                     break;
                 case REFRESH_CHANNEL_ITEMS:
@@ -109,7 +108,7 @@ public final class RssChannelItemIntentService extends IntentService {
 
     private void readChannelItemsFromDb(@NonNull final Intent intent) {
 		final AtomRssChannelDbHelper atomChannelDbHelper = new AtomRssChannelDbHelper(this);
-		final String channelUrl = intent.getStringExtra(READ_CHANNELS);
+		final String channelUrl = intent.getStringExtra(READ_CHANNEL);
 		final Channel inputChannel = atomChannelDbHelper.readChannelFromDb(channelUrl);
 		if (null != inputChannel) {
 			sendChannelItemsToBroadcast(inputChannel.getChannelItems()
@@ -120,14 +119,9 @@ public final class RssChannelItemIntentService extends IntentService {
 	private void readCurrentChannelFromDb(@NonNull final Intent intent) {
 		final AtomRssChannelDbHelper atomChannelDbHelper = new AtomRssChannelDbHelper(this);
 		final ChannelItem inputChannelItem = intent.getParcelableExtra(ChannelItem.getKEY());
-        final SharedPreferences sharedPreferences
-                = this.getSharedPreferences(ChannelItemActivityAndBroadcastObserver.getPrefsUrlKey()
-                , Context.MODE_PRIVATE);
-        final String channelUrl = sharedPreferences
-                .getString(ChannelItemActivityAndBroadcastObserver.getPrefsUrlKey(), null);
 
 		if (!inputChannelItem.isRead()) {
-			final Channel inputChannel = atomChannelDbHelper.readChannelFromDb(channelUrl);
+			final Channel inputChannel = intent.getParcelableExtra(READ_CURRENT_CHANNEL_ITEM);
 			atomChannelDbHelper.updateValueFromDb(AtomRssDataBase.ChannelItemEntry.TABLE_NAME
                     , AtomRssDataBase.ChannelItemEntry.CHANNEL_ITEM_ISREAD
 					, Long.toString(atomChannelDbHelper.boolToLong(true))
@@ -155,11 +149,11 @@ public final class RssChannelItemIntentService extends IntentService {
     }
 
     public static String getReadCurrentChannelKey() {
-        return READ_CURRENT_CHANNEL;
+        return READ_CURRENT_CHANNEL_ITEM;
     }
 
-    public static String getReadChannelsKey() {
-        return READ_CHANNELS;
+    public static String getReadChannelKey() {
+        return READ_CHANNEL;
     }
 
     public static void start(@Nullable final ChannelItem channelItem, @Nullable final String url

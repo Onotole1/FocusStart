@@ -29,7 +29,8 @@
     <string name="settings_fragment_notifications_list_dialog">Задайте период проверки обновлений</string>
     <string name="settings_fragment_notifications_entries_default_value" translatable="false">3600</string>
     <string name="settings_fragment_notifications_entries_default">Один раз в час</string>
-    <string name="settings_fragment_theme_list_default_value" translatable="false">R.style.AppTheme</string>
+    <string name="settings_fragment_theme_list_default">Светлая</string>
+    <string name="settings_fragment_theme_list_default_value" translatable="false">AppTheme</string>
     <string name="settings_fragment_theme_list_title">Тема</string>
     <string name="settings_fragment_theme_list_dialog">Выберите тему</string>
     <string name="settings_fragment_theme_list">theme_list</string>

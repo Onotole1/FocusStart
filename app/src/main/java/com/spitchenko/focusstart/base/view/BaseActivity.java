@@ -1,5 +1,6 @@
 package com.spitchenko.focusstart.base.view;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -8,8 +9,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.spitchenko.focusstart.R;
-import com.spitchenko.focusstart.observer.ActivityAndBroadcastObserver;
-import com.spitchenko.focusstart.settingswindow.view.SettingsActivity;
+import com.spitchenko.focusstart.base.controller.MainController;
+import com.spitchenko.focusstart.model.Channel;
+import com.spitchenko.focusstart.settingswindow.view.SettingsFragment;
 
 import java.util.ArrayList;
 
@@ -21,11 +23,18 @@ import lombok.NonNull;
  *
  * @author anatoliy
  */
-public abstract class BaseActivity extends AppCompatActivity {
-    protected ArrayList<ActivityAndBroadcastObserver> observers = new ArrayList<>();
+public class BaseActivity extends AppCompatActivity {
+    private final static String BASE_ACTIVITY = "com.spitchenko.focusstart.base.view.BaseActivity";
+    private final static String BASE_ACTIVITY_NOTIFICATION
+            = BASE_ACTIVITY + ".baseActivityNotification";
+
+    private final static int OBSERVERS_SIZE = 1;
+    private ArrayList<MainController> observers = new ArrayList<>(OBSERVERS_SIZE);
+    private MainController mainController = new MainController(this);
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
+        addObserver(mainController);
         super.onCreate(savedInstanceState);
         notifyOnCreate(savedInstanceState);
     }
@@ -33,28 +42,37 @@ public abstract class BaseActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        notifyOnPause();
+        if (isFinishing()) {
+            removeObserver(mainController);
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(final Menu menu) {
+        getMenuInflater().inflate(R.menu.channel_menu, menu);
+        return true;
     }
 
     @Override
     protected void onResume() {
+        addObserver(mainController);
         super.onResume();
-        notifyOnResume();
     }
 
     @Override
-	public boolean onCreateOptionsMenu(@NonNull final Menu menu) {
-		getMenuInflater().inflate(R.menu.channel_menu, menu);
-		return true;
-	}
-
-	@Override
 	public boolean onSupportNavigateUp() {
-		onBackPressed();
+		notifyOnSupportNavigateUp();
 		return true;
 	}
 
-	@Override
+    private void notifyOnSupportNavigateUp() {
+        for (int i = 0, size = observers.size(); i < size; i++) {
+            final MainController observer = observers.get(i);
+            observer.updateOnSupportNavigateUp();
+        }
+    }
+
+    @Override
 	public boolean onOptionsItemSelected(@NonNull final MenuItem item) {
 		switch (item.getItemId()) {
 			case R.id.action_settings:
@@ -64,29 +82,16 @@ public abstract class BaseActivity extends AppCompatActivity {
 	}
 
 	private void showSettingsFragment() {
-		final Intent intent = new Intent(this, SettingsActivity.class);
-		startActivity(intent);
+        SettingsFragment.start(this);
 	}
 
-    @Override
-    protected void onRestoreInstanceState(@Nullable final Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        notifyOnRestoreInstanceState(savedInstanceState);
-    }
-
-    @Override
-    protected void onSaveInstanceState(@Nullable final Bundle outState) {
-        super.onSaveInstanceState(outState);
-        notifyOnSavedInstanceState(outState);
-    }
-
-    protected void addObserver(@NonNull final ActivityAndBroadcastObserver observer) {
+    private void addObserver(@NonNull final MainController observer) {
         if (!observers.contains(observer)) {
             observers.add(observer);
         }
     }
 
-    protected void removeObserver(@NonNull final ActivityAndBroadcastObserver observer) {
+    private void removeObserver(@NonNull final MainController observer) {
         if (!observers.isEmpty()) {
             observers.remove(observer);
         }
@@ -94,36 +99,58 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     private void notifyOnCreate(@Nullable final Bundle savedInstanceState) {
         for (int i = 0, size = observers.size(); i < size; i++) {
-            final ActivityAndBroadcastObserver observer = observers.get(i);
+            final MainController observer = observers.get(i);
             observer.updateOnCreate(savedInstanceState);
         }
     }
 
-    private void notifyOnResume() {
+    public static void start(final Context context, @NonNull final ArrayList<String> channelUrls) {
+        final Intent intent = new Intent(context, BaseActivity.class);
+        intent.putStringArrayListExtra(BASE_ACTIVITY_NOTIFICATION, channelUrls);
+        intent.setAction(BASE_ACTIVITY_NOTIFICATION);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);
+    }
+
+    @Override
+    protected void onNewIntent(final Intent intent) {
+        super.onNewIntent(intent);
+        notifyOnNewIntent(intent);
+    }
+
+    private void notifyOnNewIntent(final Intent intent) {
         for (int i = 0, size = observers.size(); i < size; i++) {
-            final ActivityAndBroadcastObserver observer = observers.get(i);
-            observer.updateOnResume();
+            final MainController observer = observers.get(i);
+            observer.updateOnNewIntent(intent);
         }
     }
 
-    private void notifyOnSavedInstanceState(@NonNull final Bundle outState) {
+    public void setChannelItemFragment(final Channel channel) {
+        notifyOnSetChannelItemFragment(channel);
+    }
+
+    private void notifyOnSetChannelItemFragment(final Channel channel) {
         for (int i = 0, size = observers.size(); i < size; i++) {
-            final ActivityAndBroadcastObserver observer = observers.get(i);
-            observer.updateOnSavedInstanceState(outState);
+            final MainController observer = observers.get(i);
+            observer.updateOnSetChannelItemFragment(channel);
         }
     }
 
-    private void notifyOnRestoreInstanceState(@NonNull final Bundle savedInstanceState) {
+    public void setSettingsFragment() {
         for (int i = 0, size = observers.size(); i < size; i++) {
-            final ActivityAndBroadcastObserver observer = observers.get(i);
-            observer.updateOnRestoreInstanceState(savedInstanceState);
+            final MainController observer = observers.get(i);
+            observer.updateOnSetSettingsFragment();
         }
     }
 
-    private void notifyOnPause() {
+    public void setTheme(final String theme) {
         for (int i = 0, size = observers.size(); i < size; i++) {
-            final ActivityAndBroadcastObserver observer = observers.get(i);
-            observer.updateOnPause();
+            final MainController observer = observers.get(i);
+            observer.updateOnSetTheme(theme);
         }
+    }
+
+    public static String getBaseActivityNotificationKey() {
+        return BASE_ACTIVITY_NOTIFICATION;
     }
 }

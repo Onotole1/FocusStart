@@ -1,7 +1,7 @@
 package com.spitchenko.focusstart.channelwindow.controller;
 
+import android.app.Fragment;
 import android.app.FragmentManager;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -22,13 +22,14 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.spitchenko.focusstart.R;
-import com.spitchenko.focusstart.base.controller.BaseActivityController;
 import com.spitchenko.focusstart.base.controller.ChannelRecyclerEmptyAdapter;
+import com.spitchenko.focusstart.base.controller.ChannelRefreshDialog;
 import com.spitchenko.focusstart.base.controller.NetworkDialogShowController;
 import com.spitchenko.focusstart.base.controller.NoInternetDialog;
 import com.spitchenko.focusstart.base.controller.UpdateController;
+import com.spitchenko.focusstart.channelwindow.view.ChannelFragment;
 import com.spitchenko.focusstart.model.Channel;
-import com.spitchenko.focusstart.observer.ActivityAndBroadcastObserver;
+import com.spitchenko.focusstart.observer.FragmentAndBroadcastObserver;
 
 import java.util.ArrayList;
 
@@ -40,21 +41,19 @@ import lombok.NonNull;
  *
  * @author anatoliy
  */
-public final class ChannelActivityAndBroadcastObserver extends BaseActivityController
-        implements ActivityAndBroadcastObserver {
+public final class ChannelFragmentAndBroadcastObserver implements FragmentAndBroadcastObserver {
     private final static String CHANNEL_BROADCAST_OBSERVER
             = "com.spitchenko.focusstart.controller.channel_window."
-            + "ChannelActivityAndBroadcastObserver";
+            + "ChannelFragmentAndBroadcastObserver";
     private final static String RECYCLER_STATE = CHANNEL_BROADCAST_OBSERVER + ".recyclerState";
     private final static String UPDATE = CHANNEL_BROADCAST_OBSERVER + ".update";
     private final static String REFRESHING = CHANNEL_BROADCAST_OBSERVER + ".refreshing";
-    private final static String LOCAL_THEME = CHANNEL_BROADCAST_OBSERVER + ".localTHeme";
     private final static String IS_ADD_DIALOG_INTENT_RUN
             = CHANNEL_BROADCAST_OBSERVER + ".isAddDialog";
 
     private final ChannelBroadcastReceiver channelBroadcastReceiver = new ChannelBroadcastReceiver();
     private LocalBroadcastManager localBroadcastManager;
-    private AppCompatActivity activity;
+    private Fragment fragment;
     private RecyclerView recyclerView;
     private SwipeRefreshLayout swipeRefreshLayout;
     private Parcelable recyclerState;
@@ -66,29 +65,47 @@ public final class ChannelActivityAndBroadcastObserver extends BaseActivityContr
     private LinearLayout stubLayout;
     private ProgressBar progressBar;
 
-    public ChannelActivityAndBroadcastObserver(final AppCompatActivity context) {
-        this.activity = context;
+    public ChannelFragmentAndBroadcastObserver(final Fragment fragment) {
+        this.fragment = fragment;
+    }
+
+    @Override
+    public void updateOnCreateView(final View view) {
+        initToolbar();
+        initFabAndRecycler(view);
+        initItemTouchHelper();
+        initOtherViewsAndControllers(view);
     }
 
     @Override
     public void updateOnCreate(@Nullable final Bundle savedInstanceState) {
-
-        if (activity.getIntent().getAction().equals(UPDATE)) {
-            isUpdate = true;
+        final Bundle fragmentArguments = fragment.getArguments();
+        if (null != fragmentArguments) {
+            final String action = fragmentArguments
+                    .getString(ChannelFragment.getChannelFragmentNotificationKey());
+            if (null != action && action
+                    .equals(ChannelFragment.getChannelFragmentNotificationKey())) {
+                isUpdate = true;
+            }
         }
+    }
 
-        setThemeFromPrefs(activity);
-        activity.setContentView(R.layout.activity_channel);
+    private void initToolbar() {
+        final AppCompatActivity activity = (AppCompatActivity) fragment.getActivity();
 
-        final Toolbar toolbar = (Toolbar) activity.findViewById(R.id.activity_channel_toolbar);
-        activity.setSupportActionBar(toolbar);
+        final Toolbar toolbar = (Toolbar) activity.findViewById(R.id.activity_main_toolbar);
+        toolbar.setTitle(R.string.app_name);
         if (null != activity.getSupportActionBar()) {
-            activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            activity.getSupportActionBar().setDisplayShowHomeEnabled(true);
+            activity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+            activity.getSupportActionBar().setDisplayShowHomeEnabled(false);
         }
 
-        final FloatingActionButton fab = (FloatingActionButton) activity
-                .findViewById(R.id.activity_channel_fab);
+        activity.setSupportActionBar(toolbar);
+    }
+
+    private void initFabAndRecycler(final View view) {
+        final FloatingActionButton fab = (FloatingActionButton) view
+                .findViewById(R.id.fragment_channel_fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
@@ -96,7 +113,7 @@ public final class ChannelActivityAndBroadcastObserver extends BaseActivityContr
             }
         });
 
-        recyclerView = (RecyclerView) activity.findViewById(R.id.activity_channel_recycler_view);
+        recyclerView = (RecyclerView) view.findViewById(R.id.fragment_channel_recycler_view);
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener(){
             @Override
             public void onScrolled(final RecyclerView recyclerView, final int dx, final int dy){
@@ -114,10 +131,33 @@ public final class ChannelActivityAndBroadcastObserver extends BaseActivityContr
                 super.onScrollStateChanged(recyclerView, newState);
             }
         });
+    }
 
+    private void initOtherViewsAndControllers(final View view) {
         swipeRefreshLayout
-                = (SwipeRefreshLayout) activity.findViewById(R.id.activity_channel_swipe_refresh_layout);
+                = (SwipeRefreshLayout) view.findViewById(R.id.fragment_channel_swipe_refresh_layout);
 
+
+        stubLayout = (LinearLayout) view.findViewById(R.id.fragment_channel_stub);
+        progressBar = (ProgressBar) view.findViewById(R.id.fragment_channel_progressBar);
+
+        final AppCompatActivity activity = (AppCompatActivity) fragment.getActivity();
+
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                RssChannelIntentService.start(RssChannelIntentService.getRefreshAllChannelsKey()
+                        , activity, null, null);
+            }
+        });
+
+        updateController = new UpdateController(activity);
+        updateController.turnOnUpdate();
+
+        networkDialogShowController = new NetworkDialogShowController(activity);
+    }
+
+    private void initItemTouchHelper() {
         final ItemTouchHelper.SimpleCallback simpleItemTouchCallback
                 = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
             @Override
@@ -135,42 +175,21 @@ public final class ChannelActivityAndBroadcastObserver extends BaseActivityContr
                 channelAdapter.removeItem(viewHolder.getAdapterPosition());
 
                 RssChannelIntentService.start(RssChannelIntentService.getRemoveChannelKey()
-                        , activity, channelFromRecycler, null);
+                        , fragment.getActivity(), channelFromRecycler, null);
             }
         };
 
         final ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
         itemTouchHelper.attachToRecyclerView(recyclerView);
-
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                RssChannelIntentService.start(RssChannelIntentService.getRefreshAllChannelsKey()
-                        , activity, null, null);
-            }
-        });
-
-        stubLayout = (LinearLayout) activity.findViewById(R.id.activity_channel_stub);
-        progressBar = (ProgressBar) activity.findViewById(R.id.activity_channel_progressBar);
-
-        updateController = new UpdateController(activity);
-        updateController.turnOnUpdate();
-
-        networkDialogShowController = new NetworkDialogShowController(activity);
     }
 
     @Override
     public void updateOnResume() {
+        final AppCompatActivity activity = (AppCompatActivity) fragment.getActivity();
+
         if (activity.getIntent().getAction().equals(Intent.ACTION_VIEW) && !isAddDialogIntentRun) {
             isAddDialogIntentRun = true;
             showAddChannelDialog(activity.getIntent().getData().toString());
-        }
-
-        if (readLocalThemeIdFromPrefs() != readThemeIdOrNullFromPrefs(activity)) {
-            final Intent activityStarter = activity.getIntent();
-            activity.finish();
-            activity.startActivity(activityStarter);
-            return;
         }
 
         subscribe();
@@ -185,7 +204,7 @@ public final class ChannelActivityAndBroadcastObserver extends BaseActivityContr
     }
 
     private void subscribe() {
-        localBroadcastManager = LocalBroadcastManager.getInstance(activity);
+        localBroadcastManager = LocalBroadcastManager.getInstance(fragment.getActivity());
         final IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(ChannelBroadcastReceiver.getReceiveChannelsKey());
         intentFilter.addAction(ChannelBroadcastReceiver.getRefreshDialogKey());
@@ -218,7 +237,8 @@ public final class ChannelActivityAndBroadcastObserver extends BaseActivityContr
         receivedChannels.clear();
         receivedChannels.addAll(convertArrayListToChannelList(items));
         if (null == recyclerView.getLayoutManager()) {
-            final RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(activity);
+            final RecyclerView.LayoutManager layoutManager
+                    = new LinearLayoutManager(fragment.getActivity());
             recyclerView.setLayoutManager(layoutManager);
         }
         if (!receivedChannels.isEmpty()) {
@@ -244,8 +264,10 @@ public final class ChannelActivityAndBroadcastObserver extends BaseActivityContr
                 showNetworkDialog();
             } else if (action.equals(ChannelBroadcastReceiver.getIoExceptionAction())) {
                 stopLoading();
-                final String toastContent = activity.getResources().getString(R.string.activity_channel_controller_io_exception);
-                Toast.makeText(activity, toastContent, Toast.LENGTH_LONG).show();
+                final String toastContent
+                        = fragment.getResources()
+                        .getString(R.string.activity_channel_controller_io_exception);
+                Toast.makeText(fragment.getActivity(), toastContent, Toast.LENGTH_LONG).show();
             } else if (action.equals(ChannelBroadcastReceiver.getLoadingAction())) {
                 startLoading();
             }
@@ -266,7 +288,7 @@ public final class ChannelActivityAndBroadcastObserver extends BaseActivityContr
 
     private void checkUpdates(@NonNull final ArrayList<Channel> receivedChannels) {
         final SharedPreferences preferences
-                = RssChannelIntentService.getReadMessagesPreferences(activity);
+                = RssChannelIntentService.getReadMessagesPreferences(fragment.getActivity());
         for (int i = 0, size = receivedChannels.size(); i < size; i++) {
             final Channel channel = receivedChannels.get(i);
             final String message = preferences.getString(channel.getLink(), null);
@@ -303,7 +325,7 @@ public final class ChannelActivityAndBroadcastObserver extends BaseActivityContr
                 outState.putParcelable(RECYCLER_STATE, recyclerView.getLayoutManager().onSaveInstanceState());
                 outState.putBoolean(UPDATE, swipeRefreshLayout.isRefreshing());
             }
-            if (progressBar.isShown()) {
+            if (null != progressBar && progressBar.isShown()) {
                 outState.putBoolean(REFRESHING, true);
             }
             outState.putBoolean(IS_ADD_DIALOG_INTENT_RUN, isAddDialogIntentRun);
@@ -328,7 +350,8 @@ public final class ChannelActivityAndBroadcastObserver extends BaseActivityContr
             addDialogBundle.putString(ChannelAddDialogFragment.getChannelUrlKey(), url);
             dialogFragment.setArguments(addDialogBundle);
         }
-        final android.app.FragmentTransaction fragmentTransaction = activity.getFragmentManager().beginTransaction();
+        final android.app.FragmentTransaction fragmentTransaction = fragment.getFragmentManager()
+                .beginTransaction();
         fragmentTransaction.add(dialogFragment, ChannelAddDialogFragment.getDialogFragmentTag());
         fragmentTransaction.commitAllowingStateLoss();
     }
@@ -336,7 +359,7 @@ public final class ChannelActivityAndBroadcastObserver extends BaseActivityContr
     private void showNetworkDialog() {
         if (!networkDialogShowController.isNetworkDialogShow()) {
             final NoInternetDialog noInternetDialog = new NoInternetDialog();
-            final FragmentManager fragmentManager = activity.getFragmentManager();
+            final FragmentManager fragmentManager = fragment.getFragmentManager();
             final android.app.FragmentTransaction fragmentTransaction
                     = fragmentManager.beginTransaction();
             fragmentTransaction.add(noInternetDialog, NoInternetDialog.getNoInternetDialogKey());
@@ -347,7 +370,7 @@ public final class ChannelActivityAndBroadcastObserver extends BaseActivityContr
 
     private void showRefreshDialog(@NonNull final String url, @NonNull final String message) {
         final SharedPreferences preferences
-                = RssChannelIntentService.getReadMessagesPreferences(activity);
+                = RssChannelIntentService.getReadMessagesPreferences(fragment.getActivity());
         final SharedPreferences.Editor edit = preferences.edit();
         edit.putString(url, null);
         edit.apply();
@@ -358,28 +381,9 @@ public final class ChannelActivityAndBroadcastObserver extends BaseActivityContr
         refreshBundle.putString(ChannelRefreshDialog.getMessageKey(), message);
         channelRefreshDialog.setArguments(refreshBundle);
         final android.app.FragmentTransaction fragmentTransaction
-                = activity.getFragmentManager().beginTransaction();
+                = fragment.getFragmentManager().beginTransaction();
         fragmentTransaction.add(channelRefreshDialog, ChannelAddDialogFragment.getDialogFragmentTag());
         fragmentTransaction.commitAllowingStateLoss();
     }
 
-    public static String getUpdateKey() {
-        return UPDATE;
-    }
-
-    @Override
-    protected void saveLocalThemeIdToPrefs(final int themeId) {
-        final SharedPreferences preferences
-                = activity.getSharedPreferences(LOCAL_THEME, Context.MODE_PRIVATE);
-        final SharedPreferences.Editor editor = preferences.edit();
-        editor.putInt(LOCAL_THEME, themeId);
-        editor.apply();
-    }
-
-    @Override
-    protected int readLocalThemeIdFromPrefs() {
-        final SharedPreferences preferences
-                = activity.getSharedPreferences(LOCAL_THEME, Context.MODE_PRIVATE);
-        return preferences.getInt(LOCAL_THEME, 0);
-    }
 }

@@ -2,7 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:tools="http://schemas.android.com/tools"
           package="com.spitchenko.focusstart">
-    <!-- Зарегистрировать как оработчик URL-->'
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 
@@ -18,7 +17,7 @@
         <service android:name=".channelitemwindow.controller.RssChannelItemIntentService"/>
 
         <activity
-            android:name=".channelwindow.view.ChannelActivity"
+            android:name=".base.view.BaseActivity"
             android:theme="@style/AppTheme.NoActionBar"
             >
             <intent-filter>
@@ -53,14 +52,6 @@
                 <data android:mimeType="application/xml"/>
             </intent-filter>
         </activity>
-        <activity
-            android:name=".channelitemwindow.view.ChannelItemActivity"
-            android:launchMode="singleInstance"
-            android:theme="@style/AppTheme.NoActionBar"/>
-        <activity
-            android:name=".settingswindow.view.SettingsActivity"
-            android:launchMode="singleInstance"
-            android:theme="@style/AppTheme.NoActionBar"/>
 
         <receiver android:name="com.spitchenko.focusstart.base.controller.RefreshBroadcastReceiver"/>
         <receiver android:name="com.spitchenko.focusstart.base.controller.OnBootReceiver">

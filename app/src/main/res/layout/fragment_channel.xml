@@ -2,50 +2,28 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 xmlns:app="http://schemas.android.com/apk/res-auto"
                 xmlns:tools="http://schemas.android.com/tools"
-                android:id="@+id/activity_channel"
+                android:id="@+id/fragment_channel"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                tools:context=".channelwindow.view.ChannelActivity">
-
-    <FrameLayout
-        android:id="@+id/activity_channel_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        />
-
-    <android.support.design.widget.AppBarLayout
-        android:id="@+id/activity_channel_app_bar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
-
-        <android.support.v7.widget.Toolbar
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:tools="http://schemas.android.com/tools"
-            android:id="@+id/activity_channel_toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-        </android.support.v7.widget.Toolbar>
-    </android.support.design.widget.AppBarLayout>
+                tools:activity=".channelwindow.view.ChannelFragment">
 
     <android.support.v4.widget.SwipeRefreshLayout
-        android:id="@+id/activity_channel_swipe_refresh_layout"
+        android:id="@+id/fragment_channel_swipe_refresh_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/activity_channel_app_bar">
+        android:layout_height="wrap_content">
 
         <android.support.v7.widget.RecyclerView
-            android:id="@+id/activity_channel_recycler_view"
+            android:id="@+id/fragment_channel_recycler_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:layout_below="@+id/activity_channel_app_bar"
+            android:layout_below="@+id/fragment_channel_app_bar"
             android:scrollbars="vertical"/>
     </android.support.v4.widget.SwipeRefreshLayout>
 
     <ProgressBar
-        android:id="@+id/activity_channel_progressBar"
+        android:id="@+id/fragment_channel_progressBar"
         style="?android:attr/progressBarStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -55,7 +33,7 @@
         android:visibility="gone"/>
 
     <LinearLayout
-        android:id="@+id/activity_channel_stub"
+        android:id="@+id/fragment_channel_stub"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clickable="true"
@@ -64,7 +42,7 @@
     </LinearLayout>
 
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/activity_channel_fab"
+        android:id="@+id/fragment_channel_fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"

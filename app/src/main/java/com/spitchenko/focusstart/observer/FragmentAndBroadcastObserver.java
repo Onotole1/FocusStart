@@ -2,6 +2,7 @@ package com.spitchenko.focusstart.observer;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.view.View;
 
 import java.util.ArrayList;
 
@@ -13,8 +14,9 @@ import lombok.NonNull;
  *
  * @author anatoliy
  */
-public interface ActivityAndBroadcastObserver {
+public interface FragmentAndBroadcastObserver {
     void updateOnCreate(@Nullable Bundle savedInstanceState);
+    void updateOnCreateView(final View view);
     void updateOnResume();
     void updateOnPause();
     void updateOnReceiveItems(@Nullable final ArrayList<?> items, @Nullable final String action);

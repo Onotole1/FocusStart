@@ -13,7 +13,7 @@ import android.support.v4.app.NotificationCompat;
 
 import com.spitchenko.focusstart.R;
 import com.spitchenko.focusstart.base.controller.UpdateController;
-import com.spitchenko.focusstart.channelwindow.view.ChannelActivity;
+import com.spitchenko.focusstart.base.view.BaseActivity;
 import com.spitchenko.focusstart.database.AtomRssChannelDbHelper;
 import com.spitchenko.focusstart.database.AtomRssDataBase;
 import com.spitchenko.focusstart.model.Channel;
@@ -173,11 +173,20 @@ public final class RssChannelIntentService extends IntentService {
     }
 
     private void notificationReload() {
-        ChannelActivity.start(this);
+        final AtomRssChannelDbHelper channelDbHelper = new AtomRssChannelDbHelper(this);
+        final ArrayList<Channel> channels = channelDbHelper.readAllChannelsFromDb();
+        final ArrayList<String> channelUrls = new ArrayList<>();
+
+        for (int i = 0, size = channels.size(); i < size; i++) {
+            final Channel channel = channels.get(i);
+            channelUrls.add(channel.getLink());
+        }
+
+        BaseActivity.start(this, channelUrls);
     }
 
     private void refresh() {
-		final AtomRssChannelDbHelper channelDbHelper = new AtomRssChannelDbHelper(this);
+        final AtomRssChannelDbHelper channelDbHelper = new AtomRssChannelDbHelper(this);
 		final AtomRssParser atomRssParser = new AtomRssParser();
 		final ArrayList<Channel> channelsFromDb = channelDbHelper.readAllChannelsFromDb();
 		final ArrayList<Channel> channelsFromNet = new ArrayList<>();

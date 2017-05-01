@@ -5,9 +5,12 @@ import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.support.v7.app.AppCompatActivity;
+import android.view.Menu;
 
 import com.spitchenko.focusstart.R;
 import com.spitchenko.focusstart.base.controller.AlarmController;
+import com.spitchenko.focusstart.base.view.BaseActivity;
 
 import lombok.NonNull;
 
@@ -25,14 +28,19 @@ public class SettingsFragmentController {
     }
 
     public void updateOnCreate() {
-        fragment.addPreferencesFromResource(R.xml.settings);
-        final AlarmController alarmController = new AlarmController(fragment.getActivity());
+        fragment.setHasOptionsMenu(true);
 
-        final ListPreference timeList = (ListPreference) fragment.findPreference(fragment.getActivity().getResources()
+        fragment.addPreferencesFromResource(R.xml.settings);
+
+        final BaseActivity activity = (BaseActivity) fragment.getActivity();
+
+        final AlarmController alarmController = new AlarmController(activity);
+
+        final ListPreference timeList = (ListPreference) fragment.findPreference(activity.getResources()
                 .getString(R.string.settings_fragment_notifications_list));
 
         alarmController.saveTimeSecondsToPreferences(Integer.parseInt(
-                timeList.getValue()), fragment.getActivity());
+                timeList.getValue()), activity);
 
         timeList.setSummary(timeList.getEntry());
 
@@ -44,7 +52,7 @@ public class SettingsFragmentController {
                 if (index != -1) {
                     alarmController.saveTimeSecondsToPreferences(Integer.parseInt(newValue
                                     .toString())
-                            , fragment.getActivity());
+                            , activity);
                     alarmController.restartAlarm();
                     timeList.setSummary(timeList.getEntries()[index]);
                     timeList.setValueIndex(index);
@@ -60,9 +68,9 @@ public class SettingsFragmentController {
             @Override
             public boolean onPreferenceClick(@NonNull final Preference preference) {
                 final SharedPreferences sharedPreferences = PreferenceManager
-                        .getDefaultSharedPreferences(fragment.getActivity());
+                        .getDefaultSharedPreferences(activity);
                 alarmController.saveTimeSecondsToPreferences(Integer.parseInt(timeList.getValue())
-                        , fragment.getActivity());
+                        , activity);
                 if (!sharedPreferences.getBoolean(fragment.getActivity().getResources()
                         .getString(R.string.settings_fragment_notification_checkbox), false)) {
                     alarmController.stopAlarm();
@@ -75,22 +83,45 @@ public class SettingsFragmentController {
 
         final ListPreference themeList = (ListPreference) fragment.findPreference(fragment
                 .getActivity().getResources().getString(R.string.settings_fragment_theme_list));
-        themeList.setSummary(themeList.getEntry());
-        themeList.setValueIndex(findIndexOfEntry(themeList));
+
+        if (null != themeList.getEntry()) {
+            themeList.setSummary(themeList.getEntry());
+            themeList.setValueIndex(findIndexOfEntry(themeList));
+        } else {
+            setDefaultThemeList(themeList);
+        }
 
         themeList.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(@NonNull final Preference preference
                     , @NonNull final Object newValue) {
-                final int index = themeList.findIndexOfValue(newValue.toString());
+
+                final String theme = newValue.toString();
+
+                final int index = themeList.findIndexOfValue(theme);
                 if (index != -1) {
                     themeList.setSummary(themeList.getEntries()[index]);
                     themeList.setValueIndex(index);
-                    fragment.getActivity().recreate();
+                    activity.setTheme(theme);
                 }
                 return false;
             }
         });
+    }
+
+    private void initToolbar() {
+        final android.support.v7.widget.Toolbar toolbar
+                = (android.support.v7.widget.Toolbar) fragment.getActivity()
+                .findViewById(R.id.activity_main_toolbar);
+
+        toolbar.setTitle(fragment.getString(R.string.settings_activity_title));
+
+        final AppCompatActivity activity = (AppCompatActivity) fragment.getActivity();
+        activity.setSupportActionBar(toolbar);
+        if (null != activity.getSupportActionBar()) {
+            activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            activity.getSupportActionBar().setDisplayShowHomeEnabled(true);
+        }
     }
 
     private int findIndexOfEntry(final ListPreference listPreference) {
@@ -101,5 +132,18 @@ public class SettingsFragmentController {
         }
 
         return -1;
+    }
+
+    private void setDefaultThemeList(final ListPreference themeList) {
+        themeList.setSummary(fragment.getString(R.string.settings_fragment_theme_list_default));
+        themeList.setValueIndex(0);
+    }
+
+    public void updateOnCreateView() {
+        initToolbar();
+    }
+
+    public void updateOnCreateOptionsMenu(final Menu menu) {
+        menu.findItem(R.id.action_settings).setVisible(false);
     }
 }

@@ -25,7 +25,7 @@ public final class ChannelItemBroadcastReceiver extends BroadcastReceiver {
     private final static String NO_INTERNET_ACTION = CHANNEL_ITEM_BROADCAST_RECEIVER + ".noInet";
     private final static String CHANNEL_REFRESH = CHANNEL_ITEM_BROADCAST_RECEIVER + ".refresh";
 
-	private final ArrayList<ChannelItemActivityAndBroadcastObserver> observers = new ArrayList<>();
+	private final ArrayList<ChannelItemFragmentAndBroadcastObserver> observers = new ArrayList<>();
 	private final ArrayList<ChannelItem> receivedChannels = new ArrayList<>();
 
     @Override
@@ -42,11 +42,11 @@ public final class ChannelItemBroadcastReceiver extends BroadcastReceiver {
         }
 	}
 
-	public void addObserver(@NonNull final ChannelItemActivityAndBroadcastObserver observer) {
+	public void addObserver(@NonNull final ChannelItemFragmentAndBroadcastObserver observer) {
 		observers.add(observer);
 	}
 
-	public void removeObserver(@NonNull final ChannelItemActivityAndBroadcastObserver observer) {
+	public void removeObserver(@NonNull final ChannelItemFragmentAndBroadcastObserver observer) {
 		final int index = observers.indexOf(observer);
 		if (index >= 0) {
 			observers.remove(index);
@@ -55,7 +55,7 @@ public final class ChannelItemBroadcastReceiver extends BroadcastReceiver {
 
 	public void notifyObservers(@Nullable final String action) {
         for (int i = 0, size = observers.size(); i < size; i++) {
-            final ChannelItemActivityAndBroadcastObserver observer = observers.get(i);
+            final ChannelItemFragmentAndBroadcastObserver observer = observers.get(i);
             observer.updateOnReceiveItems(receivedChannels, action);
         }
 	}
