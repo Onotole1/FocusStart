@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <exclude
+        domain="database"
+        path="AtomRssChannel.db"/>
+    <exclude
+        domain="sharedpref"
+        path="com.spitchenko.focusstart.channelwindow.DialogFragmentchannels_preferences.xml"/>
+    <exclude
+        domain="sharedpref"
+        path="com.spitchenko.focusstart.controller.NetworkDialogShowController.xml"/>
+    <exclude
+        domain="sharedpref"
+        path="com.spitchenko.focusstart.controller.channel_item_window .ChannelItemFragmentAndBroadcastObserver.channelPrefsTitle.xml"/>
+    <exclude
+        domain="sharedpref"
+        path="com.spitchenko.focusstart.base.controller.MainController.themePreferences.xml"/>
+    <exclude
+        domain="sharedpref"
+        path="com.spitchenko.focusstart.base.controller.AlarmController.xml"/>
+    <exclude
+        domain="sharedpref"
+        path="com.spitchenko.focusstart.controller.channel_item_window .ChannelItemFragmentAndBroadcastObserver.channelPrefsUrl.xml"/>
+    <exclude
+        domain="sharedpref"
+        path="com.spitchenko.focusstart.controller.channel_window.RssChannelIntentService.notification.xml"/>
+    <exclude
+        domain="sharedpref"
+        path="com.spitchenko.focusstart.controller.updateController.xml"/>
+</full-backup-content>
